@@ -32,7 +32,7 @@ This project is developed by students from the **University of San Carlos** for 
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Acknowledgements
 
 - Instructor: Paule Glenn Acuin
 - University of San Carlos 
