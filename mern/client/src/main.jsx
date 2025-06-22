@@ -11,23 +11,27 @@ import Record from "./components/Record.jsx";
 import RecordList from "./components/RecordList.jsx";
 import "./index.css";
 
+import Home from "./pages/Home";
+import Reports from "./pages/Reports";
+import Claims from "./pages/Claims";
+import About from "./pages/About";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Profile from "./pages/Profile";
+
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      {
-        index: true, // equivalent to path: "/"
-        element: <RecordList />,
-      },
-      {
-        path: "edit/:id",
-        element: <Record />,
-      },
-      {
-        path: "create",
-        element: <Record />,
-      },
+      { index: true, element: <Home /> },
+      { path: "reports", element: <Reports /> },
+      { path: "claims", element: <Claims /> },
+      { path: "about", element: <About /> },
+      { path: "login", element: <Login /> },
+      { path: "signup", element: <SignUp /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
 ]);

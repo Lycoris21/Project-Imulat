@@ -1,17 +1,58 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar({ isLoggedIn = false }) {
+  const navItems = [
+    { name: "Home", to: "/" },
+    { name: "Reports", to: "/reports" },
+    { name: "Claims", to: "/claims" },
+    { name: "About", to: "/about" },
+  ];
+
   return (
-    <div>
-      <nav className="flex justify-between items-center mb-6">
-        <NavLink to="/">
-          <img alt="MongoDB logo" className="h-10 inline" src="https://d3cy9zhslanhfa.cloudfront.net/media/3800C044-6298-4575-A05D5C6B7623EE37/4B45D0EC-3482-4759-82DA37D8EA07D229/webimage-8A27671A-8A53-45DC-89D7BF8537F15A0D.png"></img>
-        </NavLink>
+    <nav className="bg-white border-b shadow px-6 py-4 flex justify-between items-center">
+      <div className="flex items-center space-x-6">
+        <h1 className="text-xl font-bold text-blue-600">Project Imulat</h1>
 
-        <NavLink className="inline-flex items-center justify-center whitespace-nowrap text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 h-9 rounded-md px-3" to="/create">
-          Create Employee
-        </NavLink>
-      </nav>
-    </div>
+        {navItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.to}
+            className={({ isActive }) =>
+              `text-gray-700 hover:text-blue-600 font-medium ${
+                isActive ? "border-b-2 border-blue-500 pb-1" : ""
+              }`
+            }
+          >
+            {item.name}
+          </NavLink>
+        ))}
+      </div>
+
+      <div>
+        {isLoggedIn ? (
+          <Link
+            to="/profile"
+            className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl"
+          >
+            Profile
+          </Link>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="text-sm font-medium text-blue-600 hover:underline mr-4"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/signup"
+              className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl"
+            >
+              Sign Up
+            </Link>
+          </>
+        )}
+      </div>
+    </nav>
   );
 }
