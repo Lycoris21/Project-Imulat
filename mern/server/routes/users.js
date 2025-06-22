@@ -31,7 +31,7 @@ router.get("/:id", async (req, res) => {
 // Create a new user
 router.post("/", async (req, res) => {
   try {
-    const { username, email, password, birthdate, bio, role } = req.body;
+    const { username, email, password, birthdate, bio, role, profilePictureUrl, backgroundImageUrl } = req.body;
     
     // Basic validation
     if (!username || !email || !password) {
@@ -54,7 +54,9 @@ router.post("/", async (req, res) => {
       passwordHash: password, // In production, hash this password
       birthdate,
       bio,
-      role
+      role,
+      profilePictureUrl,
+      backgroundImageUrl
     });
 
     const savedUser = await newUser.save();
@@ -73,11 +75,11 @@ router.post("/", async (req, res) => {
 // Update a user
 router.patch("/:id", async (req, res) => {
   try {
-    const { username, email, birthdate, bio, role } = req.body;
+    const { username, email, birthdate, bio, role, profilePictureUrl, backgroundImageUrl } = req.body;
     
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { username, email, birthdate, bio, role },
+      { username, email, birthdate, bio, role, profilePictureUrl, backgroundImageUrl },
       { new: true, runValidators: true }
     ).select('-passwordHash');
 
