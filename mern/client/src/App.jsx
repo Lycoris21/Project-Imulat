@@ -8,14 +8,20 @@ import Navbar from "./components/Navbar";
 function App() {
   const [count, setCount] = useState(0)
   const isLoggedIn = false; // Replace with actual auth state later
+  
+  // Mock user data - replace with actual user data from auth context
+  const user = isLoggedIn ? {
+    username: "john_doe",
+    profilePicture: null // or URL to profile picture
+  } : null;
 
   return (
-    <>
-      <Navbar isLoggedIn={isLoggedIn} />
-      <main className="p-6">
+    <div className="app">
+      <Navbar isLoggedIn={isLoggedIn} user={user} />
+      <main>
          <Outlet />
       </main>
-    </>
+    </div>
   );
 }
 
