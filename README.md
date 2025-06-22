@@ -12,7 +12,7 @@
 
 ## 🧑‍💻 Team
 
-This project is developed by students from the **University of San Carlos** for the final requirement in the **AppDev & Emerging Tech** course.
+This project is developed by students from the **University of San Carlos** for the final requirement in the **Application Development & Emerging Technologies** course.
 
 - Christine Ann Dejito
 - Andrei Benedict Go
