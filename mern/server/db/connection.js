@@ -1,30 +1,46 @@
 
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config({ path: './config.env' });
+
 const uri = process.env.ATLAS_URI || "";
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+// Connect to MongoDB using Mongoose
+const connectDB = async () => {
+  try {
+    if (!uri) {
+      throw new Error('ATLAS_URI environment variable is not set');
+    }
+    
+    const conn = await mongoose.connect(uri);
+    
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('Database connection error:', error);
+    process.exit(1);
   }
+};
+
+// Handle connection events
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to MongoDB Atlas');
 });
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+mongoose.connection.on('error', (err) => {
+  console.error('Mongoose connection error:', err);
+});
 
-let db = client.db("users");
+mongoose.connection.on('disconnected', () => {
+  console.log('Mongoose disconnected');
+});
 
-export default db;
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  console.log('MongoDB connection closed through app termination');
+  process.exit(0);
+});
+
+export default connectDB;
