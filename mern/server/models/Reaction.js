@@ -13,7 +13,7 @@ const reactionSchema = new mongoose.Schema({
   },
   targetType: {
     type: String,
-    enum: ['Report', 'Claim', 'Comment'],
+    enum: ['Report', 'Claim', 'Comment', 'User'],
     required: true
   },
   reactionType: {
