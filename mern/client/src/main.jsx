@@ -1,0 +1,39 @@
+// main.jsx or index.jsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+
+import App from "./App.jsx";
+import Record from "./components/Record.jsx";
+import RecordList from "./components/RecordList.jsx";
+import "./index.css";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        index: true, // equivalent to path: "/"
+        element: <RecordList />,
+      },
+      {
+        path: "edit/:id",
+        element: <Record />,
+      },
+      {
+        path: "create",
+        element: <Record />,
+      },
+    ],
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>
+);
