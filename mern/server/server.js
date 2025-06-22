@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connection.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import authRoutes from "./routes/auth.js";
 
 // Import routes
 import records from "./routes/record.js";
@@ -32,6 +33,7 @@ app.use("/api/record", records);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
 app.use("/api/reports", reports);
+app.use("/api/auth", authRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
