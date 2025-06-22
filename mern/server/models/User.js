@@ -23,11 +23,39 @@ const userSchema = new mongoose.Schema({  username: {
   birthdate: {
     type: Date,
     required: false
-  },
+  },  
   bio: {
     type: String,
     maxlength: 500,
     trim: true
+  },  
+  profilePictureUrl: {
+    type: String,
+    trim: true,
+    default: null,
+    validate: {
+      validator: function(v) {
+        // Only validate if a URL is provided
+        if (!v) return true;
+        // Basic URL validation
+        return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
+      },
+      message: 'Profile picture must be a valid image URL (jpg, jpeg, png, gif, webp)'
+    }
+  },
+  backgroundImageUrl: {
+    type: String,
+    trim: true,
+    default: null,
+    validate: {
+      validator: function(v) {
+        // Only validate if a URL is provided
+        if (!v) return true;
+        // Basic URL validation
+        return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
+      },
+      message: 'Background image must be a valid image URL (jpg, jpeg, png, gif, webp)'
+    }
   },
   role: {
     type: String,
