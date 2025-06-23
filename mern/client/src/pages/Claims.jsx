@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Claims() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center text-center px-4">
+    <div className="min-h-screen bg-[#4B548B] flex flex-col justify-center items-center text-center px-4">
       <h1 className="text-4xl font-bold text-blue-600 mb-4">Welcome to Project Imulat</h1>
       <p className="text-gray-700 text-lg max-w-xl mb-8">
         This is your claims page. Use this space to highlight recent activity, announcements, or quick access to features.

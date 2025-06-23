@@ -50,8 +50,8 @@ export default function SignUp() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-50 to-blue-100 px-4">
-      <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#4B548B] px-4">
+      <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[40%] p-8 m-auto">
         <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
           Create Your Account
         </h2>

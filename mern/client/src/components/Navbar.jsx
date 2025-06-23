@@ -9,29 +9,17 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
   ];
 
   return (
-    <nav className="bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      {/* Left side - Logo and App Name */}
+    <nav className="bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
+    {/* Left side - Logo and App Name */}
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-blue-600">
+        <div style={{height: '60px' }}>
           <img 
-            src="/logo.png" 
+            src="logo.png" 
             alt="Project IMULAT Logo" 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // Fallback to SVG if image doesn't load
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'block';
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
-          <svg 
-            className="w-6 h-6 text-white hidden" 
-            fill="currentColor" 
-            viewBox="0 0 20 20"
-            style={{ display: 'none' }}
-          >
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
         </div>
-        <h1 className="text-xl font-bold text-gray-800">Project IMULAT</h1>
+        <h1 className="text-xl font-bold text-[#4B548B]">Project IMULAT</h1>
       </div>
 
       {/* Center - Navigation Items */}
@@ -41,8 +29,8 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             key={item.name}
             to={item.to}
             className={({ isActive }) =>
-              `text-gray-600 hover:text-blue-600 font-medium transition-colors ${
-                isActive ? "text-blue-600 border-b-2 border-blue-500 pb-1" : ""
+              `text-[#4B548B] hover:text-blue-600 font-medium transition-colors ${
+                isActive ? "text-[#4B548B] opacity-60 border-b-2 border-blue-500 pb-1" : ""
               }`
             }
           >
