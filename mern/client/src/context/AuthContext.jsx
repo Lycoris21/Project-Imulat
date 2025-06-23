@@ -10,32 +10,33 @@ export function useAuth() {
 
 // Provider component
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser ] = useState(null);
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-     if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        console.log("🔍 Loaded user from localStorage:", parsed);
-        setUser(parsed);
+    const storedUser  = localStorage.getItem("user");
+    if (storedUser ) {
+      const parsed = JSON.parse(storedUser );
+      console.log("🔍 Loaded user from localStorage:", parsed);
+      setUser (parsed);
     }
   }, []);
 
   // Login function
   const login = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+    setUser (userData);
   };
 
   // Logout function
   const logout = () => {
     localStorage.removeItem("user");
-    setUser(null);
+    setUser (null);
   };
 
   const value = {
     user,
+    setUser,
     isLoggedIn: !!user,
     login,
     logout,

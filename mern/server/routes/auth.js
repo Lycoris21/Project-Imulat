@@ -25,12 +25,7 @@ router.post("/login", async (req, res) => {
     // Optional: send back basic user data (not the hash)
     res.status(200).json({
       message: "Login successful.",
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }
+      user,
     });
 
     // Optional: You could also issue a JWT here

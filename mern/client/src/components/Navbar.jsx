@@ -7,7 +7,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
     { name: "Claims", to: "/claims" },
     { name: "About", to: "/about" },
   ];
-
+  
   return (
     <nav className="bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
     {/* Left side - Logo and App Name */}
@@ -47,9 +47,9 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             className="flex items-center space-x-3 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
           >
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-              {user.profilePicture ? (
+              {user.profilePictureUrl ? (
                 <img 
-                  src={user.profilePicture} 
+                  src={user.profilePictureUrl} 
                   alt={user.username}
                   className="w-full h-full object-cover"
                 />

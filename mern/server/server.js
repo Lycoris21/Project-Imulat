@@ -3,11 +3,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connection.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
-import authRoutes from "./routes/auth.js";
 
 // Import routes
+import auth from "./routes/auth.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
+import upload from "./routes/upload.js";
 import reports from "./routes/reports.js";
 
 // Load environment variables
@@ -24,14 +25,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (uploaded images)
-app.use('/uploads', express.static('uploads'));
+// // Serve static files (uploaded images)
+// app.use('/uploads', express.static('uploads'));
 
 // API Routes
+app.use('/api/upload', upload);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
 app.use("/api/reports", reports);
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", auth);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
