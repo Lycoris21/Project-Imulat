@@ -6,7 +6,6 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.js";
 
 // Import routes
-import records from "./routes/record.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
 import reports from "./routes/reports.js";
@@ -29,7 +28,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // API Routes
-app.use("/api/record", records);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
 app.use("/api/reports", reports);
