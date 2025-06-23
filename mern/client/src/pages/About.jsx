@@ -2,9 +2,9 @@ import React from "react";
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-[#4B548B] flex flex-col justify-center items-center text-center">
+    <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center">
       <h1 className="text-4xl font-bold text-blue-600 mb-4">Welcome to Project Imulat</h1>
-      <p className="text-gray-700 text-lg max-w-xl mb-8">
+      <p className="text-white text-lg max-w-xl mb-8">
         This is your about page. Use this space to highlight recent activity, announcements, or quick access to features.
       </p>
 

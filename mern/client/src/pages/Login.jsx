@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // ✅ adjust path if needed
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ use context login method
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
@@ -26,8 +28,7 @@ export default function Login() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Login failed");
 
-      console.log("Logged in:", data.user);
-      // You can save user info to state or localStorage here
+      login(data.user);
       navigate("/home");
     } catch (err) {
       setError(err.message);
@@ -35,9 +36,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#4B548B] px-4">
-      <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[50%] p-8 m-auto">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">Login to Project Imulat</h2>
+    <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center px-4">
+      <div className="bg-[#ffffff] shadow-xl rounded w-[50%] p-8 m-auto">
+        <h2 className="text-3xl font-bold text-center text-deep mb-6">Login</h2>
 
         {error && (
           <div className="bg-red-100 text-red-700 text-sm p-3 rounded-lg mb-4">

@@ -5,10 +5,9 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext"; // Adjust path
 
 import App from "./App.jsx";
-import Record from "./components/Record.jsx";
-import RecordList from "./components/RecordList.jsx";
 import "./index.css";
 
 import Home from "./pages/Home";
@@ -39,6 +38,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 );

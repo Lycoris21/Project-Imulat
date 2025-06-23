@@ -1,27 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from "react-router-dom";
-import './index.css'
-
+import { useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 
+import './index.css'
+
 function App() {
-  const [count, setCount] = useState(0)
-  const isLoggedIn = false; // Replace with actual auth state later
-  
-  // Mock user data - replace with actual user data from auth context
-  const user = isLoggedIn ? {
-    username: "john_doe",
-    profilePicture: null // or URL to profile picture
-  } : null;
+  // Simulate auth state
+  const { user, isLoggedIn } = useAuth();
 
   return (
-    <div className="app">
-      <Navbar isLoggedIn={isLoggedIn} user={user} />
-      <main>
-         <Outlet />
-      </main>
-    </div>
+    <>
+       <div className="app">
+        <Navbar isLoggedIn={isLoggedIn} user={user} />
+        <main>
+          <Outlet />
+        </main>
+      </div>
+    </>
   );
 }
 
-export default App
+export default App;

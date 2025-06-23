@@ -1,21 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import ProfilePictureUpdater from "../components/ProfilePictureUpdater.jsx"; // adjust path as needed
+
+
 
 export default function Profile() {
-  return (
-    <div className="min-h-screen bg-[#4B548B] flex flex-col justify-center items-center text-center px-4">
-      <h1 className="text-4xl font-bold text-blue-600 mb-4">Welcome to Project Imulat</h1>
-      <p className="text-gray-700 text-lg max-w-xl mb-8">
-        This is your profile page. Use this space to highlight recent activity, announcements, or quick access to features.
-      </p>
+  const { user, logout, login } = useAuth();
+  const navigate = useNavigate();
+  const [imageUrl, setImageUrl] = useState(user?.profilePictureUrl || "");
+  const [message, setMessage] = useState("");
 
-      <div className="flex gap-4">
-        <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-2xl shadow hover:bg-blue-700 transition">
-          Go to Reports
-        </button>
-        <button className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-2xl hover:bg-gray-300 transition">
-          View Claims
-        </button>
-      </div>
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  return (
+    <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center px-4">
+      <h1 className="text-4xl font-bold text-blue-600 mb-4">Welcome, {user.username}</h1>
+
+      <ProfilePictureUpdater />
+
+      {/* Log Out */}
+      <button
+        onClick={handleLogout}
+        className="mt-6 px-6 py-3 bg-red-600 text-white font-semibold rounded-2xl shadow hover:bg-red-700 transition"
+      >
+        Log Out
+      </button>
     </div>
   );
 }
