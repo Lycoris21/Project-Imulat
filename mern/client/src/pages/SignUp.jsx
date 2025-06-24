@@ -82,7 +82,7 @@ export default function SignUp() {
 
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center px-4">
+    <div className="min-h-screen bg-base-gradient flex flex-col justify-center items-center text-center px-4">
       <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[40%] p-8 m-auto">
         <h2 className="text-3xl font-bold text-center text-deep mb-6">
           Create Your Account

@@ -5,3 +5,7 @@
     --color-dark: #1E275E;
     --color-deep: #223291;
 }
+
+.bg-base-gradient {
+  background-image: linear-gradient(to bottom, var(--color-base) 0%, #2F3558 75%, #141625 100%);
+}

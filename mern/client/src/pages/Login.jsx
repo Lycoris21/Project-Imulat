@@ -36,7 +36,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center px-4">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex flex-col justify-center items-center text-center px-4">
       <div className="bg-white shadow-xl rounded-xl w-full max-w-lg p-8">
         <h2 className="text-3xl font-bold text-center text-deep mb-6">Login</h2>
 

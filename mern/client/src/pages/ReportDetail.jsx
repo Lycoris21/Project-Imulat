@@ -127,7 +127,7 @@ export default function ReportDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  flex items-center justify-center">
+      <div className="min-h-screen bg-base-gradient  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading report...</p>
@@ -138,7 +138,7 @@ export default function ReportDetail() {
 
   if (!report) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  flex items-center justify-center">
+      <div className="min-h-screen bg-base-gradient  flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Report Not Found</h1>
           <p className="text-gray-600 mb-4">The report you're looking for doesn't exist.</p>
@@ -149,7 +149,7 @@ export default function ReportDetail() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient  py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Back Navigation */}
         <div className="mb-6">
