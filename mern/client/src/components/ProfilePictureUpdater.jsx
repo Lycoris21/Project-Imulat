@@ -26,7 +26,7 @@ export default function ProfilePictureUpdater() {
     formData.append("image", file);
 
     try {
-      const response = await fetch(`http://localhost:5050/api/upload/profile-picture/${user.id}`, {
+      const response = await fetch(`http://localhost:5050/api/upload/profile-picture/${user._id}`, {
         method: "PUT",
         body: formData,
       });
