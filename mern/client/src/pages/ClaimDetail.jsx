@@ -101,7 +101,7 @@ export default function ClaimDetail() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading claim...</div>;
+    return <div className="min-h-screen bg-base-gradient flex items-center justify-center">Loading claim...</div>;
   }
 
   if (!claim) {
