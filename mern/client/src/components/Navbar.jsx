@@ -17,6 +17,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
+     setDropdownOpen(false);
     logout();
     navigate("/login");
   };
@@ -110,7 +111,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[#4B548B] rounded-lg cursor-pointer"
           >
             Logout
           </button>
