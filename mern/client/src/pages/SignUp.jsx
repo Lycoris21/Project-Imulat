@@ -52,7 +52,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex flex-col justify-center items-center text-center px-4">
       <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[40%] p-8 m-auto">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        <h2 className="text-3xl font-bold text-center text-deep mb-6">
           Create Your Account
         </h2>
 
@@ -64,68 +64,100 @@ export default function SignUp() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-deep mb-1 text-left">
               Username
             </label>
-            <input
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              required
-              placeholder="yourname"
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
+   <div className="flex items-center border-b border-gray-400 py-2">
+    <input
+      type="text"
+      name="username"
+      value={form.username}
+      onChange={handleChange}
+      required
+      placeholder="Enter Username"
+      className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+    />
+  </div>
+   </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-deep mb-1 text-left">
               Email
             </label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
+
+    <div className="flex items-center border-b border-gray-400 py-2">
+      <input
+        type="email"
+        name="email"
+        value={form.email}
+        onChange={handleChange}
+        required
+        placeholder="Enter Email"
+        className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+      />
+    </div>
+  </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-deep mb-1 text-left">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
+
+      <div className="flex items-center border-b border-gray-400 py-2">
+      <input
+        type="password"
+        name="password"
+        value={form.password}
+        onChange={handleChange}
+        required
+        placeholder="Enter Password"
+        className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+      />
+    </div>
+  </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-deep mb-1 text-left">
               Confirm Password
             </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              className="w-full border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
+
+    <div className="flex items-center border-b border-gray-400 py-2">
+      <input
+        type="password"
+        name="confirmPassword"
+        value={form.confirmPassword}
+        onChange={handleChange}
+        required
+        placeholder="Re-enter Password"
+        className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+      />
+    </div>
+    
+  </div>
+ 
+ 
+<div>
+  <label className="block text-sm font-medium text-deep mb-1 text-left">
+    Birthdate
+  </label>
+  <div className="flex items-center border-b border-gray-400 py-2">
+    <input
+      type="date"
+      name="birthdate"
+      value={form.birthdate}
+      onChange={handleChange}
+      className="appearance-none bg-transparent border-none w-full text-gray-700 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+    />
+  </div>
+</div>
+
+
+
+
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-xl hover:bg-blue-700 transition"
+              className="w-full bg-[#1E275E] text-white font-semibold py-2 rounded-xl hover:bg-[#161e49] transition"
           >
             Sign Up
           </button>
@@ -133,7 +165,7 @@ export default function SignUp() {
 
         <p className="text-sm text-center text-gray-500 mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline font-medium">
+          <a href="/login" className="text-[#4B548B] hover:underline font-medium">
             Log In
           </a>
         </p>
