@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function About() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] px-4 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">

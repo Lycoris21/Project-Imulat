@@ -27,7 +27,7 @@ useEffect(() => {
       <div className="flex items-center space-x-3">
         <div style={{height: '60px' }}>
           <img 
-            src="logo.png" 
+            src="/logo.png" 
             alt="Project IMULAT Logo" 
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />

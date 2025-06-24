@@ -1,0 +1,47 @@
+import CommentService from '../services/commentService.js';
+
+class CommentController {
+  static async createComment(req, res) {
+    try {
+      const { userId, targetId, targetType, parentCommentId, commentContent } = req.body;
+      console.log("Incoming comment:", req.body);
+
+      
+      const comment = await CommentService.createComment({
+        userId,
+        targetId,
+        targetType,
+        parentCommentId,
+        commentContent
+      });
+      res.status(201).json(comment);
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Failed to create comment" });
+    }
+  }
+
+  static async getCommentsByTarget(req, res) {
+    try {
+      const targetType = req.params.targetType.charAt(0).toUpperCase() + req.params.targetType.slice(1).toLowerCase();
+      const targetId = req.params.targetId;
+      
+      const comments = await CommentService.getCommentsByTarget(targetType, targetId);
+      res.status(200).json(comments);
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Failed to retrieve comments" });
+    }
+  }
+
+  static async deleteComment(req, res) {
+    try {
+      const { commentId } = req.params;
+      const userId = req.user?._id || req.body.userId; // Fallback if not using auth middleware
+      await CommentService.deleteComment(commentId, userId);
+      res.status(200).json({ message: "Comment deleted" });
+    } catch (err) {
+      res.status(403).json({ message: err.message || "Failed to delete comment" });
+    }
+  }
+}
+
+export default CommentController;
