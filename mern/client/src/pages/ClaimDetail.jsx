@@ -119,7 +119,7 @@ export default function ClaimDetail() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">{claim.claimTitle}</h1>
-              <p className="text-gray-600 mb-2">Submitted by <span className="font-medium">{claim?.submitterUsername || "Unknown"}</span></p>
+              <p className="text-gray-600 mb-2">Submitted by <span className="font-medium">{claim?.userId?.username || "Unknown"}</span></p>
               <p className="text-gray-500 text-sm">{formatRelativeTime(claim.createdAt)}</p>
             </div>
             <div className={`px-4 py-2 rounded-lg border ${getTruthIndexColor(claim.aiTruthIndex)}`}>

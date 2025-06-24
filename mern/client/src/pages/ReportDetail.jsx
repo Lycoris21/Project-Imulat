@@ -149,7 +149,7 @@ export default function ReportDetail() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient  py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Back Navigation */}
         <div className="mb-6">
@@ -175,7 +175,7 @@ export default function ReportDetail() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">{report.reportTitle}</h1>
-              <p className="text-gray-600 mb-2">By <span className="font-medium">{report.adminUsername}</span></p>
+              <p className="text-gray-600 mb-2">By <span className="font-medium">{report.userId?.username}</span></p>
               <p className="text-gray-500 text-sm">{formatRelativeTime(report.createdAt)}</p>
             </div>
             <div className={`px-4 py-2 rounded-lg border ${getVerdictColor(report.truthVerdict)}`}>
