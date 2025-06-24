@@ -21,10 +21,10 @@ export default function Home() {
         case 8: date = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000); break; // 10 days ago (will show date)
         case 9: date = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); break; // 30 days ago (will show date)
         default: date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      }
-        return {
+      }      return {
         id: i + 1,
         title: `Report ${i + 1}: Sample fact-check report`,
+        reportCoverUrl: i % 3 === 0 ? `https://picsum.photos/400/250?random=${i}` : null, // Some reports have cover images
         summary: `This is a summary of report ${i + 1} covering various claims and findings.`,
         verdict: i % 3 === 0 ? "True" : i % 3 === 1 ? "False" : "Partially True",
         date: date,
@@ -159,13 +159,28 @@ export default function Home() {
             </Link>
           </div>            
           <div className="space-y-4">
-            {latestReports.map((report) => (
-              <Link 
+            {latestReports.map((report) => (              <Link 
                 key={report.id} 
                 to={`/reports/${report.id}`}
                 className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[#EDEEF1] transition-colors rounded-lg p-3 m-3"
               >
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex gap-3">                  {/* Cover Image on the left */}
+                  {report.reportCoverUrl && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={report.reportCoverUrl} 
+                        alt={`Cover for ${report.title}`}
+                        className="w-25 h-full object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Content on the right */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-gray-800 text-sm leading-tight hover:text-blue-600 transition-colors">
                     {report.title}
                   </h3>
@@ -194,8 +209,9 @@ export default function Home() {
                         <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
                       </svg>
                       <span>{report.commentCount}</span>
-                    </span>
-                    <span className="italic">{formatRelativeTime(report.date)}</span>
+                    </span>                    <span className="italic">{formatRelativeTime(report.date)}</span>
+                  </div>
+                </div>
                   </div>
                 </div>
               </Link>

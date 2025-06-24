@@ -16,6 +16,20 @@ const reportSchema = new mongoose.Schema({
     trim: true,
     maxlength: 200
   },
+  reportCoverUrl: {
+    type: String,
+    trim: true,
+    default: null,
+    validate: {
+      validator: function(v) {
+        // Only validate if a URL is provided
+        if (!v) return true;
+        // Basic URL validation for image formats
+        return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
+      },
+      message: 'Report cover must be a valid image URL (jpg, jpeg, png, gif, webp)'
+    }
+  },
   reportContent: {
     type: String,
     required: true,
@@ -34,8 +48,7 @@ const reportSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },
-  reportReferences: {
+  },  reportReferences: {
     type: String,
     trim: true
   }

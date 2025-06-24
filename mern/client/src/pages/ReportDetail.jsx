@@ -13,8 +13,7 @@ export default function ReportDetail() {
   // Mock data - replace with actual API call
   useEffect(() => {
     // Simulate API call
-    setTimeout(() => {
-      const mockReport = {
+    setTimeout(() => {      const mockReport = {
         id: id,
         reportTitle: `Detailed Report ${id}: Comprehensive Fact-Check Analysis`,
         adminUsername: "FactChecker_Admin",
@@ -46,6 +45,7 @@ The evidence suggests that while some aspects of the original claim contain fact
 • Statistical Data - National Statistics Bureau
 • Cross-reference - International Fact-Checking Network
         `,
+        reportCoverUrl: `https://picsum.photos/800/400?random=${id}`, // Add cover image
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
         likes: 45,
         dislikes: 12,
@@ -162,10 +162,22 @@ The evidence suggests that while some aspects of the original claim contain fact
           <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium">
             ← Back to Home
           </Link>
-        </div>
-
-        {/* Report Header */}
+        </div>        {/* Report Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          {/* Cover Image */}
+          {report.reportCoverUrl && (
+            <div className="mb-6">
+              <img 
+                src={report.reportCoverUrl} 
+                alt={`Cover for ${report.reportTitle}`}
+                className="w-full h-64 object-cover rounded-lg shadow-md"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+          
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">{report.reportTitle}</h1>
