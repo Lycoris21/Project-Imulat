@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { capitalizeWords } from "../utils/stringUtils";
+import { parseTruthVerdict } from "../utils/stringUtils";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,7 +19,7 @@ export default function Home() {
           title: report.reportTitle,
           reportCoverUrl: report.reportCoverUrl || null,
           summary: report.aiReportSummary || "No summary provided",
-          verdict: capitalizeWords(report.truthVerdict) || "Unverified",
+          verdict: parseTruthVerdict(report.truthVerdict) || "Unverified",
           date: report.createdAt,
           author: report.userId?.username || "Unknown",
           likes: report.likes || 0,

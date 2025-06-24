@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { capitalizeWords } from "../utils/stringUtils";
+import { parseTruthVerdict } from "../utils/stringUtils";
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
@@ -56,7 +56,7 @@ export default function Reports() {
         id: report._id,
         reportTitle: report.reportTitle,
         aiReportSummary: report.aiReportSummary,
-        truthVerdict: capitalizeWords(report.truthVerdict) || "Unknown",
+        truthVerdict: parseTruthVerdict(report.truthVerdict) || "Unknown",
         adminUsername: report.userId?.username || "Unknown", // ensure populated in backend
         reportCoverUrl: report.reportCoverUrl || null, // adjust if field is different
         createdAt: new Date(report.createdAt),

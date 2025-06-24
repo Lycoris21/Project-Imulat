@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { capitalizeWords } from "../utils/stringUtils";
+import { parseTruthVerdict } from "../utils/stringUtils";
 import { useAuth } from "../context/AuthContext";
 
 export default function ReportDetail() {
@@ -21,7 +21,7 @@ export default function ReportDetail() {
         if (!response.ok) throw new Error("Failed to fetch report");
 
         const data = await response.json();
-        data.truthVerdict = capitalizeWords(data.truthVerdict);
+        data.truthVerdict = parseTruthVerdict(data.truthVerdict);
         setReport(data);
       } catch (err) {
         console.error("Error fetching report:", err);
