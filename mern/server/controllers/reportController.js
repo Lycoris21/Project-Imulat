@@ -117,6 +117,19 @@ class ReportController {
       res.status(500).json({ error: "Error fetching reports by verdict" });
     }
   }
+
+  // Get latest reports
+  static async getLatestReports(req, res) {
+    try {
+      const reports = await ReportService.getLatestReports();
+      res.status(200).json(reports);
+    } catch (error) {
+      console.error("Error fetching latest reports:", error);
+      res.status(500).json({ error: "Error fetching latest reports" });
+    }
+  }
+
+
 }
 
 export default ReportController;

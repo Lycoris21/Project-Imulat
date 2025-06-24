@@ -3,6 +3,12 @@ import ReportController from "../controllers/reportController.js";
 
 const router = express.Router();
 
+// Get latest reports
+router.get("/latest", ReportController.getLatestReports);
+
+// Get reports by truth verdict
+router.get("/verdict/:verdict", ReportController.getReportsByVerdict);
+
 // Get all reports
 router.get("/", ReportController.getAllReports);
 
@@ -17,8 +23,5 @@ router.patch("/:id", ReportController.updateReport);
 
 // Delete a report
 router.delete("/:id", ReportController.deleteReport);
-
-// Get reports by truth verdict
-router.get("/verdict/:verdict", ReportController.getReportsByVerdict);
 
 export default router;

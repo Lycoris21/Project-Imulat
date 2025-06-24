@@ -77,6 +77,14 @@ class ReportService {
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
   }
+
+  static async getLatestReports() {
+    return await Report.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('userId', 'username email')
+      .populate('claimIds', 'claimTitle aiTruthIndex');
+  }
 }
 
 export default ReportService;
