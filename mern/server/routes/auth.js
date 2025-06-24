@@ -43,7 +43,7 @@ router.post("/signup", async (req, res) => {
     birthdate,
     bio,
     profilePictureUrl,
-    backgroundImageUrl,
+    coverPhotoUrl,
     role
   } = req.body;
 
@@ -69,7 +69,7 @@ router.post("/signup", async (req, res) => {
       birthdate,
       bio,
       profilePictureUrl,
-      backgroundImageUrl,
+      coverPhotoUrl,
       role
     });
 

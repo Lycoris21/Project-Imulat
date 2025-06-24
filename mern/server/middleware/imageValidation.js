@@ -28,14 +28,14 @@ export const processUploadedImages = (req, res, next) => {
       req.body.profilePictureUrl = req.files.profilePicture[0].path.replace(/\\/g, '/');
     }
     if (req.files.backgroundImage) {
-      req.body.backgroundImageUrl = req.files.backgroundImage[0].path.replace(/\\/g, '/');
+      req.body.coverPhotoUrl = req.files.backgroundImage[0].path.replace(/\\/g, '/');
     }
   } else if (req.file) {
     // Single file upload
     if (req.file.fieldname === 'profilePicture') {
       req.body.profilePictureUrl = req.file.path.replace(/\\/g, '/');
     } else if (req.file.fieldname === 'backgroundImage') {
-      req.body.backgroundImageUrl = req.file.path.replace(/\\/g, '/');
+      req.body.coverPhotoUrl = req.file.path.replace(/\\/g, '/');
     }
   }
   

@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({  username: {
       message: 'Profile picture must be a valid image URL (jpg, jpeg, png, gif, webp)'
     }
   },
-  backgroundImageUrl: {
+  coverPhotoUrl: {
     type: String,
     trim: true,
     default: null,

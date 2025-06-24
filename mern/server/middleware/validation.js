@@ -35,7 +35,7 @@ export const validateUser = [
     .optional()
     .isURL()
     .withMessage('Profile picture must be a valid URL'),
-  body('backgroundImageUrl')
+  body('coverPhotoUrl')
     .optional()
     .isURL()
     .withMessage('Background image must be a valid URL'),
@@ -62,7 +62,7 @@ export const validateUserUpdate = [
     .optional()
     .isURL()
     .withMessage('Profile picture must be a valid URL'),
-  body('backgroundImageUrl')
+  body('coverPhotoUrl')
     .optional()
     .isURL()
     .withMessage('Background image must be a valid URL'),

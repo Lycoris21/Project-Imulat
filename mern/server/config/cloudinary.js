@@ -16,6 +16,8 @@ const storage = new CloudinaryStorage({
       folder = 'pfps';
     } else if (req.originalUrl.includes('report-cover')) {
       folder = 'report-covers';
+    } else if (req.originalUrl.includes('cover-photo')) {
+      folder = 'cover-photos';
     }
 
     return {

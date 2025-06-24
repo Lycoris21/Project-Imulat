@@ -30,7 +30,7 @@ class UserController {
   // Create new user
   static async createUser(req, res) {
     try {
-      const { username, email, password, birthdate, bio, role, profilePictureUrl, backgroundImageUrl } = req.body;
+      const { username, email, password, birthdate, bio, role, profilePictureUrl, coverPhotoUrl } = req.body;
       
       // Basic validation
       if (!username || !email || !password) {
@@ -52,7 +52,7 @@ class UserController {
         bio,
         role,
         profilePictureUrl,
-        backgroundImageUrl
+        coverPhotoUrl
       };
 
       const newUser = await UserService.createUser(userData);
@@ -69,7 +69,7 @@ class UserController {
   // Update user
   static async updateUser(req, res) {
     try {
-      const { username, email, birthdate, bio, role, profilePictureUrl, backgroundImageUrl } = req.body;
+      const { username, email, birthdate, bio, role, profilePictureUrl, coverPhotoUrl } = req.body;
       
       const updateData = {
         username,
@@ -78,7 +78,7 @@ class UserController {
         bio,
         role,
         profilePictureUrl,
-        backgroundImageUrl
+        coverPhotoUrl
       };
 
       const updatedUser = await UserService.updateUser(req.params.id, updateData);

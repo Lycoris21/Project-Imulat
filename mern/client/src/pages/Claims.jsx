@@ -19,46 +19,8 @@ export default function Claims() {
   // Check if user is an admin
   const isAdmin = isLoggedIn && user?.role === "admin";
 
-  // Mock data - replace with actual API calls later
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockClaims = Array.from({ length: 25 }, (_, i) => {
-        let date;
-        // Create varied dates for demonstration
-        const daysAgo = Math.floor(Math.random() * 90); // Random days within last 90 days
-        date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-        
-        return {
-          id: i + 1,
-          claimTitle: `${
-            i % 6 === 0 ? "Breaking: New COVID-19 Variant Discovered" :
-            i % 6 === 1 ? "Economic Recession Expected by 2025" :
-            i % 6 === 2 ? "Climate Change Causes Increase in Natural Disasters" :
-            i % 6 === 3 ? "Social Media Platform Implements New Privacy Policy" :
-            i % 6 === 4 ? "Artificial Intelligence Breakthrough in Medical Research" :
-            "Government Announces New Education Reform Initiative"
-          } - Claim ${i + 1}`,
-          claimContent: `This claim discusses important developments and their potential impact on society. The information presented here requires fact-checking and verification from reliable sources. Claim ${i + 1} provides detailed analysis of the situation.`,
-          aiTruthIndex: Math.floor(Math.random() * 101), // 0-100
-          userUsername: `User_${Math.floor(Math.random() * 1000)}`,
-          aiClaimSummary: `AI-generated summary: This claim examines recent developments and their implications. The analysis suggests various perspectives should be considered when evaluating the accuracy of the presented information.`,
-          createdAt: date,
-          likes: Math.floor(Math.random() * 200) + 5,
-          dislikes: Math.floor(Math.random() * 50) + 1,
-          commentCount: Math.floor(Math.random() * 80) + 3,
-          hasReport: Math.random() > 0.7, // 30% chance of having an associated report
-          sources: i % 3 === 0 ? "https://example.com/source1, https://example.com/source2" : null
-        };
-      });
-
-      // Sort by date, latest first
-      mockClaims.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      
-      setClaims(mockClaims);
-      setFilteredClaims(mockClaims);
-      setLoading(false);
-    }, 1000);
+    fetchClaims();
   }, []);
 
   // Filter claims based on search query
@@ -92,24 +54,60 @@ export default function Claims() {
   // Handle claim submission
   const handleSubmitClaim = async (e) => {
     e.preventDefault();
-    
+
     try {
-      console.log("Submitting claim:", claimFormData);
-      
-      // Reset form and close modal
+      const payload = {
+        userId: user._id, // assuming user comes from useAuth
+        claimTitle: claimFormData.claimTitle,
+        claimContent: claimFormData.claimContent,
+        sources: claimFormData.sources,
+        aiClaimSummary: "SAMPLE SUMMARY — AI not integrated yet.",
+        aiTruthIndex: Math.floor(Math.random() * 101), // optional, for placeholder
+      };
+
+      const response = await fetch("http://localhost:5050/api/claims", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create claim");
+      }
+
+      // Clear form and close modal
       setClaimFormData({
         claimTitle: "",
         claimContent: "",
-        sources: ""
+        sources: "",
       });
       setShowSubmitModal(false);
-      
-      // You would typically refetch the claims here
       alert("Claim submitted successfully!");
+
+      fetchClaims();
     } catch (error) {
       console.error("Error submitting claim:", error);
-      alert("Error submitting claim. Please try again.");
-    }  };
+      alert(error.message || "Error submitting claim. Please try again.");
+    }
+  };
+
+  const fetchClaims = async () => {
+      try {
+        const response = await fetch("http://localhost:5050/api/claims");
+        const data = await response.json();
+        // Sort by creation date
+        data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setClaims(data);
+        setFilteredClaims(data);
+      } catch (error) {
+        console.error("Failed to fetch claims:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // Close claim modal and reset form
   const handleCloseClaimModal = () => {
@@ -173,7 +171,7 @@ export default function Claims() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex items-center justify-center">
+      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-white text-lg">Loading claims...</p>
@@ -257,7 +255,7 @@ export default function Claims() {
                 className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-80 md:w-96 relative"
               >
                 <Link
-                  to={`/claims/${claim.id}`}
+                  to={`/claims/${claim._id}`}
                   className="block"
                 >
                   {/* Content */}
@@ -279,7 +277,8 @@ export default function Claims() {
 
                     {/* Author & Status */}
                     <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
-                      <span>By <span className="font-medium">{claim.userUsername}</span></span>                      <div className="flex items-center gap-2">
+                      <span>By <span className="font-medium">{claim.userId?.username || "Unknown"}</span></span>
+                      <div className="flex items-center gap-2">
                         {claim.hasReport && (
                           <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex items-center gap-1">
                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">

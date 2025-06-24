@@ -121,7 +121,6 @@ export default function Reports() {
         uploadedCoverUrl = uploadResult.url;
       }
 
-      // Step 2: Prepare payload
       const payload = {
         userId: user._id,
         claimIds: formData.claimIds ? [formData.claimIds] : [],

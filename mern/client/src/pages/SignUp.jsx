@@ -40,8 +40,8 @@ export default function SignUp() {
   }
 
   const today = new Date();
-  const birthDate = new Date(form.birthdate);
-  const ageDifMs = today - birthDate;
+  const birthdate = new Date(form.birthdate);
+  const ageDifMs = today - birthdate;
   const ageDate = new Date(ageDifMs);
   const age = Math.abs(ageDate.getUTCFullYear() - 1970);
 
@@ -66,7 +66,7 @@ export default function SignUp() {
           birthdate: form.birthdate,
           bio: form.bio || "",
           profilePictureUrl: null,
-          backgroundImageUrl: null,
+          coverPhotoUrl: null,
           role: "user"
         }),
       });

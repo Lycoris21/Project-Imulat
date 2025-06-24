@@ -1,10 +1,28 @@
-import Claim from "../models/Claim.js";
+import { Claim, Comment} from "../models/index.js";
 
 class ClaimService {
   static async getAllClaims() {
-    return await Claim.find({})
-      .populate("userId", "username email")
-      .populate("reportId", "reportTitle");
+    const claims = await Claim.find({})
+      .populate('userId', 'username email')
+      .populate("reportId", "reportTitle")
+      .sort({ createdAt: -1 })
+      .lean(); // important: use lean() to allow adding custom fields
+
+    // Append commentCount for each claim
+    const claimsWithCommentCount = await Promise.all(
+      claims.map(async (claim) => {
+        const count = await Comment.countDocuments({
+          targetType: 'claim',
+          targetId: claim._id,
+        });
+        return {
+          ...claim,
+          commentCount: count,
+        };
+      })
+    );
+
+    return claimsWithCommentCount;
   }
 
   static async getClaimById(id) {
@@ -27,11 +45,28 @@ class ClaimService {
   }
 
   static async getLatestClaims(limit = 10) {
-    return await Claim.find({})
+    const claims = await Claim.find({})
+      .populate('userId', 'username email')
+      .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
       .limit(limit)
-      .populate("userId", "username email")
-      .populate("reportId", "reportTitle");
+      .lean(); // important: use lean() to allow adding custom fields
+
+    // Append commentCount for each claim
+    const claimsWithCommentCount = await Promise.all(
+      claims.map(async (claim) => {
+        const count = await Comment.countDocuments({
+          targetType: 'claim',
+          targetId: claim._id,
+        });
+        return {
+          ...claim,
+          commentCount: count,
+        };
+      })
+    );
+
+    return claimsWithCommentCount;
   }
 }
 

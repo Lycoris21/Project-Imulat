@@ -1,4 +1,4 @@
-import { User } from "../models/index.js";
+import { User, Claim, Reaction} from "../models/index.js";
 
 class UserService {
   // Get all users
@@ -8,8 +8,26 @@ class UserService {
 
   // Get user by ID
   static async getUserById(id) {
-    return await User.findById(id, '-passwordHash');
+    // Step 1: Get the user without passwordHash
+    const user = await User.findById(id, '-passwordHash').lean();
+    if (!user) throw new Error('User not found');
+
+    // Step 2: Get all claims authored by this user
+    const claims = await Claim.find({ userId: id }).lean();
+    user.claims = claims;
+
+    // Step 3: Count likes and dislikes on the user object
+    const [likes, dislikes] = await Promise.all([
+      Reaction.countDocuments({ targetId: id, targetType: 'user', reactionType: 'like' }),
+      Reaction.countDocuments({ targetId: id, targetType: 'user', reactionType: 'dislike' }),
+    ]);
+
+    user.likes = likes;
+    user.dislikes = dislikes;
+
+    return user;
   }
+
 
   // Find user by email or username
   static async findUserByEmailOrUsername(email, username) {

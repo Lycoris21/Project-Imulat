@@ -23,7 +23,7 @@ router.post("/with-images",
   [
     ...validateUser.slice(0, -1), // All validations except handleValidationErrors
     validateImageUrl('profilePictureUrl', 'Profile picture'),
-    validateImageUrl('backgroundImageUrl', 'Background image'),
+    validateImageUrl('coverPhotoUrl', 'Background image'),
     validateUser[validateUser.length - 1] // handleValidationErrors
   ],
   UserController.createUser
@@ -41,7 +41,7 @@ router.patch("/:id/with-images",
   [
     ...validateUserUpdate.slice(0, -1), // All validations except handleValidationErrors
     validateImageUrl('profilePictureUrl', 'Profile picture'),
-    validateImageUrl('backgroundImageUrl', 'Background image'),
+    validateImageUrl('coverPhotoUrl', 'Background image'),
     validateUserUpdate[validateUserUpdate.length - 1] // handleValidationErrors
   ],
   UserController.updateUser

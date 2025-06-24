@@ -43,7 +43,7 @@ const upload = multer({
 // Middleware for single profile picture upload
 export const uploadProfilePicture = upload.single('profilePicture');
 
-// Middleware for single background image upload
+// Middleware for single cover photo upload
 export const uploadBackgroundImage = upload.single('backgroundImage');
 
 // Middleware for multiple file uploads (profile + background)

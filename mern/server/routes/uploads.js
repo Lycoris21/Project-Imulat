@@ -7,6 +7,24 @@ const router = express.Router();
 
 const upload = multer({ storage });
 
+// Uploads cover photos
+router.post('/cover-photo', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ success: false, message: 'No image file provided' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      url: req.file.path // Cloudinary gives a full URL here
+    });
+
+  } catch (err) {
+    console.error("Background image upload error:", err);
+    return res.status(500).json({ success: false, message: "Failed to upload cover photo" });
+  }
+});
+
 // Upload report cover image
 router.post('/report-cover', upload.single('image'), async (req, res) => {
   try {
