@@ -153,25 +153,30 @@ export default function Home() {
             <Link to="/reports" className="text-[#4B548B] hover:text-[#1E275E] font-medium">
               View All →
             </Link>
-          </div>
-            <div className="space-y-4">
+          </div>            
+          <div className="space-y-4">
             {latestReports.map((report) => (
-              <div key={report.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+              <Link 
+                key={report.id} 
+                to={`/reports/${report.id}`}
+                className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[#EDEEF1] transition-colors rounded-lg p-3 m-3"
+              >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-gray-800 text-sm leading-tight">
+                  <h3 className="font-bold text-gray-800 text-sm leading-tight hover:text-blue-600 transition-colors">
                     {report.title}
                   </h3>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${getVerdictColor(report.verdict)}`}>
                     {report.verdict}
                   </span>
-                </div>
+                </div>                
                 <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                  {report.summary}
-                </p>                <div className="flex justify-between text-xs text-gray-500">
-                  <span>By {report.author}</span>
+                  <span className="font-medium">AI-generated summary:</span> {report.summary}
+                </p>                
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>By <span className="font-medium">{report.author}</span></span>
                   <span>{formatRelativeTime(report.date)}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -183,11 +188,16 @@ export default function Home() {
             <Link to="/claims" className="text-[#4B548B] hover:text-[#1E275E] font-medium">
               View All →
             </Link>
-          </div>            <div className="space-y-4">
+          </div>            
+          <div className="space-y-4">
             {latestClaims.map((claim) => (
-              <div key={claim.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+              <Link 
+                key={claim.id} 
+                to={`/claims/${claim.id}`}
+                className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[#EDEEF1] transition-colors rounded-lg p-3 m-3"
+              >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-gray-800 text-sm leading-tight flex-1 mr-2">
+                  <h3 className="font-bold text-gray-800 text-sm leading-tight flex-1 mr-2 hover:text-blue-600 transition-colors">
                     {claim.claim}
                   </h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -201,14 +211,15 @@ export default function Home() {
                       AI Truth Index: {claim.aiTruthIndex}%
                     </span>
                   </div>
-                </div>
+                </div>                
                 <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                  {claim.aiSummary}
-                </p>                <div className="flex justify-between text-xs text-gray-500">
-                  <span>Submitted by: {claim.submittedBy}</span>
+                  <span className="font-medium">AI-generated summary:</span> {claim.aiSummary}
+                </p>                
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Submitted by: <span className="font-medium">{claim.submittedBy}</span></span>
                   <span>{formatRelativeTime(claim.date)}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>      
