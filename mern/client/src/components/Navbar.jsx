@@ -19,7 +19,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </div>
-        <h1 className="text-xl font-bold text-[#4B548B]">Project IMULAT</h1>
+        <h1 className="text-xl font-bold text-[#4B548B] -m-5">Project IMULAT</h1>
       </div>
 
       {/* Center - Navigation Items */}
