@@ -9,7 +9,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
   ];
   
   return (
-    <nav className="bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
+    <nav className="h-20 bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
     {/* Left side - Logo and App Name */}
       <div className="flex items-center space-x-3">
         <div style={{height: '60px' }}>

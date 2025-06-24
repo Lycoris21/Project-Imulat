@@ -19,7 +19,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
+      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center text-white">
         <p>Loading user info...</p>
       </div>
     );
