@@ -29,8 +29,8 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             key={item.name}
             to={item.to}
             className={({ isActive }) =>
-              `text-[#4B548B] hover:text-blue-600 font-medium transition-colors ${
-                isActive ? "text-[#4B548B] opacity-60 border-b-2 border-blue-500 pb-1" : ""
+              `text-[#4B548B] hover:text-[#1E275E] font-medium transition-colors ${
+                isActive ? "text-[#1E275E] opacity-60 border-b-2 border-[#1E275E] pb-1" : ""
               }`
             }
           >
@@ -65,13 +65,13 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           <div className="flex items-center space-x-3">
             <Link
               to="/login"
-              className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="px-4 py-2 border-1 border-[#4B548B] text-[#4B548B] hover:text-white hover:border-white hover:bg-[#4B548B] font-medium rounded-lg transition-colors"
             >
               Login
             </Link>
             <Link
               to="/signup"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              className="px-4 py-2 border-1 bg-[#4B548B] hover:bg-white hover:text-[#4B548B] hover:border-[#4B548B] text-white font-medium rounded-lg transition-colors"
             >
               Sign Up
             </Link>
