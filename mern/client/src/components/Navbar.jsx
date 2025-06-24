@@ -88,40 +88,58 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
       </button>
 
     {dropdownOpen && (
-      <div className="absolute left-0 mt-2 w-72 bg-white shadow-lg z-50 text-sm rounded-lg">
+      <div className="absolute right-0 mt-2 min-w-[200px] bg-white shadow-lg z-50 text-sm rounded-lg">
 
 
-          <Link
-            to="/profile"
-            className="block px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
-          >
-            Profile
-          </Link>
-            <div className="my-1 border-t border-gray-200 mx-"></div>
-          <Link
-            to="/bookmarks"
-            className="block px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
-          >
-            Bookmarks
-          </Link>
-            <div className="my-1 border-t border-gray-200 mx-3"></div>
-          <Link
-            to="/notifications"
-            className="block px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
-          >
-            Notifications
-          </Link>
-            <div className="my-1 border-t border-gray-200 mx-3"></div>
-          <button
-            onClick={handleLogout}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[#4B548B] rounded-lg cursor-pointer"
-          >
-            Logout
-          </button>
+
+<div className="rounded-lg hover:bg-gray-100">
+  <Link
+    to="/profile"
+    className="text-center block px-4 py-2 text-[#4B548B]"
+  >
+    Profile
+  </Link>
+  <div className="border-t border-gray-200 mx-10" />
+</div>
+
+<div className="hover:bg-gray-100">
+  <Link
+    to="/bookmarks"
+    className="text-center block px-4 py-2 text-[#4B548B]"
+  >
+    Bookmarks
+  </Link>
+  <div className="border-t border-gray-200 mx-10" />
+</div>
+
+<div className="hover:bg-gray-100">
+  <Link
+    to="/notifications"
+    className="text-center block px-4 py-2 text-[#4B548B]"
+  >
+    Notifications
+  </Link>
+  <div className="border-t border-gray-200 mx-10" />
+</div>
+
+<div className="hover:bg-gray-100 rounded-b-lg">
+  <button
+  className="text-center w-full px-4 py-2 text-[#4B548B] cursor-pointer"
+    onClick={handleLogout}
+    
+  >
+    Logout
+  </button>
+  
+</div>
+
+
+
         </div>
       )}
     </div>
-  ) : (
+  
+) : (
     <div className="flex items-center space-x-3">
       <Link
         to="/login"
