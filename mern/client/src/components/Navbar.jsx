@@ -86,8 +86,9 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
         <span className="text-gray-700 font-medium">{user.username}</span>
       </button>
 
-      {dropdownOpen && (
-        <div className="absolute right-0 mt-2 w-full bg-white border-none shadow-lg z-50 text-sm rounded-none focus:outline-none">
+    {dropdownOpen && (
+      <div className="absolute left-0 mt-2 w-72 bg-white shadow-lg z-50 text-sm rounded-lg">
+
 
           <Link
             to="/profile"
