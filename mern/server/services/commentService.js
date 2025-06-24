@@ -14,8 +14,6 @@ class CommentService {
   }
 
   static async getCommentsByTarget(targetType, targetId) {
-    console.log("Querying comments with:", { targetType, targetId });
-    
     return await Comment.find({
       targetType,
       targetId,

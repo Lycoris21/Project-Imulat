@@ -13,7 +13,6 @@ export default function ReportDetail() {
   const [newComment, setNewComment] = useState("");
   const { user } = useAuth();
 
-  // Mock data - replace with actual API call
   useEffect(() => {
     const fetchReport = async () => {
       try {
@@ -28,27 +27,6 @@ export default function ReportDetail() {
         setReport(null); // ensure it's null so error message renders
       } finally {
         setLoading(false);
-      }
-    };
-
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`http://localhost:5050/api/comments/report/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch comments");
-
-        const data = await response.json();
-        const normalized = data.map((comment) => ({
-          id: comment._id,
-          username: comment.userId?.username || "Unknown",
-          content: comment.commentContent,
-          createdAt: comment.createdAt,
-          likes: 0
-        }));
-        
-        console.log("Comments:", normalized);
-        setComments(normalized);
-      } catch (err) {
-        console.error("Error fetching comments:", err);
       }
     };
 
@@ -119,23 +97,32 @@ export default function ReportDetail() {
       if (!res.ok) throw new Error("Failed to submit comment");
       const savedComment = await res.json();
 
-     setComments([
-        {
-          id: savedComment._id,
-          username: savedComment.userId.username,
-          content: savedComment.commentContent,
-          createdAt: savedComment.createdAt,
-          likes: 0 // optional
-        },
-        ...comments
-      ]);
+      await fetchComments(); 
       setNewComment("");
     } catch (err) {
       console.error("Error submitting comment:", err);
     }
   };
 
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`http://localhost:5050/api/comments/report/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch comments");
 
+      const data = await response.json();
+      const normalized = data.map((comment) => ({
+        id: comment._id,
+        username: comment.userId?.username || "Unknown",
+        content: comment.commentContent,
+        createdAt: comment.createdAt,
+        likes: 0
+      }));
+      
+      setComments(normalized);
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+    }
+  };
 
 
   if (loading) {
