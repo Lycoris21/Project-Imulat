@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { capitalizeWords } from "../utils/stringUtils";
+import { useAuth } from "../context/AuthContext";
 
 export default function ReportDetail() {
   const { id } = useParams();
@@ -9,77 +11,56 @@ export default function ReportDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const { user } = useAuth();
 
   // Mock data - replace with actual API call
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {      const mockReport = {
-        id: id,
-        reportTitle: `Detailed Report ${id}: Comprehensive Fact-Check Analysis`,
-        adminUsername: "FactChecker_Admin",
-        claimTitle: "Sample claim that was fact-checked in this report",
-        claimLinks: [
-          { id: 1, title: "Related Claim #1", url: `/claims/1` },
-          { id: 2, title: "Related Claim #2", url: `/claims/2` }
-        ],
-        truthVerdict: "Partially True",
-        aiReportSummary: "This comprehensive analysis examines multiple claims and provides evidence-based conclusions. The AI analysis indicates mixed accuracy with some verified elements and some unsubstantiated claims.",
-        reportContent: `
-This detailed fact-checking report examines the claims made regarding recent events. Our investigation involved:
+    const fetchReport = async () => {
+      try {
+        const response = await fetch(`http://localhost:5050/api/reports/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch report");
 
-1. **Source Verification**: We analyzed primary sources and cross-referenced multiple reliable databases.
+        const data = await response.json();
+        data.truthVerdict = capitalizeWords(data.truthVerdict);
+        setReport(data);
+      } catch (err) {
+        console.error("Error fetching report:", err);
+        setReport(null); // ensure it's null so error message renders
+      } finally {
+        setLoading(false);
+      }
+    };
 
-2. **Expert Consultation**: Subject matter experts were consulted to provide context and technical accuracy.
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`http://localhost:5050/api/comments/report/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch comments");
 
-3. **Timeline Analysis**: Events were mapped chronologically to identify inconsistencies or confirmations.
+        const data = await response.json();
+        const normalized = data.map((comment) => ({
+          id: comment._id,
+          username: comment.userId?.username || "Unknown",
+          content: comment.commentContent,
+          createdAt: comment.createdAt,
+          likes: 0
+        }));
+        
+        console.log("Comments:", normalized);
+        setComments(normalized);
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+      }
+    };
 
-4. **Media Coverage Review**: We examined how different media outlets reported on this topic.
-
-The evidence suggests that while some aspects of the original claim contain factual elements, there are significant portions that lack supporting evidence or contain misleading information.
-        `,
-        reportSummary: "Mixed accuracy found in claims with some verified facts but also unsubstantiated elements requiring further investigation.",
-        reportReferences: `
-• Primary Source Document A (Government Database)
-• Expert Interview - Dr. Jane Smith, University of Facts
-• News Report - Reliable News Outlet, June 2025
-• Statistical Data - National Statistics Bureau
-• Cross-reference - International Fact-Checking Network
-        `,
-        reportCoverUrl: `https://picsum.photos/800/400?random=${id}`, // Add cover image
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        likes: 45,
-        dislikes: 12,
-        bookmarks: 23
-      };
-      
-      const mockComments = [
-        {
-          id: 1,
-          username: "User123",
-          content: "Great analysis! The methodology seems thorough.",
-          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-          likes: 5
-        },
-        {
-          id: 2,
-          username: "CriticalThinker",
-          content: "I appreciate the detailed references. This helps verify the conclusions.",
-          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-          likes: 3
-        }
-      ];
-
-      setReport(mockReport);
-      setComments(mockComments);
-      setLoading(false);
-    }, 1000);
+    fetchReport();
+    fetchComments();
   }, [id]);
 
   const getVerdictColor = (verdict) => {
     switch (verdict) {
       case "True": case "Verified": return "text-green-600 bg-green-100 border-green-200";
       case "False": case "Debunked": return "text-red-600 bg-red-100 border-red-200";
-      case "Partially True": return "text-yellow-600 bg-yellow-100 border-yellow-200";
+      case "Partially True": case "Misleading": return "text-yellow-600 bg-yellow-100 border-yellow-200";
       default: return "text-gray-600 bg-gray-100 border-gray-200";
     }
   };
@@ -115,25 +96,51 @@ The evidence suggests that while some aspects of the original claim contain fact
     // TODO: API call to save bookmark
   };
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        username: "CurrentUser", // Get from auth context
-        content: newComment,
-        createdAt: new Date(),
-        likes: 0
-      };
-      setComments([...comments, comment]);
+    if (!newComment.trim()) return;
+
+    const commentPayload = {
+      userId: user?._id,
+      targetId: id,
+      targetType: "Report",
+      commentContent: newComment
+    };
+
+    try {
+      const res = await fetch("http://localhost:5050/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(commentPayload)
+      });
+
+      if (!res.ok) throw new Error("Failed to submit comment");
+      const savedComment = await res.json();
+
+     setComments([
+        {
+          id: savedComment._id,
+          username: savedComment.userId.username,
+          content: savedComment.commentContent,
+          createdAt: savedComment.createdAt,
+          likes: 0 // optional
+        },
+        ...comments
+      ]);
       setNewComment("");
-      // TODO: API call to save comment
+    } catch (err) {
+      console.error("Error submitting comment:", err);
     }
   };
 
+
+
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading report...</p>
@@ -144,7 +151,7 @@ The evidence suggests that while some aspects of the original claim contain fact
 
   if (!report) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Report Not Found</h1>
           <p className="text-gray-600 mb-4">The report you're looking for doesn't exist.</p>
@@ -155,7 +162,7 @@ The evidence suggests that while some aspects of the original claim contain fact
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)]  py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Back Navigation */}
         <div className="mb-6">
@@ -231,10 +238,10 @@ The evidence suggests that while some aspects of the original claim contain fact
           </div>
         </div>
 
-        {/* Report Summary */}
+        {/* Report Conclustion */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Summary</h2>
-          <p className="text-gray-700">{report.reportSummary}</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Conclusion</h2>
+          <p className="text-gray-700">{report.reportConclusion}</p>
         </div>
 
         {/* References */}

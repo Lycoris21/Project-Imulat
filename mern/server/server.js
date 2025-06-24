@@ -7,10 +7,12 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 // Import routes
 import auth from "./routes/auth.js";
 import claims from "./routes/claims.js";
+import comments from "./routes/comments.js";
+import reports from "./routes/reports.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
 import upload from "./routes/upload.js";
-import reports from "./routes/reports.js";
+
 
 // Load environment variables
 dotenv.config({ path: './config.env' });
@@ -30,12 +32,14 @@ app.use(express.urlencoded({ extended: true }));
 // app.use('/uploads', express.static('uploads'));
 
 // API Routes
+app.use("/api/auth", auth);
 app.use("/api/claims", claims);
+app.use("/api/comments", comments);
+app.use("/api/reports", reports);
 app.use('/api/upload', upload);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
-app.use("/api/reports", reports);
-app.use("/api/auth", auth);
+
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
