@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useRef} from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const datePickerRef = useRef(null);
+
+  const handleIconClick = () => {
+  if (datePickerRef.current) {
+    datePickerRef.current.setOpen(true);
+  }
+};
+
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    birthdate: null,
   });
   const [error, setError] = useState("");
 
@@ -132,28 +144,65 @@ export default function SignUp() {
         className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
       />
     </div>
-    
+
   </div>
  
  
-<div>
-  <label className="block text-sm font-medium text-deep mb-1 text-left">
-    Birthdate
-  </label>
-  <div className="flex items-center border-b border-gray-400 py-2">
-    <input
-      type="date"
-      name="birthdate"
-      value={form.birthdate}
-      onChange={handleChange}
-      className="appearance-none bg-transparent border-none w-full text-gray-700 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
-    />
-  </div>
-</div>
+    <div>
+      <label className="flex items-center gap-2 text-sm font-medium text-deep mb-1 text-left">
+        <span>Birthdate</span>
+        <svg
+          onClick={handleIconClick} // 3. Make SVG clickable
+          className="cursor-pointer"
+          width="20"
+          height="20"
+          viewBox="0 0 29 32"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M25.9998 6H2.6665V11H25.9998V6Z" fill="#4B548B" />
+          <path
+            d="M14.3333 4.33337H26C26.9167 4.33337 27.6667 5.08337 27.6667 6.00004V29.3334C27.6667 30.25 26.9167 31 26 31H2.66667C1.75 31 1 30.25 1 29.3334V6.00004C1 5.08337 1.75 4.33337 2.66667 4.33337H14.3333Z"
+            stroke="#4B548B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6 4.33333V1M22.6667 4.33333V1"
+            stroke="#4B548B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6 16H22.6667"
+            stroke="#4B548B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6 22.6666H17.6667"
+            stroke="#4B548B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </label>
 
-
-
-
+      <div className="flex items-center border-b border-gray-400 py-2">
+        <DatePicker
+          ref={datePickerRef} 
+          selected={form.birthdate}
+          onChange={(date) => setForm({ ...form, birthdate: date })}
+          placeholderText="mm/dd/yyyy"
+          className="appearance-none bg-transparent border-none w-full text-black placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
+          dateFormat="MM/dd/yyyy"
+        />
+      </div>
+    </div>
 
           <button
             type="submit"
