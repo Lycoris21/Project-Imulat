@@ -336,7 +336,7 @@ export default function Reports() {
                     <h3 className="font-bold text-gray-800 text-lg leading-tight hover:text-blue-600 transition-colors flex-1 mr-3 line-clamp-2">
                       {report.reportTitle}
                     </h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdict)}`}>
+                    <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdict)}`}>
                       {report.truthVerdict}
                     </span>
                   </div>
@@ -344,14 +344,14 @@ export default function Reports() {
                   {/* AI Summary */}
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                     <span className="font-medium">AI-generated summary:</span> {report.aiReportSummary}
-                  </p>
-
-                  {/* Author & Claim Count */}
+                  </p>                  {/* Author & Claim Count */}
                   <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
                     <span>By <span className="font-medium">{report.adminUsername}</span></span>
-                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                      {report.claimCount} claim{report.claimCount !== 1 ? 's' : ''}
-                    </span>
+                    {report.claimCount > 0 && (
+                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                        {report.claimCount} claim{report.claimCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
 
                   {/* Stats & Date */}
@@ -387,12 +387,14 @@ export default function Reports() {
                   </div>
                 </div>
               </Link>
-            ))}          </div>
+            ))}          
+          </div>
         )}
       </div>
 
       {/* Admin: Create Report Modal */}
-      {showCreateModal && (        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>        
+      {showCreateModal && (        
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>        
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             {/* Modal Header - Fixed */}
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
