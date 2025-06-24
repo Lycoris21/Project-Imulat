@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // assumes auth context is available
 
 export default function ClaimDetail() {
@@ -11,6 +11,7 @@ export default function ClaimDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const navigate = useNavigate();
 
   const fetchClaim = async () => {
     try {
@@ -81,7 +82,7 @@ export default function ClaimDetail() {
     const commentPayload = {
       userId: user?._id,
       targetId: id,
-      targetType: "Claim",
+      targetType: "claim",
       commentContent: newComment
     };
     try {
@@ -112,7 +113,9 @@ export default function ClaimDetail() {
     <div className="min-h-screen bg-base-gradient py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-6">
-          <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium">← Back to Home</Link>
+          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
+            ← Back
+          </button>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -213,7 +216,7 @@ export default function ClaimDetail() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments ({comments.length})</h2>
           <form onSubmit={handleCommentSubmit} className="mb-6">
             <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg" rows="3" placeholder="Share your thoughts..." />
-            <button type="submit" className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Post Comment</button>
+            <button type="submit" className="mt-2 px-4 py-2 bg-dark text-white rounded-lg hover:bg-darker">Post Comment</button>
           </form>
           <div className="space-y-4">
             {comments.map((comment) => (

@@ -29,12 +29,22 @@ class ReportController {
   // Create new report
   static async createReport(req, res) {
     try {
-      const { userId, claimIds, reportTitle, reportContent, truthVerdict, aiReportSummary, reportConclusion, reportReferences } = req.body;
-      
+      const {
+        userId,
+        claimIds,
+        reportTitle,
+        reportContent,
+        truthVerdict,
+        aiReportSummary,
+        reportConclusion,
+        reportReferences,
+        reportCoverUrl
+      } = req.body;
+
       // Basic validation
       if (!userId || !reportTitle || !reportContent || !truthVerdict || !reportConclusion) {
-        return res.status(400).json({ 
-          error: "UserId, reportTitle, reportContent, truthVerdict, and reportConclusion are required" 
+        return res.status(400).json({
+          error: "UserId, reportTitle, reportContent, truthVerdict, and reportConclusion are required"
         });
       }
 
@@ -46,7 +56,8 @@ class ReportController {
         truthVerdict,
         aiReportSummary,
         reportConclusion,
-        reportReferences
+        reportReferences,
+        reportCoverUrl
       };
 
       const newReport = await ReportService.createReport(reportData);
@@ -59,6 +70,7 @@ class ReportController {
       res.status(500).json({ error: "Error creating report" });
     }
   }
+
 
   // Update report
   static async updateReport(req, res) {

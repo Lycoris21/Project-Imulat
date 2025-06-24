@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { capitalizeWords } from "../utils/stringUtils";
 import { useAuth } from "../context/AuthContext";
 
@@ -12,6 +12,7 @@ export default function ReportDetail() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -81,7 +82,7 @@ export default function ReportDetail() {
     const commentPayload = {
       userId: user?._id,
       targetId: id,
-      targetType: "Report",
+      targetType: "report",
       commentContent: newComment
     };
 
@@ -142,7 +143,9 @@ export default function ReportDetail() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Report Not Found</h1>
           <p className="text-gray-600 mb-4">The report you're looking for doesn't exist.</p>
-          <Link to="/" className="text-blue-600 hover:underline">← Back to Home</Link>
+          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
+            ← Back
+          </button>
         </div>
       </div>
     );
@@ -153,9 +156,9 @@ export default function ReportDetail() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Back Navigation */}
         <div className="mb-6">
-          <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium">
-            ← Back to Home
-          </Link>
+          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
+            ← Back
+          </button>
         </div>        {/* Report Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {/* Cover Image */}
@@ -314,7 +317,7 @@ export default function ReportDetail() {
             />
             <button
               type="submit"
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="mt-2 px-4 py-2 bg-dark text-white rounded-lg hover:bg-darker transition"
             >
               Post Comment
             </button>

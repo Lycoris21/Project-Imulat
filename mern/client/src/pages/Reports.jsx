@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { capitalizeWords } from "../utils/stringUtils";
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
@@ -23,45 +24,10 @@ export default function Reports() {
   // Check if user is an admin
   const isAdmin = isLoggedIn && user?.role === "admin";
 
-  // Mock data - replace with actual API calls later
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockReports = Array.from({ length: 20 }, (_, i) => {
-        let date;
-        // Create varied dates for demonstration
-        const daysAgo = Math.floor(Math.random() * 60); // Random days within last 60 days
-        date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
-        
-        return {
-          id: i + 1,
-          reportTitle: `Comprehensive Fact-Check Report ${i + 1}: ${
-            i % 5 === 0 ? "Climate Change Analysis" :
-            i % 5 === 1 ? "Economic Policy Review" :
-            i % 5 === 2 ? "Healthcare System Investigation" :
-            i % 5 === 3 ? "Technology Impact Assessment" :
-            "Social Media Misinformation Study"
-          }`,
-          aiReportSummary: `This detailed analysis examines claims ${i + 1} and provides evidence-based conclusions. Our investigation involved multiple sources and expert consultation to verify the accuracy of the information presented.`,
-          truthVerdict: i % 4 === 0 ? "True" : i % 4 === 1 ? "False" : i % 4 === 2 ? "Partially True" : "Misleading",
-          adminUsername: `FactChecker_${i % 3 === 0 ? "Admin" : i % 3 === 1 ? "Expert" : "Reviewer"}`,
-          reportCoverUrl: i % 3 === 0 ? `https://picsum.photos/400/300?random=${i}` : null,
-          createdAt: date,
-          likes: Math.floor(Math.random() * 100) + 10,
-          dislikes: Math.floor(Math.random() * 20) + 1,
-          commentCount: Math.floor(Math.random() * 50) + 5,
-          claimCount: Math.floor(Math.random() * 5) + 1 // Number of claims in this report
-        };
-      });
-
-      // Sort by date, latest first
-      mockReports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      
-      setReports(mockReports);
-      setFilteredReports(mockReports);
-      setLoading(false);
-    }, 1000);
+    fetchReports();
   }, []);
+
 
   // Filter reports based on search query
   useEffect(() => {
@@ -77,6 +43,40 @@ export default function Reports() {
       setFilteredReports(filtered);
     }
   }, [searchQuery, reports]);
+
+  const fetchReports = async () => {
+    try {
+      const response = await fetch("http://localhost:5050/api/reports");
+      if (!response.ok) throw new Error("Failed to fetch reports");
+      
+      const data = await response.json();
+
+      // Optional: map to format if necessary
+      const processedReports = data.map((report) => ({
+        id: report._id,
+        reportTitle: report.reportTitle,
+        aiReportSummary: report.aiReportSummary,
+        truthVerdict: capitalizeWords(report.truthVerdict) || "Unknown",
+        adminUsername: report.userId?.username || "Unknown", // ensure populated in backend
+        reportCoverUrl: report.reportCoverUrl || null, // adjust if field is different
+        createdAt: new Date(report.createdAt),
+        likes: report.likes?.length || 0,
+        dislikes: report.dislikes?.length || 0,
+        commentCount: report.commentCount || 0,
+        claimCount: report.claims?.length || 0
+      }));
+
+      processedReports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setReports(processedReports);
+      setFilteredReports(processedReports);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching reports:", err);
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     // Search is handled by useEffect above
@@ -99,30 +99,70 @@ export default function Reports() {
       reportCoverFile: file
     }));
   };
+  
   // Handle form submission
   const handleSubmitReport = async (e) => {
     e.preventDefault();
-    
+
     try {
-      // Here you would typically upload the image first, then create the report
-      console.log("Submitting report:", formData);
-        // Reset form and close modal
+      let uploadedCoverUrl = null;
+
+      if (formData.reportCoverFile) {
+        const uploadData = new FormData();
+        uploadData.append("image", formData.reportCoverFile);
+
+        const uploadRes = await fetch("http://localhost:5050/api/uploads/report-cover", {
+          method: "POST",
+          body: uploadData
+        });
+
+        if (!uploadRes.ok) throw new Error("Failed to upload cover image");
+        const uploadResult = await uploadRes.json();
+        uploadedCoverUrl = uploadResult.url;
+      }
+
+      // Step 2: Prepare payload
+      const payload = {
+        userId: user._id,
+        claimIds: formData.claimIds ? [formData.claimIds] : [],
+        reportTitle: formData.reportTitle,
+        reportContent: formData.reportContent,
+        truthVerdict: formData.truthVerdict,
+        reportConclusion: formData.reportConclusion,
+        reportReferences: formData.references,
+        aiReportSummary: "SAMPLE AI REPORT BECAUSE WE DON'T HAVE THAT FUNCTIONALITY YET!!!",
+        reportCoverUrl: uploadedCoverUrl
+      };
+
+      const response = await fetch("http://localhost:5050/api/reports", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create report");
+      }
+
+      // Clear form and close modal
       setFormData({
         reportTitle: "",
         reportContent: "",
         truthVerdict: "",
         reportConclusion: "",
         references: "",
-        claimId: "",
+        claimIds: "",
         reportCoverFile: null
       });
       setShowCreateModal(false);
-      
-      // You would typically refetch the reports here
       alert("Report created successfully!");
+      fetchReports();
     } catch (error) {
       console.error("Error creating report:", error);
-      alert("Error creating report. Please try again.");
+      alert(error.message || "Error creating report. Please try again.");
     }
   };
 
@@ -440,13 +480,13 @@ export default function Reports() {
                       }`}
                     >
                       <option value="" disabled className="text-gray-400">Select a verdict...</option>
-                      <option value="Unverified" className="text-gray-900">Unverified - Lacks sufficient evidence for verification</option>
-                      <option value="True" className="text-gray-900">True - Completely accurate and supported by evidence</option>
-                      <option value="False" className="text-gray-900">False - Completely inaccurate or fabricated</option>
-                      <option value="Partially True" className="text-gray-900">Partially True - Contains some truth but missing context</option>
-                      <option value="Misleading" className="text-gray-900">Misleading - Technically accurate but deceptive in context</option>
-                      <option value="Disputed" className="text-gray-900">Disputed - Credible sources disagree on the facts</option>
-                      <option value="Debunked" className="text-gray-900">Debunked - Previously proven false with clear evidence</option>
+                      <option value="unverified" className="text-gray-900">Unverified - Lacks sufficient evidence for verification</option>
+                      <option value="true" className="text-gray-900">True - Completely accurate and supported by evidence</option>
+                      <option value="false" className="text-gray-900">False - Completely inaccurate or fabricated</option>
+                      <option value="partially_true" className="text-gray-900">Partially True - Contains some truth but missing context</option>
+                      <option value="misleading" className="text-gray-900">Misleading - Technically accurate but deceptive in context</option>
+                      <option value="disputed" className="text-gray-900">Disputed - Credible sources disagree on the facts</option>
+                      <option value="debunked" className="text-gray-900">Debunked - Previously proven false with clear evidence</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-1">
                       Choose the verdict that best represents the factual accuracy of the claim

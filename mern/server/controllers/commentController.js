@@ -4,7 +4,6 @@ class CommentController {
   static async createComment(req, res) {
     try {
       const { userId, targetId, targetType, parentCommentId, commentContent } = req.body;
-      console.log("Incoming comment:", req.body);
 
       
       const comment = await CommentService.createComment({
@@ -22,8 +21,7 @@ class CommentController {
 
   static async getCommentsByTarget(req, res) {
     try {
-      const targetType = req.params.targetType.charAt(0).toUpperCase() + req.params.targetType.slice(1).toLowerCase();
-      const targetId = req.params.targetId;
+      const { targetType, targetId } = req.params;
       
       const comments = await CommentService.getCommentsByTarget(targetType, targetId);
       res.status(200).json(comments);

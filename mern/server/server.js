@@ -11,7 +11,7 @@ import comments from "./routes/comments.js";
 import reports from "./routes/reports.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
-import upload from "./routes/upload.js";
+import uploads from "./routes/uploads.js";
 
 
 // Load environment variables
@@ -36,7 +36,7 @@ app.use("/api/auth", auth);
 app.use("/api/claims", claims);
 app.use("/api/comments", comments);
 app.use("/api/reports", reports);
-app.use('/api/upload', upload);
+app.use('/api/uploads', uploads);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
 

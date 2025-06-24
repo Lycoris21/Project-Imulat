@@ -18,7 +18,7 @@ const bookmarkSchema = new mongoose.Schema({
   },
   targetType: {
     type: String,
-    enum: ['Report', 'Claim'],
+    enum: ['report', 'claim'],
     required: true
   }
 }, {

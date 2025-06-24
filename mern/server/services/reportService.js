@@ -1,12 +1,29 @@
-import { Report, User, Claim } from "../models/index.js";
+import { Report, User, Claim, Comment} from "../models/index.js";
 
 class ReportService {
   // Get all reports
   static async getAllReports() {
-    return await Report.find({})
+    const reports = await Report.find({})
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // important: use lean() to allow adding custom fields
+
+    // Append commentCount for each report
+    const reportsWithCommentCount = await Promise.all(
+      reports.map(async (report) => {
+        const count = await Comment.countDocuments({
+          targetType: 'report',
+          targetId: report._id,
+        });
+        return {
+          ...report,
+          commentCount: count,
+        };
+      })
+    );
+
+    return reportsWithCommentCount;
   }
 
   // Get report by ID
@@ -79,11 +96,28 @@ class ReportService {
   }
 
   static async getLatestReports() {
-    return await Report.find({})
+    const reports = await Report.find({})
+      .populate('userId', 'username email')
+      .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate('userId', 'username email')
-      .populate('claimIds', 'claimTitle aiTruthIndex');
+      .lean(); // important: use lean() to allow adding custom fields
+
+    // Append commentCount for each report
+    const reportsWithCommentCount = await Promise.all(
+      reports.map(async (report) => {
+        const count = await Comment.countDocuments({
+          targetType: 'report',
+          targetId: report._id,
+        });
+        return {
+          ...report,
+          commentCount: count,
+        };
+      })
+    );
+
+    return reportsWithCommentCount;
   }
 }
 
