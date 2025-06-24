@@ -19,6 +19,7 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import ReportDetail from "./pages/ReportDetail";
 import ClaimDetail from "./pages/ClaimDetail";
+import EditProfile from "./pages/EditProfile";
 
 
 const router = createBrowserRouter([
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "signup", element: <SignUp /> },
       { path: "profile", element: <Profile /> },
+      { path: "editprofile", element: <EditProfile /> },
     ],
   },
 ]);
