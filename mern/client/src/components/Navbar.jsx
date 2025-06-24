@@ -67,14 +67,14 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
               to="/login"
               className="px-4 py-2 border-1 border-[#4B548B] text-[#4B548B] hover:text-white hover:border-white hover:bg-[#4B548B] font-medium rounded-lg transition-colors"
             >
-              Login
+              Login / Sign up
             </Link>
-            <Link
+            {/* <Link
               to="/signup"
               className="px-4 py-2 border-1 bg-[#4B548B] hover:bg-white hover:text-[#4B548B] hover:border-[#4B548B] text-white font-medium rounded-lg transition-colors"
             >
               Sign Up
-            </Link>
+            </Link> */}
           </div>
         )}
       </div>
