@@ -1,4 +1,5 @@
 import { Claim, Comment} from "../models/index.js";
+import aiSummaryService from "./aiSummaryService.js";
 
 class ClaimService {
   static async getAllClaims() {
@@ -31,9 +32,29 @@ class ClaimService {
       .populate("reportId", "reportTitle");
   }
 
-  static async createClaim(claimData) {
-    const newClaim = new Claim(claimData);
-    return await newClaim.save();
+ static async createClaim(claimData) {
+    const { claimContent } = claimData;
+
+    try {
+      console.log("Creating claim with content:", claimContent); // ✅ log input
+
+      const aiClaimSummary = await aiSummaryService.generateAISummary(claimContent);
+      const aiTruthIndex = await aiSummaryService.generateTruthIndex(claimContent);
+
+      const newClaim = new Claim({
+        ...claimData,
+        aiClaimSummary,
+        aiTruthIndex: aiTruthIndex ?? Math.floor(Math.random() * 101),
+      });
+
+      const savedClaim = await newClaim.save();
+      console.log("Saved Claim:", savedClaim); // ✅ confirm successful DB save
+
+      return savedClaim;
+    } catch (err) {
+      console.error("Error in createClaim:", err); // ❌ log any caught error
+      throw err; // rethrow to let controller handle the error response
+    }
   }
 
   static async updateClaim(id, updateData) {

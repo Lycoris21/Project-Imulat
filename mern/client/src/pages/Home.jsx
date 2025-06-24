@@ -41,7 +41,7 @@ export default function Home() {
 
         const formatted = data.map((claim) => ({
           id: claim._id,
-          claim: claim.claimContent,
+          claim: claim.claimTitle,
           aiSummary: claim.aiClaimSummary || "No summary provided",
           aiTruthIndex: claim.aiTruthIndex || 0,
           reportId: claim.reportId || null,

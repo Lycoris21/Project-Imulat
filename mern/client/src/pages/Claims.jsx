@@ -57,12 +57,10 @@ export default function Claims() {
 
     try {
       const payload = {
-        userId: user._id, // assuming user comes from useAuth
+        userId: user._id,
         claimTitle: claimFormData.claimTitle,
         claimContent: claimFormData.claimContent,
-        sources: claimFormData.sources,
-        aiClaimSummary: "SAMPLE SUMMARY — AI not integrated yet.",
-        aiTruthIndex: Math.floor(Math.random() * 101), // optional, for placeholder
+        sources: claimFormData.sources
       };
 
       const response = await fetch("http://localhost:5050/api/claims", {
@@ -251,7 +249,7 @@ export default function Claims() {
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredClaims.map((claim) => (
               <div
-                key={claim.id}
+                key={claim._id}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-80 md:w-96 relative"
               >
                 <Link
