@@ -34,7 +34,8 @@ export default function ProfilePictureUpdater() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Upload failed");
 
-      setUser(data.user); // Update context with new user info (which includes profileImageUrl)
+      setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setPreviewUrl(data.user.profilePictureUrl);
       setStatus("Profile picture updated successfully!");
     } catch (err) {

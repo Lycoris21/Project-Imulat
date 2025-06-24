@@ -1,72 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { capitalizeWords } from "../utils/stringUtils";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [latestReports, setLatestReports] = useState([]);
   const [latestClaims, setLatestClaims] = useState([]);
   // Mock data for now - replace with actual API calls later
-  useEffect(() => {    // Mock latest reports data with varied dates to show all time states
-    const mockReports = Array.from({ length: 10 }, (_, i) => {
-      let date;
-      switch (i) {
-        case 0: date = new Date(Date.now() - 30 * 1000); break; // 30 seconds ago
-        case 1: date = new Date(Date.now() - 5 * 60 * 1000); break; // 5 minutes ago
-        case 2: date = new Date(Date.now() - 45 * 60 * 1000); break; // 45 minutes ago
-        case 3: date = new Date(Date.now() - 2 * 60 * 60 * 1000); break; // 2 hours ago
-        case 4: date = new Date(Date.now() - 8 * 60 * 60 * 1000); break; // 8 hours ago
-        case 5: date = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000); break; // 1 day ago
-        case 6: date = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000); break; // 3 days ago
-        case 7: date = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000); break; // 6 days ago
-        case 8: date = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000); break; // 10 days ago (will show date)
-        case 9: date = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); break; // 30 days ago (will show date)
-        default: date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      }      return {
-        id: i + 1,
-        title: `Report ${i + 1}: Sample fact-check report`,
-        reportCoverUrl: i % 3 === 0 ? `https://picsum.photos/400/250?random=${i}` : null, // Some reports have cover images
-        summary: `This is a summary of report ${i + 1} covering various claims and findings.`,
-        verdict: i % 3 === 0 ? "True" : i % 3 === 1 ? "False" : "Partially True",
-        date: date,
-        author: `Author ${i + 1}`,
-        likes: Math.floor(Math.random() * 50) + 5, // Random likes 5-54
-        dislikes: Math.floor(Math.random() * 15) + 1, // Random dislikes 1-15
-        commentCount: Math.floor(Math.random() * 25) + 2 // Random comments 2-26
-      };
-    });
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch("http://localhost:5050/api/reports/latest");
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Expected an array of reports");
 
-    // Mock latest claims data with varied dates to show all time states
-    const mockClaims = Array.from({ length: 10 }, (_, i) => {
-      let date;
-      switch (i) {
-        case 0: date = new Date(Date.now() - 15 * 1000); break; // 15 seconds ago
-        case 1: date = new Date(Date.now() - 10 * 60 * 1000); break; // 10 minutes ago
-        case 2: date = new Date(Date.now() - 30 * 60 * 1000); break; // 30 minutes ago
-        case 3: date = new Date(Date.now() - 1 * 60 * 60 * 1000); break; // 1 hour ago
-        case 4: date = new Date(Date.now() - 12 * 60 * 60 * 1000); break; // 12 hours ago
-        case 5: date = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000); break; // 2 days ago
-        case 6: date = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000); break; // 4 days ago
-        case 7: date = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000); break; // 5 days ago
-        case 8: date = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); break; // 15 days ago (will show date)
-        case 9: date = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000); break; // 45 days ago (will show date)
-        default: date = new Date(Date.now() - i * 12 * 60 * 60 * 1000);
+        const formatted = data.map((report) => ({
+          id: report._id,
+          title: report.reportTitle,
+          reportCoverUrl: report.reportCoverUrl || null,
+          summary: report.aiReportSummary || "No summary provided",
+          verdict: capitalizeWords(report.truthVerdict) || "Unverified",
+          date: report.createdAt,
+          author: report.userId?.username || "Unknown",
+          likes: report.likes || 0,
+          dislikes: report.dislikes || 0,
+          commentCount: report.commentCount || 0
+        }));
+
+        setLatestReports(formatted);
+      } catch (err) {
+        console.error("Failed to fetch reports:", err);
       }
-        return {
-        id: i + 1,
-        claim: `Sample claim ${i + 1} about current events and facts`,
-        aiSummary: `AI-generated summary: This claim discusses important facts and requires verification through multiple sources and evidence.`,
-        aiTruthIndex: Math.floor(Math.random() * 101), // Random score 0-100
-        reportId: i % 2 === 0 ? `report_${i + 1}` : null, // Some claims have reportId, some are null
-        date: date,
-        submittedBy: `User${i + 1}`,
-        likes: Math.floor(Math.random() * 35) + 3, // Random likes 3-37
-        dislikes: Math.floor(Math.random() * 10) + 1, // Random dislikes 1-10
-        commentCount: Math.floor(Math.random() * 20) + 1 // Random comments 1-20
-      };
-    });
+    };
 
-    setLatestReports(mockReports);
-    setLatestClaims(mockClaims);
+    const fetchClaims = async () => {
+      try {
+        const response = await fetch("http://localhost:5050/api/claims/latest");
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Expected an array of claims");
+
+        const formatted = data.map((claim) => ({
+          id: claim._id,
+          claim: claim.claimContent,
+          aiSummary: claim.aiClaimSummary || "No summary provided",
+          aiTruthIndex: claim.aiTruthIndex || 0,
+          reportId: claim.reportId || null,
+          date: claim.createdAt,
+          submittedBy: claim.userId?.username || "Unknown",
+          likes: claim.likes || 0,
+          dislikes: claim.dislikes || 0,
+          commentCount: claim.commentCount || 0
+        }));
+
+        setLatestClaims(formatted);
+      } catch (err) {
+        console.error("Failed to fetch claims:", err);
+      }
+    };
+
+    fetchReports();
+    fetchClaims();
   }, []);
 
   const handleSearch = (e) => {

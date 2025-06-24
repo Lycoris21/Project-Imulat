@@ -6,6 +6,7 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 // Import routes
 import auth from "./routes/auth.js";
+import claims from "./routes/claims.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
 import upload from "./routes/upload.js";
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use('/uploads', express.static('uploads'));
 
 // API Routes
+app.use("/api/claims", claims);
 app.use('/api/upload', upload);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
