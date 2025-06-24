@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Navbar({ isLoggedIn = false, user = null }) {
   const navItems = [
-    { name: "Home", to: "/" },
+    { name: "Home", to: "/Home" },
     { name: "Reports", to: "/reports" },
     { name: "Claims", to: "/claims" },
     { name: "About", to: "/about" },
@@ -35,16 +35,16 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
     return (
       <nav className="h-20 bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
       {/* Left side - Logo and App Name */}
-        <div className="flex items-center space-x-3">
-          <div style={{height: '60px' }}>
-            <img 
-              src="/logo.png" 
-              alt="Project IMULAT Logo" 
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            />
-          </div>
-          <h1 className="text-xl font-bold text-[#4B548B] -m-5">Project IMULAT</h1>
-        </div>
+        <Link to="/Home" className="flex items-center space-x-3">
+  <div style={{ height: '60px' }}>
+    <img 
+      src="/logo.png" 
+      alt="Project IMULAT Logo" 
+      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+    />
+  </div>
+  <h1 className="text-xl font-bold text-[#4B548B] -m-5">Project IMULAT</h1>
+</Link>
 
         {/* Center - Navigation Items */}
         <div className="flex items-center space-x-8">
@@ -97,18 +97,21 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           >
             Profile
           </Link>
+            <div className="my-1 border-t border-gray-200 mx-"></div>
           <Link
             to="/bookmarks"
             className="block px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
           >
             Bookmarks
           </Link>
+            <div className="my-1 border-t border-gray-200 mx-3"></div>
           <Link
             to="/notifications"
             className="block px-4 py-2 hover:bg-gray-100 text-[#4B548B]"
           >
             Notifications
           </Link>
+            <div className="my-1 border-t border-gray-200 mx-3"></div>
           <button
             onClick={handleLogout}
             className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[#4B548B] rounded-lg cursor-pointer"
