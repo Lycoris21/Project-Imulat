@@ -8,27 +8,47 @@ export default function SignUp() {
   const navigate = useNavigate();
   const datePickerRef = useRef(null);
 
+  const [form, setForm] = useState({
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  birthdate: null,
+  });
+
+  const [error, setError] = useState("");
+  const [birthdateError, setBirthdateError] = useState("");
+
+  const handleChange = (e) => {
+  setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   const handleIconClick = () => {
   if (datePickerRef.current) {
     datePickerRef.current.setOpen(true);
   }
 };
 
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    birthdate: null,
-  });
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  setError("");
+  setBirthdateError("");
+
+  if (!form.birthdate) {
+  setBirthdateError("Birthdate is required.");
+  return;
+  }
+
+  const today = new Date();
+  const birthDate = new Date(form.birthdate);
+  const ageDifMs = today - birthDate;
+  const ageDate = new Date(ageDifMs);
+  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+  if (age < 13) {
+    setBirthdateError("You must be at least 13 years old to register.");
+    return;
+  }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -43,12 +63,12 @@ export default function SignUp() {
           username: form.username,
           email: form.email,
           password: form.password,
-          birthdate: form.birthdate || null,
+          birthdate: form.birthdate,
           bio: form.bio || "",
           profilePictureUrl: null,
           backgroundImageUrl: null,
           role: "user"
-        })
+        }),
       });
 
       const data = await response.json();
@@ -198,9 +218,14 @@ export default function SignUp() {
           selected={form.birthdate}
           onChange={(date) => setForm({ ...form, birthdate: date })}
           placeholderText="mm/dd/yyyy"
+          maxDate={new Date()}
           className="appearance-none bg-transparent border-none w-full text-black placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
           dateFormat="MM/dd/yyyy"
         />
+        {birthdateError && (
+  <p className="text-sm text-red-600 mt-1">{birthdateError}</p>
+)}
+
       </div>
     </div>
 
