@@ -128,14 +128,25 @@ export default function Profile() {
                 </span>
               </div>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setProfilePictureFile(e.target.files[0])}
-              className="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0 file:text-sm file:font-semibold
-                file:bg-base file:text-white hover:file:bg-deep"
-            />
+
+            <div className="mt-4">
+                <label className="block font-semibold text-left mb-2">Profile Picture</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setProfilePictureFile(e.target.files[0])}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                    <span className="text-gray-900">Choose File</span>
+                    <span className="mx-2">|</span>
+                    <span className={`${profilePictureFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
+                      {profilePictureFile ? profilePictureFile.name : 'No file chosen'}
+                    </span>
+                  </div>
+                </div>
+            </div>
           </div>
 
           <div>
@@ -192,23 +203,30 @@ export default function Profile() {
             ) : (
               <p className="text-sm text-gray-500 mb-2">No cover photo set.</p>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setcoverFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0 file:text-sm file:font-semibold
-                file:bg-base file:text-white hover:file:bg-deep"
-            />
+            <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setcoverFile(e.target.files[0])}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                    <span className="text-gray-900">Choose File</span>
+                    <span className="mx-2">|</span>
+                    <span className={`${coverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
+                      {coverFile ? coverFile.name : 'No file chosen'}
+                    </span>
+                  </div>
+                </div>
           </div>
         </div>
 
         <div className="flex justify-between mt-6">
           <button
-            onClick={handleLogout}
+            onClick={() => navigate("/profile")}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Log Out
+            Cancel
           </button>
           <button
             onClick={handleSave}

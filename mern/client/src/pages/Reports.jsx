@@ -426,7 +426,7 @@ export default function Reports() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
-                        <span className="text-gray-900">Choose File</span>
+                        <span className="text-gray-600">Choose File</span>
                         <span className="mx-2 text-gray-300">|</span>
                         <span className={`${formData.reportCoverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate`}>
                           {formData.reportCoverFile ? formData.reportCoverFile.name : 'No file chosen'}
