@@ -1,4 +1,6 @@
-import { User, Claim, Reaction} from "../models/index.js";
+import { User, Claim, Report, Reaction} from "../models/index.js";
+import reportService from './reportService.js';
+import claimService from './claimService.js';
 
 class UserService {
   // Get all users
@@ -12,11 +14,17 @@ class UserService {
     const user = await User.findById(id, '-passwordHash').lean();
     if (!user) throw new Error('User not found');
 
-    // Step 2: Get all claims authored by this user
-    const claims = await Claim.find({ userId: id }).lean();
+    // Step 2: Get all claims authored by this user using service
+    const claims = await claimService.getClaimsByUser(id); // must use .lean({ virtuals: true }) internally
     user.claims = claims;
 
-    // Step 3: Count likes and dislikes on the user object
+    // Step 3: If admin, get reports using service
+    if (user?.role === 'admin') {
+      const reports = await reportService.getReportsByUser(id); // already populates and returns virtuals
+      user.reports = reports;
+    }
+    
+    // Step 4: Count likes and dislikes on the user object
     const [likes, dislikes] = await Promise.all([
       Reaction.countDocuments({ targetId: id, targetType: 'user', reactionType: 'like' }),
       Reaction.countDocuments({ targetId: id, targetType: 'user', reactionType: 'dislike' }),

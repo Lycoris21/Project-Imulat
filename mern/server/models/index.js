@@ -6,3 +6,4 @@ export { default as Comment } from './Comment.js';
 export { default as Reaction } from './Reaction.js';
 export { default as Bookmark } from './Bookmark.js';
 export { default as Collection } from './Collection.js';
+export { default as Notification } from './Notification.js';

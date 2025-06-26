@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ClaimCard from '../components/ClaimCards/ClaimCard.jsx';
 
 export default function Claims() {
   const { user, isLoggedIn } = useAuth();
@@ -139,34 +140,6 @@ export default function Claims() {
     };
   }, [showSubmitModal]);
 
-  const getTruthIndexColor = (index) => {
-    if (index >= 80) return "text-green-600 bg-green-100";
-    if (index >= 60) return "text-yellow-600 bg-yellow-100";
-    if (index >= 40) return "text-orange-600 bg-orange-100";
-    return "text-red-600 bg-red-100";
-  };
-
-  const formatRelativeTime = (dateString) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-    } else if (diffInSeconds < 604800) {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} day${days === 1 ? '' : 's'} ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
@@ -248,84 +221,7 @@ export default function Claims() {
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredClaims.map((claim) => (
-              <div
-                key={claim._id}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-80 md:w-96 relative"
-              >
-                <Link
-                  to={`/claims/${claim._id}`}
-                  className="block"
-                >
-                  {/* Content */}
-                  <div className="p-6">
-                    {/* Header with Truth Index */}
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-gray-800 text-lg leading-tight hover:text-blue-600 transition-colors flex-1 mr-3 line-clamp-2">
-                        {claim.claimTitle}
-                      </h3>
-                      <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getTruthIndexColor(claim.aiTruthIndex)}`}>
-                       AI Truth Index: {claim.aiTruthIndex}%
-                      </span>
-                    </div>
-
-                    {/* AI Summary */}
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      <span className="font-medium">AI-generated summary:</span> {claim.aiClaimSummary}
-                    </p>
-
-                    {/* Author & Status */}
-                    <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
-                      <span>By <span className="font-medium">{claim.userId?.username || "Unknown"}</span></span>
-                      <div className="flex items-center gap-2">
-                        {claim.hasReport && (
-                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex items-center gap-1">
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                            </svg>
-                            Report Available
-                          </span>
-                        )}
-                        {claim.sources && (
-                          <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">
-                            Sources provided
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Stats & Date */}
-                    <div className="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-                      <div className="flex items-center space-x-4">
-                        {/* Likes */}
-                        <span className="flex items-center space-x-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                          </svg>
-                          <span>{claim.likes}</span>
-                        </span>
-                        
-                        {/* Dislikes */}
-                        <span className="flex items-center space-x-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" transform="rotate(180)">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                          </svg>
-                          <span>{claim.dislikes}</span>
-                        </span>
-                        
-                        {/* Comments */}
-                        <span className="flex items-center space-x-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-                          </svg>
-                          <span>{claim.commentCount}</span>
-                        </span>
-                      </div>
-                      
-                      {/* Date */}
-                      <span className="italic">{formatRelativeTime(claim.createdAt)}</span>
-                    </div>
-                  </div>                </Link>
-              </div>
+                <ClaimCard claim={claim} variant="detailed"/>
             ))}
           </div>
         )}

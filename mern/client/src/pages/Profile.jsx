@@ -1,11 +1,16 @@
 import React, { useState, useEffect} from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import ClaimCard from '../components/ClaimCards/ClaimCard.jsx';
+import ReportCard from '../components/ReportCards/ReportCard.jsx';
 
 export default function Profile() {
     const { user } = useAuth(); // access logged-in user
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("claims");
+
+    const isAdmin = user?.role === "admin";
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -97,60 +102,65 @@ export default function Profile() {
                     </div>
                 </div>
 
+                {/* Claims / Reports Tabs */}
+                {(isAdmin && profileData.reports.length > 0) ? (
+                <div className="mt-8">
+                    {/* Tabs */}
+                    <div className="flex border-b mb-4 space-x-4">
+                    <button
+                        onClick={() => setActiveTab("claims")}
+                        className={`pb-2 text-sm font-medium transition-colors ${
+                        activeTab === "claims"
+                            ? "border-b-2 border-blue-600 text-blue-600"
+                            : "text-gray-500 hover:text-blue-600"
+                        }`}
+                    >
+                        Claims ({profileData.claims.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("reports")}
+                        className={`pb-2 text-sm font-medium transition-colors ${
+                        activeTab === "reports"
+                            ? "border-b-2 border-blue-600 text-blue-600"
+                            : "text-gray-500 hover:text-blue-600"
+                        }`}
+                    >
+                        Reports ({profileData.reports.length})
+                    </button>
+                    </div>
 
-                {/* Claims Section */}
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
-                    <div className="space-y-4">
+                    {/* Tab Content */}
+                    <div className="transition-opacity duration-300 ease-in-out">
+                    {activeTab === "claims" && (
+                        <div className="space-y-4 opacity-100">
                         {profileData.claims.map((claim) => (
-                            <div key={claim._id} className="bg-white rounded-lg shadow-md p-4 border-none flex">
-                            <Link
-                                to={`/claims/${claim._id}`}
-                                className="flex-1 hover:text-blue-600 cursor-pointer"
-                            >
-                                <div className="flex justify-start items-center">
-                                <h3 className="text-lg font-semibold transition-colors">
-                                    {claim.claimTitle}
-                                </h3>
-                                {claim.reportId && (
-                                    <span className="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded">
-                                    <svg
-                                        width="22"
-                                        height="22"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="mr-1"
-                                        style={{ verticalAlign: "middle" }}
-                                    >
-                                        <path
-                                        d="M14.172 2H10C8.114 2 7.172 2 6.586 2.586C6 3.172 6 4.114 6 6V16C6 17.886 6 18.828 6.586 19.414C7.172 20 8.114 20 10 20H16C17.886 20 18.828 20 19.414 19.414C20 18.828 20 17.886 20 16V7.828C20 7.42 20 7.215 19.924 7.032C19.848 6.849 19.704 6.703 19.414 6.414L15.586 2.586C15.296 2.296 15.152 2.152 14.969 2.076C14.785 2 14.58 2 14.172 2Z"
-                                        stroke="#2563EB"
-                                        strokeWidth="2"
-                                        />
-                                        <path
-                                        d="M10 12H16M10 16H14"
-                                        stroke="#2563EB"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        />
-                                        <path
-                                        d="M14 2V6C14 6.943 14 7.414 14.293 7.707C14.586 8 15.057 8 16 8H20"
-                                        stroke="#2563EB"
-                                        strokeWidth="2"
-                                        />
-                                    </svg>
-                                    Report Available
-                                    </span>
-                                )}
-                                </div>
-                                <p className="text-gray-600 mt-2">{claim.aiClaimSummary}</p>
-                            </Link>
-                            </div>
-
+                            <ClaimCard key={claim._id} claim={claim} variant="simple" />
                         ))}
+                        </div>
+                    )}
+
+                    {activeTab === "reports" && (
+                        <div className="space-y-4 opacity-100">
+                        {profileData.reports.map((report) => (
+                            <ReportCard key={report._id} report={report} variant="simple" />
+                        ))}
+                        </div>
+                    )}
                     </div>
                 </div>
+                ) : (
+                // Show just Claims if user is not admin or has no reports
+                <div className="mt-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
+                    <div className="space-y-4">
+                    {profileData.claims.map((claim) => (
+                        <ClaimCard key={claim._id} claim={claim} variant="simple" />
+                    ))}
+                    </div>
+                </div>
+                )}
+
+
             </div>
         </div>
     );

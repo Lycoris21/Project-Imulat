@@ -53,3 +53,11 @@ export const formatError = (message, details = null) => {
   
   return response;
 };
+
+export const parseVerdict = (verdict) => {
+  if (!verdict) return "Unknown";
+  return verdict
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};

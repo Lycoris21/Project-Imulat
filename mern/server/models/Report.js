@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { parseVerdict } from '../utils/helpers.js';
 
 const reportSchema = new mongoose.Schema({
   userId: {
@@ -53,7 +54,13 @@ const reportSchema = new mongoose.Schema({
     trim: true
   }
 }, {
-  timestamps: true // This automatically adds createdAt and updatedAt
+  timestamps: true, // This automatically adds createdAt and updatedAt
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+reportSchema.virtual('truthVerdictParsed').get(function () {
+  return parseVerdict(this.truthVerdict);
 });
 
 // Create indexes for better query performance

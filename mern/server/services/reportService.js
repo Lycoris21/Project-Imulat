@@ -1,4 +1,4 @@
-import { Report, User, Claim, Comment} from "../models/index.js";
+import { Report, User, Claim, Comment } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 
 class ReportService {
@@ -7,19 +7,20 @@ class ReportService {
     const reports = await Report.find({})
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
-      .sort({ createdAt: -1 })
-      .lean(); // important: use lean() to allow adding custom fields
+      .sort({ createdAt: -1 });
 
-    // Append commentCount for each report
     const reportsWithCommentCount = await Promise.all(
       reports.map(async (report) => {
         const count = await Comment.countDocuments({
           targetType: 'report',
           targetId: report._id,
         });
+
+        const plainReport = report.toObject({ virtuals: true });
+
         return {
-          ...report,
-          commentCount: count,
+          ...plainReport,
+          commentCount: count
         };
       })
     );
@@ -29,23 +30,21 @@ class ReportService {
 
   // Get report by ID
   static async getReportById(id) {
-    return await Report.findById(id)
+    const report = await Report.findById(id)
       .populate('userId', 'username email bio')
       .populate('claimIds');
+
+    return report?.toObject({ virtuals: true }) || null;
   }
 
   // Create new report
   static async createReport(reportData) {
-    const { userId, claimIds , reportContent} = reportData;
+    const { userId, claimIds, reportContent } = reportData;
 
     try {
-      // Verify user exists
       const user = await User.findById(userId);
-      if (!user) {
-        throw new Error("User not found");
-      }
+      if (!user) throw new Error("User not found");
 
-      // If claimIds provided, verify they exist
       if (claimIds && claimIds.length > 0) {
         const claims = await Claim.find({ _id: { $in: claimIds } });
         if (claims.length !== claimIds.length) {
@@ -62,26 +61,29 @@ class ReportService {
       });
 
       const savedReport = await newReport.save();
-      console.log("Saved Report:", savedReport); // ✅ confirm successful DB save
 
-      // Return populated report
-      return await Report.findById(savedReport._id)
+      const populated = await Report.findById(savedReport._id)
         .populate('userId', 'username email')
         .populate('claimIds', 'claimTitle aiTruthIndex');
+
+      return populated?.toObject({ virtuals: true }) || null;
     } catch (err) {
-      console.error("Error in createReport:", err); // ❌ log any caught error
-      throw err; // rethrow to let controller handle the error response
+      console.error("Error in createReport:", err);
+      throw err;
     }
   }
 
   // Update report
   static async updateReport(id, updateData) {
-    return await Report.findByIdAndUpdate(
+    const updated = await Report.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('userId', 'username email')
-     .populate('claimIds', 'claimTitle aiTruthIndex');
+    )
+      .populate('userId', 'username email')
+      .populate('claimIds', 'claimTitle aiTruthIndex');
+
+    return updated?.toObject({ virtuals: true }) || null;
   }
 
   // Delete report
@@ -91,37 +93,41 @@ class ReportService {
 
   // Get reports by truth verdict
   static async getReportsByVerdict(verdict) {
-    return await Report.find({ truthVerdict: verdict })
+    const reports = await Report.find({ truthVerdict: verdict })
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
+
+    return reports.map(r => r.toObject({ virtuals: true }));
   }
 
   // Get reports by user
   static async getReportsByUser(userId) {
-    return await Report.find({ userId })
+    const reports = await Report.find({ userId })
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
+
+    return reports.map(r => r.toObject({ virtuals: true }));
   }
 
+  // Get latest reports
   static async getLatestReports() {
     const reports = await Report.find({})
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 })
-      .limit(10)
-      .lean(); // important: use lean() to allow adding custom fields
+      .limit(10);
 
-    // Append commentCount for each report
     const reportsWithCommentCount = await Promise.all(
       reports.map(async (report) => {
         const count = await Comment.countDocuments({
           targetType: 'report',
           targetId: report._id,
         });
+
         return {
-          ...report,
+          ...report.toObject({ virtuals: true }),
           commentCount: count,
         };
       })

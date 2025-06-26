@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // assumes auth context is available
+import { getTruthIndexColor } from '../utils/colors';
+import { formatRelativeTime } from '../utils/time.js';
 
 export default function ClaimDetail() {
   const { id } = useParams();
@@ -85,24 +87,6 @@ export default function ClaimDetail() {
       document.body.style.overflow = 'unset';
     };
   }, [showCreateModal]);
-
-  const getTruthIndexColor = (index) => {
-    if (index >= 80) return "text-green-600 bg-green-100 border-green-200";
-    if (index >= 60) return "text-yellow-600 bg-yellow-100 border-yellow-200";
-    if (index >= 40) return "text-orange-600 bg-orange-100 border-orange-200";
-    return "text-red-600 bg-red-100 border-red-200";
-  };
-
-  const formatRelativeTime = (dateString) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minute${Math.floor(diffInSeconds / 60) === 1 ? '' : 's'} ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hour${Math.floor(diffInSeconds / 3600) === 1 ? '' : 's'} ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} day${Math.floor(diffInSeconds / 86400) === 1 ? '' : 's'} ago`;
-    return date.toLocaleDateString();
-  };
 
   const handleReaction = (type) => {
     setUserReaction(userReaction === type ? null : type);
@@ -247,11 +231,28 @@ export default function ClaimDetail() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-base-gradient flex items-center justify-center">Loading claim...</div>;
+    return (
+       <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex items-center justify-center">
+              <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading claim...</p>
+              </div>
+          </div>
+    );
   }
 
   if (!claim) {
-    return <div className="min-h-screen bg-base-gradient flex items-center justify-center">Claim Not Found</div>;
+    return (
+      <div className="min-h-screen bg-base-gradient  flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Claim Not Found</h1>
+          <p className="text-white mb-4">The claim you're looking for doesn't exist.</p>
+          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
+            ← Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

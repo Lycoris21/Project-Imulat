@@ -32,6 +32,16 @@ class ClaimService {
       .populate("reportId", "reportTitle");
   }
 
+   // Get reports by user
+    static async getClaimsByUser(userId) {
+      return await Claim.find({ userId })
+        .populate('userId', 'username email')
+        .populate("reportId", "reportTitle")
+        .sort({ createdAt: -1 })
+        .lean();
+    }
+  
+
  static async createClaim(claimData) {
     const { claimContent } = claimData;
 
