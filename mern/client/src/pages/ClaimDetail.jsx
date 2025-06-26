@@ -126,7 +126,7 @@ export default function ClaimDetail() {
 
           {claim.aiClaimSummary && (
             <div className="mt-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">AI Claim Summary</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
               <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
                 <p className="text-gray-700">{claim.aiClaimSummary}</p>
               </div>
@@ -136,13 +136,13 @@ export default function ClaimDetail() {
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Full Claim Details</h2>
-          <div className="whitespace-pre-line text-gray-700 leading-relaxed">{claim.claimContent}</div>
+          <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words">{claim.claimContent}</div>
         </div>
 
         {claim.claimSources && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Claim Sources</h2>
-            <div className="whitespace-pre-line text-gray-700">{claim.claimSources}</div>
+            <div className="whitespace-pre-wrap text-gray-700 break-words">{claim.claimSources}</div>
           </div>
         )}
 
@@ -154,7 +154,7 @@ export default function ClaimDetail() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleReaction('like')}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
                     userReaction === 'like' 
                       ? 'bg-green-100 text-green-600' 
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -163,11 +163,11 @@ export default function ClaimDetail() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
-                  <span>{claim.likes}</span>
+                  <span>{claim.likes} {claim.likes === 1 ? 'Like' : 'Likes'}</span>
                 </button>
                 <button
                   onClick={() => handleReaction('dislike')}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
                     userReaction === 'dislike' 
                       ? 'bg-red-100 text-red-600' 
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -176,14 +176,14 @@ export default function ClaimDetail() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" transform="rotate(180)">
                     <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                   </svg>
-                  <span>{claim.dislikes}</span>
+                  <span>{claim.dislikes} {claim.dislikes === 1 ? 'Dislike' : 'Dislikes'}</span>
                 </button>
               </div>
 
               {/* Bookmark */}
               <button
                 onClick={handleBookmark}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
                   isBookmarked 
                     ? 'bg-yellow-100 text-yellow-600' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -192,11 +192,11 @@ export default function ClaimDetail() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v16l-8-4-8 4V3z" />
                 </svg>
-                <span>Bookmark</span>
+                <span>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
               </button>
 
               {/* Share */}
-              <button className="flex items-center space-x-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+              <button className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                 </svg>
