@@ -6,6 +6,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [latestReports, setLatestReports] = useState([]);
   const [latestClaims, setLatestClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
   // Mock data for now - replace with actual API calls later
   useEffect(() => {
     const fetchReports = async () => {
@@ -58,8 +59,13 @@ export default function Home() {
       }
     };
 
-    fetchReports();
-    fetchClaims();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchReports(), fetchClaims()]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   const handleSearch = (e) => {
@@ -111,6 +117,17 @@ export default function Home() {
       return date.toLocaleDateString();
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading latest content...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
