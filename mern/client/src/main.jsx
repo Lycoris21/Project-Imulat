@@ -20,7 +20,7 @@ import Profile from "./pages/Profile";
 import ReportDetail from "./pages/ReportDetail";
 import ClaimDetail from "./pages/ClaimDetail";
 import EditProfile from "./pages/EditProfile";
-
+import Bookmarks from "./pages/Bookmarks";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +38,7 @@ const router = createBrowserRouter([
       { path: "signup", element: <SignUp /> },
       { path: "profile/:id", element: <Profile /> },
       { path: "editprofile", element: <EditProfile /> },
+      { path: "bookmarks", element: <Bookmarks /> },
     ],
   },
 ]);

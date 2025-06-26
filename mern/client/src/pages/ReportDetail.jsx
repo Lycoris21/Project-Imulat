@@ -20,29 +20,83 @@ export default function ReportDetail() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchReport = async () => {
-      try {
-        const response = await fetch(`http://localhost:5050/api/reports/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch report");
+  const fetchInitialData = async () => {
+    setLoading(true);
 
-        const data = await response.json();
-        data.truthVerdict = parseTruthVerdict(data.truthVerdict);
-        setReport(data);
+    const reportPromise = fetch(`http://localhost:5050/api/reports/${id}`);
+    const reactionPromise = user?._id
+      ? fetch(`http://localhost:5050/api/reactions/user/report/${id}/${user._id}`)
+      : null;
+
+    try {
+        const [reportRes, reactionRes] = await Promise.all([
+          reportPromise,
+          reactionPromise
+        ]);
+
+        if (reportRes.ok) {
+          const reportData = await reportRes.json();
+          setReport(reportData);
+        } else {
+          throw new Error("Failed to fetch report");
+        }
+
+        if (reactionRes?.ok) {
+          const { reactionType } = await reactionRes.json();
+          setUserReaction(reactionType || null);
+        } else {
+          setUserReaction(null);
+        }
+
+        await fetchComments();
+
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching report:", err);
-        setReport(null); // ensure it's null so error message renders
-      } finally {
+        console.error("Error loading data:", err);
+        setReport(null);
         setLoading(false);
       }
     };
 
-    fetchReport();
-    fetchComments();
-  }, [id]);
+    fetchInitialData();
+  }, [id, user?._id]);
 
-  const handleReaction = (type) => {
-    setUserReaction(userReaction === type ? null : type);
-    // TODO: API call to save reaction
+  const handleReaction = async (type) => {
+    const newReaction = userReaction === type ? null : type;
+
+    try {
+      if (newReaction) {
+        await fetch("http://localhost:5050/api/reactions", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user?._id,
+            targetId: id,
+            targetType: "report",
+            reactionType: type,
+          }),
+        });
+      } else {
+        await fetch(`http://localhost:5050/api/reactions/report/${id}/${user?._id}`, {
+          method: "DELETE",
+        });
+      }
+
+      // ✅ Update user reaction state immediately
+      setUserReaction(newReaction);
+
+      // ✅ Refetch fresh reaction counts
+      const countsRes = await fetch(`http://localhost:5050/api/reactions/counts/report/${id}`);
+      const counts = await countsRes.json();
+
+      // ✅ Apply updated counts to report state
+      setReport((prev) => ({
+        ...prev,
+        reactionCounts: counts,
+      }));
+    } catch (err) {
+      console.error("Reaction error:", err);
+    }
   };
 
   const handleBookmark = () => {
@@ -147,33 +201,29 @@ export default function ReportDetail() {
 
               <p className="text-gray-500 text-sm">{formatRelativeTime(report.createdAt)}</p>
             </div>
-            <div className={`px-4 py-2 rounded-lg border ${getVerdictColor(report.truthVerdict)}`}>
-              <span className="font-semibold">{report.truthVerdict}</span>
+            <div className={`px-4 py-2 rounded-lg border ${getVerdictColor(report.truthVerdictParsed)}`}>
+              <span className="font-semibold">{report.truthVerdictParsed}</span>
             </div>
           </div>
 
           {/* Related Claims */}
-          {report.claimTitle && (
+          {report.claimIds && report.claimIds.length > 0 && (
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Related Claims</h3>
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-gray-700">{report.claimTitle}</p>
-                {report.claimLinks && report.claimLinks.length > 0 && (
-                  <div className="mt-2 space-x-2">
-                    {report.claimLinks.map((claim) => (
-                      <Link 
-                        key={claim.id} 
-                        to={claim.url}
-                        className="inline-block text-blue-600 hover:text-blue-800 text-sm underline"
-                      >
-                        {claim.title}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+              <div className="bg-blue-50 p-3 rounded-lg space-y-2">
+                {report.claimIds.slice(0, 3).map((claim) => (
+                  <Link
+                    key={claim._id}
+                    to={`/claims/${claim._id}`}
+                    className="block text-base hover:text-dark text-sm underline"
+                  >
+                    {claim.claimTitle || 'Untitled Claim'}
+                  </Link>
+                ))}
               </div>
             </div>
           )}
+
 
           {/* AI Summary */}
           <div className="mb-4">
@@ -209,7 +259,14 @@ export default function ReportDetail() {
         </div>
 
         {/* Action Buttons */}
-        <ReactionBar/>
+        <ReactionBar
+          likes={report.reactionCounts.like}
+          dislikes={report.reactionCounts.dislike}
+          isBookmarked={report.bookmarkedUsers?.includes(user?._id)}
+          userReaction={userReaction}
+          onReact={handleReaction} // or "Report"
+          onBookmark={() => handleBookmark(report._id, "Report")}
+        />
 
         {/* Comments Section */}
         <div className="bg-white rounded-lg shadow-lg p-6">

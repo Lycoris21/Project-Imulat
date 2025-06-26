@@ -30,13 +30,22 @@ export default function ClaimDetail() {
 
   const fetchClaim = async () => {
     try {
-      const response = await fetch(`http://localhost:5050/api/claims/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch claim");
-      const data = await response.json();
+      const claimRes = await fetch(`http://localhost:5050/api/claims/${id}`);
+      if (!claimRes.ok) throw new Error("Failed to fetch claim");
+      const data = await claimRes.json();
       setClaim(data);
+
+      if (user?._id) {
+        const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/claim/${id}/${user._id}`);
+        if (reactionRes.ok) {
+          const { reactionType } = await reactionRes.json();
+          setUserReaction(reactionType || null);
+        }
+      }
+
+      await fetchComments();
     } catch (err) {
-      console.error("Error fetching claim:", err);
-      setClaim(null);
+      console.error("Error loading data:", err);
     } finally {
       setLoading(false);
     }
@@ -88,9 +97,37 @@ export default function ClaimDetail() {
     };
   }, [showCreateModal]);
 
-  const handleReaction = (type) => {
-    setUserReaction(userReaction === type ? null : type);
+  const handleReaction = async (type) => {
+    const newReaction = userReaction === type ? null : type;
+
+    try {
+      if (newReaction) {
+        await fetch("http://localhost:5050/api/reactions", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user._id,
+            targetId: id,
+            targetType: "claim",
+            reactionType: type,
+          }),
+        });
+      } else {
+        await fetch(`http://localhost:5050/api/reactions/claim/${id}/${user._id}`, {
+          method: "DELETE",
+        });
+      }
+
+      setUserReaction(newReaction);
+      // Optional: re-fetch claim if you have reaction counts in claim
+      const refreshed = await fetch(`http://localhost:5050/api/claims/${id}`);
+      const updated = await refreshed.json();
+      setClaim(updated);
+    } catch (err) {
+      console.error("Reaction error:", err);
+    }
   };
+
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -232,13 +269,13 @@ export default function ClaimDetail() {
 
   if (loading) {
     return (
-      <LoadingScreen message="Loading claim..."/>
+      <LoadingScreen message="Loading claim..." />
     );
   }
 
   if (!claim) {
     return (
-      <ErrorScreen title="Claim Not Found" message="The claim you're looking for doesn't exist."/>
+      <ErrorScreen title="Claim Not Found" message="The claim you're looking for doesn't exist." />
     );
   }
 
@@ -250,12 +287,12 @@ export default function ClaimDetail() {
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">{claim.claimTitle}</h1>
               <p className="text-gray-600 mb-2"> By{" "}
-                  <Link
-                    to={`/profile/${claim.userId?._id}`}
-                    className="font-medium hover:text-selected hover:underline"
-                  >
-                    {claim.userId?.username}
-                  </Link>
+                <Link
+                  to={`/profile/${claim.userId?._id}`}
+                  className="font-medium hover:text-selected hover:underline"
+                >
+                  {claim.userId?.username}
+                </Link>
               </p>
               <p className="text-gray-500 text-sm">{formatRelativeTime(claim.createdAt)}</p>
             </div>
@@ -287,7 +324,16 @@ export default function ClaimDetail() {
         )}
 
         {/* Action Buttons */}
-        <ReactionBar handleOpenModal = { handleOpenModal }/>
+        <ReactionBar
+          likes={claim.reactionCounts?.like || 0}
+          dislikes={claim.reactionCounts?.dislike || 0}
+          isBookmarked={isBookmarked}
+          userReaction={userReaction}
+          onReact={handleReaction}
+          onBookmark={handleBookmark}
+          handleOpenModal={handleOpenModal}
+        />
+
 
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments ({comments.length})</h2>
@@ -312,7 +358,7 @@ export default function ClaimDetail() {
 
         {/* Admin: Create Report Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               {/* Modal Header - Fixed */}
               <div className="p-6 border-b border-gray-200 flex-shrink-0">
@@ -398,9 +444,8 @@ export default function ClaimDetail() {
                         value={formData.truthVerdict}
                         onChange={handleInputChange}
                         required
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none ${
-                          formData.truthVerdict === '' ? 'text-gray-400' : 'text-gray-900'
-                        }`}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none ${formData.truthVerdict === '' ? 'text-gray-400' : 'text-gray-900'
+                          }`}
                       >
                         <option value="" disabled className="text-gray-400">Select a verdict...</option>
                         <option value="unverified" className="text-gray-900">Unverified - Lacks sufficient evidence for verification</option>

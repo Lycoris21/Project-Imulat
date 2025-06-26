@@ -22,10 +22,10 @@ export default function ReactionBar({
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                         <button
-                            onClick={() => handleReaction('like')}
+                            onClick={() => onReact('like')}
                             className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${userReaction === 'like'
-                                    ? 'bg-green-100 text-green-600'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-green-100 text-green-600'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -34,10 +34,10 @@ export default function ReactionBar({
                             <span>{likes} {likes === 1 ? 'Like' : 'Likes'}</span>
                         </button>
                         <button
-                            onClick={() => handleReaction('dislike')}
+                            onClick={() => onReact('dislike')}
                             className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${userReaction === 'dislike'
-                                    ? 'bg-red-100 text-red-600'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" transform="rotate(180)">
@@ -51,8 +51,8 @@ export default function ReactionBar({
                     <button
                         onClick={onBookmark}
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${isBookmarked
-                                ? 'bg-yellow-100 text-yellow-600'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-yellow-100 text-yellow-600'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -62,7 +62,15 @@ export default function ReactionBar({
                     </button>
 
                     {/* Share */}
-                    <button className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                    <button
+                        onClick={onShare || (() => {
+                            const shareUrl = window.location.href;
+                            navigator.clipboard.writeText(shareUrl)
+                                .then(() => alert("Link copied to clipboard!"))
+                                .catch(() => alert("Failed to copy link."));
+                        })}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                    >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                         </svg>

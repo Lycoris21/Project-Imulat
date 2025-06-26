@@ -1,5 +1,6 @@
 import { Report, User, Claim, Comment } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
+import ReactionService from "./reactionService.js";
 
 class ReportService {
   // Get all reports
@@ -9,32 +10,41 @@ class ReportService {
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
 
-    const reportsWithCommentCount = await Promise.all(
+    const reportsWithMeta = await Promise.all(
       reports.map(async (report) => {
         const count = await Comment.countDocuments({
           targetType: 'report',
           targetId: report._id,
         });
 
+        const reactionCounts = await ReactionService.countReactions(report._id, 'report');
         const plainReport = report.toObject({ virtuals: true });
 
         return {
           ...plainReport,
-          commentCount: count
+          commentCount: count,
+          reactionCounts
         };
       })
     );
 
-    return reportsWithCommentCount;
+    return reportsWithMeta;
   }
 
   // Get report by ID
   static async getReportById(id) {
     const report = await Report.findById(id)
-      .populate('userId', 'username email bio')
-      .populate('claimIds');
+    .populate('userId', 'username email bio')
+    .populate('claimIds');
 
-    return report?.toObject({ virtuals: true }) || null;
+    if (!report) return null;
+
+    const reactionCounts = await ReactionService.countReactions(id, 'report');
+    const reportObj = report.toObject({ virtuals: true });
+    reportObj.reactionCounts = reactionCounts;
+
+    return reportObj;
+
   }
 
   // Create new report
@@ -119,22 +129,26 @@ class ReportService {
       .sort({ createdAt: -1 })
       .limit(10);
 
-    const reportsWithCommentCount = await Promise.all(
+    const reportsWithMeta = await Promise.all(
       reports.map(async (report) => {
         const count = await Comment.countDocuments({
           targetType: 'report',
           targetId: report._id,
         });
 
+        const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+
         return {
           ...report.toObject({ virtuals: true }),
           commentCount: count,
+          reactionCounts,
         };
       })
     );
 
-    return reportsWithCommentCount;
+    return reportsWithMeta;
   }
+
 }
 
 export default ReportService;

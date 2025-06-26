@@ -1,5 +1,6 @@
 import { Claim, Comment} from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
+import ReactionService from './reactionService.js';
 
 class ClaimService {
   static async getAllClaims() {
@@ -7,40 +8,71 @@ class ClaimService {
       .populate('userId', 'username email')
       .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
-      .lean(); // important: use lean() to allow adding custom fields
+      .lean();
 
-    // Append commentCount for each claim
-    const claimsWithCommentCount = await Promise.all(
+    const claimsWithMeta = await Promise.all(
       claims.map(async (claim) => {
-        const count = await Comment.countDocuments({
-          targetType: 'claim',
-          targetId: claim._id,
-        });
+        const [commentCount, reactionCounts] = await Promise.all([
+          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+          ReactionService.countReactions(claim._id, 'claim'),
+        ]);
+
         return {
           ...claim,
-          commentCount: count,
+          commentCount,
+          reactionCounts,
         };
       })
     );
 
-    return claimsWithCommentCount;
+    return claimsWithMeta;
   }
 
   static async getClaimById(id) {
-    return await Claim.findById(id)
+    const claim = await Claim.findById(id)
       .populate("userId", "username email")
-      .populate("reportId", "reportTitle");
+      .populate("reportId", "reportTitle")
+      .lean();
+
+    if (!claim) return null;
+
+    const [commentCount, reactionCounts] = await Promise.all([
+      Comment.countDocuments({ targetType: 'claim', targetId: id }),
+      ReactionService.countReactions(id, 'claim'),
+    ]);
+
+    return {
+      ...claim,
+      commentCount,
+      reactionCounts,
+    };
   }
 
-   // Get reports by user
-    static async getClaimsByUser(userId) {
-      return await Claim.find({ userId })
-        .populate('userId', 'username email')
-        .populate("reportId", "reportTitle")
-        .sort({ createdAt: -1 })
-        .lean();
-    }
-  
+  // Get reports by user
+  static async getClaimsByUser(userId) {
+    const claims = await Claim.find({ userId })
+      .populate('userId', 'username email')
+      .populate("reportId", "reportTitle")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const claimsWithMeta = await Promise.all(
+      claims.map(async (claim) => {
+        const [commentCount, reactionCounts] = await Promise.all([
+          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+          ReactionService.countReactions(claim._id, 'claim'),
+        ]);
+
+        return {
+          ...claim,
+          commentCount,
+          reactionCounts,
+        };
+      })
+    );
+
+    return claimsWithMeta;
+  }
 
  static async createClaim(claimData) {
     const { claimContent } = claimData;
@@ -81,24 +113,26 @@ class ClaimService {
       .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
       .limit(limit)
-      .lean(); // important: use lean() to allow adding custom fields
+      .lean();
 
-    // Append commentCount for each claim
-    const claimsWithCommentCount = await Promise.all(
+    const claimsWithMeta = await Promise.all(
       claims.map(async (claim) => {
-        const count = await Comment.countDocuments({
-          targetType: 'claim',
-          targetId: claim._id,
-        });
+        const [commentCount, reactionCounts] = await Promise.all([
+          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+          ReactionService.countReactions(claim._id, 'claim'),
+        ]);
+
         return {
           ...claim,
-          commentCount: count,
+          commentCount,
+          reactionCounts,
         };
       })
     );
 
-    return claimsWithCommentCount;
+    return claimsWithMeta;
   }
+
 }
 
 export default ClaimService;

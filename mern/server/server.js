@@ -8,6 +8,8 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import auth from "./routes/auth.js";
 import claims from "./routes/claims.js";
 import comments from "./routes/comments.js";
+import notifications from "./routes/notifications.js";
+import reactions from "./routes/reactions.js";
 import reports from "./routes/reports.js";
 import users from "./routes/users.js";
 import usersWithUpload from "./routes/usersWithUpload.js";
@@ -35,11 +37,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", auth);
 app.use("/api/claims", claims);
 app.use("/api/comments", comments);
+app.use("/api/notifications", notifications);
+app.use("/api/reactions", reactions);
 app.use("/api/reports", reports);
 app.use('/api/uploads', uploads);
 app.use("/api/users", users);
 app.use("/api/users-upload", usersWithUpload);
-
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

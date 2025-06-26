@@ -25,9 +25,8 @@ export default function Home() {
           verdict: report?.truthVerdictParsed,
           date: report.createdAt,
           author: report.userId?.username || "Unknown",
-          likes: report.likes || 0,
-          dislikes: report.dislikes || 0,
-          commentCount: report.commentCount || 0
+          commentCount: report.commentCount || 0,
+          reactionCounts: report.reactionCounts
         }));
 
         setLatestReports(formatted);

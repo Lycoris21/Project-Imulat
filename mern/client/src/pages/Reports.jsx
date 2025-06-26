@@ -68,7 +68,8 @@ export default function Reports() {
         likes: report.likes?.length || 0,
         dislikes: report.dislikes?.length || 0,
         commentCount: report.commentCount || 0,
-        claimCount: report.claims?.length || 0
+        claimCount: report.claims?.length || 0,
+        reactionCounts: report.reactionCounts || {like: 0, dislike: 0}
       }));
 
       processedReports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
