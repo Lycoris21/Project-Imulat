@@ -129,7 +129,6 @@ export default function Reports() {
         truthVerdict: formData.truthVerdict,
         reportConclusion: formData.reportConclusion,
         reportReferences: formData.references,
-        aiReportSummary: "SAMPLE AI REPORT BECAUSE WE DON'T HAVE THAT FUNCTIONALITY YET!!!",
         reportCoverUrl: uploadedCoverUrl
       };
 
