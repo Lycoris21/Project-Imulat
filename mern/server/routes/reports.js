@@ -1,5 +1,6 @@
 import express from "express";
 import ReportController from "../controllers/reportController.js";
+import { validateReport } from "../middleware/validation.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get("/", ReportController.getAllReports);
 router.get("/:id", ReportController.getReportById);
 
 // Create a new report
-router.post("/", ReportController.createReport);
+router.post("/", validateReport, ReportController.createReport);
 
 // Update a report
 router.patch("/:id", ReportController.updateReport);

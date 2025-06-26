@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate} from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar({ isLoggedIn = false, user = null }) {
   const navItems = [

@@ -15,3 +15,10 @@ export function parseTruthVerdict(verdict) {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+
+export function truncateWords(text, maxWords) {
+  const words = text.split(" ");
+  return words.length > maxWords
+    ? words.slice(0, maxWords).join(" ") + "..."
+    : text;
+}

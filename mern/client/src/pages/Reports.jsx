@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { parseTruthVerdict } from "../utils/strings";
-import ReportCard from '../components/ReportCards/ReportCard.jsx';
+
+// Components
+import { LoadingScreen, ErrorScreen, ReportCard} from '../components';
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
@@ -10,6 +12,9 @@ export default function Reports() {
   const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Form state for create report modal
   const [formData, setFormData] = useState({
     reportTitle: "",
@@ -103,6 +108,7 @@ export default function Reports() {
   // Handle form submission
   const handleSubmitReport = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       let uploadedCoverUrl = null;
@@ -142,7 +148,15 @@ export default function Reports() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create report");
+        let message = "Validation failed.";
+        if (Array.isArray(errorData.details)) {
+          message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
+        } else if (errorData.error) {
+          message = errorData.error;
+        }
+
+        alert(message);
+        return;
       }
 
       // Clear form and close modal
@@ -161,6 +175,8 @@ export default function Reports() {
     } catch (error) {
       console.error("Error creating report:", error);
       alert(error.message || "Error creating report. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -224,12 +240,7 @@ export default function Reports() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading reports...</p>
-        </div>
-      </div>
+      <LoadingScreen message="Loading reports..."/>
     );
   }
 
@@ -472,10 +483,11 @@ export default function Reports() {
                 </button>
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   form="report-form"
                   className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1"
                 >
-                  Submit Report
+                {isSubmitting ? 'Submitting...' : 'Submit Report'}
                 </button>
               </div>
             </div>

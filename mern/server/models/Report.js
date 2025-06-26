@@ -34,6 +34,7 @@ const reportSchema = new mongoose.Schema({
   reportContent: {
     type: String,
     required: true,
+    minlength: 250,
     trim: true
   },
   truthVerdict: {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getTruthIndexColor } from '../../utils/colors';
 import { formatRelativeTime } from '../../utils/time.js';
+import { truncateWords } from '../../utils/strings';
 
 const ClaimCardDetailed = ({ claim }) => (
   <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 relative transition-all duration-300 transform hover:-translate-y-1 group">
@@ -15,7 +16,7 @@ const ClaimCardDetailed = ({ claim }) => (
           </span>
         </div>
         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          <span className="font-medium">AI-generated summary:</span> {claim.aiClaimSummary}
+          <span className="font-medium">AI-generated summary:</span> {truncateWords(claim.aiClaimSummary)}
         </p>
         <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
           <span>By <span className="font-medium">{claim.userId?.username || "Unknown"}</span></span>

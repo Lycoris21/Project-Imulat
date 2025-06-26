@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate} from "react-router-dom";
 
+// Components
+import { LoadingScreen, ErrorScreen } from '../components';
+
 export default function Profile() {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
@@ -99,10 +102,8 @@ export default function Profile() {
   };
 
   if (!user) {
-    return (
-      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center text-white">
-        <p>Loading user info...</p>
-      </div>
+   return (
+      <LoadingScreen message="Loading user info..."/>
     );
   }
 

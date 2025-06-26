@@ -80,8 +80,8 @@ export const validateReport = [
     .withMessage('Report title is required and must not exceed 200 characters'),
   body('reportContent')
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Report content is required'),
+    .isLength({ min: 250 })
+    .withMessage('Report content must be at least 250 characters'),
   body('truthVerdict')
     .isIn(['true', 'false', 'partially_true', 'misleading', 'unverified', 'disputed'])
     .withMessage('Please provide a valid truth verdict'),
@@ -97,6 +97,22 @@ export const validateReport = [
     .optional()
     .isMongoId()
     .withMessage('Each claim ID must be a valid MongoDB ObjectId'),
+  handleValidationErrors
+];
+
+// Claim validation rules
+export const validateClaim = [
+  body('userId')
+    .isMongoId()
+    .withMessage('Please provide a valid user ID'),
+  body('claimTitle')
+    .trim()
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Claim title is required and must not exceed 200 characters'),
+  body('claimContent')
+    .trim()
+    .isLength({ min: 250 })
+    .withMessage('Claim content must be at least 250 characters'),
   handleValidationErrors
 ];
 

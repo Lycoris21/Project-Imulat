@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { truncateWords } from '../../utils/strings';
 import { getTruthIndexColor } from '../../utils/colors';
 import ReportIcon from '../../components/icons/ReportIcon.jsx';
 
@@ -23,7 +24,7 @@ const ClaimCardSimple = ({ claim }) => (
 
       </div>
       <p className="text-gray-600 mt-2">
-        <span className="font-medium">AI-generated summary:</span> {claim.aiClaimSummary}
+        <span className="font-medium">AI-generated summary:</span> {truncateWords(claim.aiClaimSummary, 30)}
       </p>
     </Link>
   </div>

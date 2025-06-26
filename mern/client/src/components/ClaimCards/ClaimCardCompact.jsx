@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getTruthIndexColor } from '../../utils/colors';
 import { formatRelativeTime } from '../../utils/time.js';
+import { truncateWords } from '../../utils/strings';
 import ReportIcon from '../../components/icons/ReportIcon.jsx';
 
 const ClaimCardCompact = ({ claim }) => (
@@ -22,7 +23,7 @@ const ClaimCardCompact = ({ claim }) => (
       </div>
     </div>
     <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-      <span className="font-medium">AI-generated summary:</span> {claim.aiSummary}
+      <span className="font-medium">AI-generated summary:</span> {truncateWords(claim.aiSummary)}
     </p>
     <div className="flex justify-between items-center text-xs text-gray-500">
       <span>Submitted by: <span className="font-medium">{claim.submittedBy}</span></span>

@@ -2,8 +2,9 @@ import React, { useState, useEffect} from "react";
 import { useParams } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
-import ClaimCard from '../components/ClaimCards/ClaimCard.jsx';
-import ReportCard from '../components/ReportCards/ReportCard.jsx';
+
+// Components
+import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard  } from '../components';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -46,14 +47,15 @@ export default function Profile() {
         }, [user, id]);
 
 
-    if (loading || !profileData) {
+    if (loading) {
         return (
-            <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex items-center justify-center">
-                <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white text-lg">Loading profile...</p>
-                </div>
-            </div>
+            <LoadingScreen message = "Loading profile..."/>
+        );
+    }
+
+    if (!profileData){
+        return (
+            <ErrorScreen title="User Not Found" message="The user you're looking for doesn't exist."/>
         );
     }
 

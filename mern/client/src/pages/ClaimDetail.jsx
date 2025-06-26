@@ -4,6 +4,9 @@ import { useAuth } from "../context/AuthContext"; // assumes auth context is ava
 import { getTruthIndexColor } from '../utils/colors';
 import { formatRelativeTime } from '../utils/time.js';
 
+// Components
+import { LoadingScreen, ErrorScreen, ReactionBar } from '../components';
+
 export default function ClaimDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -24,9 +27,6 @@ export default function ClaimDetail() {
     reportCoverFile: null
   });
   const navigate = useNavigate();
-
-  // Check if user is an admin
-  const isAdmin = user?.role === "admin";
 
   const fetchClaim = async () => {
     try {
@@ -232,26 +232,13 @@ export default function ClaimDetail() {
 
   if (loading) {
     return (
-       <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] flex items-center justify-center">
-              <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-white text-lg">Loading claim...</p>
-              </div>
-          </div>
+      <LoadingScreen message="Loading claim..."/>
     );
   }
 
   if (!claim) {
     return (
-      <div className="min-h-screen bg-base-gradient  flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Claim Not Found</h1>
-          <p className="text-white mb-4">The claim you're looking for doesn't exist.</p>
-          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
-            ← Back
-          </button>
-        </div>
-      </div>
+      <ErrorScreen title="Claim Not Found" message="The claim you're looking for doesn't exist."/>
     );
   }
 
@@ -300,77 +287,7 @@ export default function ClaimDetail() {
         )}
 
         {/* Action Buttons */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {/* Like/Dislike */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handleReaction('like')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
-                    userReaction === 'like' 
-                      ? 'bg-green-100 text-green-600' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                  </svg>
-                  <span>{claim.likes} {claim.likes === 1 ? 'Like' : 'Likes'}</span>
-                </button>
-                <button
-                  onClick={() => handleReaction('dislike')}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
-                    userReaction === 'dislike' 
-                      ? 'bg-red-100 text-red-600' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" transform="rotate(180)">
-                    <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                  </svg>
-                  <span>{claim.dislikes} {claim.dislikes === 1 ? 'Dislike' : 'Dislikes'}</span>
-                </button>
-              </div>
-
-              {/* Bookmark */}
-              <button
-                onClick={handleBookmark}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${
-                  isBookmarked 
-                    ? 'bg-yellow-100 text-yellow-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v16l-8-4-8 4V3z" />
-                </svg>
-                <span>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
-              </button>
-
-              {/* Share */}
-              <button className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                </svg>
-                <span>Share</span>
-              </button>
-            </div>
-
-            {/* Admin: Make A Report Button */}
-            {isAdmin && (
-              <button
-                onClick={handleOpenModal}
-                className="px-4 py-2 bg-dark text-white font-semibold rounded-lg shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Make A Report
-              </button>
-            )}
-          </div>
-        </div>
+        <ReactionBar handleOpenModal = { handleOpenModal }/>
 
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments ({comments.length})</h2>

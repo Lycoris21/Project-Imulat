@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import ClaimCard from '../components/ClaimCards/ClaimCard.jsx';
+
+// Components
+import { LoadingScreen, ErrorScreen, ClaimCard } from '../components';
 
 export default function Claims() {
   const { user, isLoggedIn } = useAuth();
@@ -142,12 +144,7 @@ export default function Claims() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading claims...</p>
-        </div>
-      </div>
+      <LoadingScreen message="Loading claims..."/>
     );
   }
 

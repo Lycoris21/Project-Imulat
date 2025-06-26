@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatRelativeTime } from '../../utils/time.js';
+import { truncateWords } from '../../utils/strings';
 import { getVerdictColor } from '../../utils/colors.js';
 
 const ReportCardCompact = ({ report }) => (
@@ -32,7 +33,7 @@ const ReportCardCompact = ({ report }) => (
                         {report.verdict}
                     </span>
                 </div>                  <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                    <span className="font-medium">AI-generated summary:</span> {report.summary}
+                    <span className="font-medium">AI-generated summary:</span> {truncateWords(report.summary)}
                 </p>
                 <div className="flex justify-between items-center text-xs text-gray-500">
                     <span>By <span className="font-medium">{report.author}</span></span>

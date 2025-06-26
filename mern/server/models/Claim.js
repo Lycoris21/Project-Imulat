@@ -20,6 +20,7 @@ const claimSchema = new mongoose.Schema({
   claimContent: {
     type: String,
     required: true,
+    minlength: 250,
     trim: true
   },
   claimSources: {

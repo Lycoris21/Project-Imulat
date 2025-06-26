@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ReportCard from '../components/ReportCards/ReportCard.jsx';
-import ClaimCard from '../components/ClaimCards/ClaimCard.jsx';
+
+// Components
+import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard } from '../components';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,12 +80,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading latest content...</p>
-        </div>
-      </div>
+      <LoadingScreen message="Loading latest content..."/>
     );
   }
 

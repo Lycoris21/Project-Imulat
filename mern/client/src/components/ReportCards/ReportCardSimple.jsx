@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { truncateWords } from '../../utils/strings';
 import { getVerdictColor } from '../../utils/colors';
 
 const ReportCardSimple = ({ report }) => (
@@ -28,7 +29,7 @@ const ReportCardSimple = ({ report }) => (
       </div>
 
       <p className="text-gray-600 mt-2">
-        <span className="font-medium">AI-generated summary:</span> {report.aiReportSummary}
+        <span className="font-medium">AI-generated summary:</span> {truncateWords(report.aiReportSummary, 30)}
       </p>
     </Link>
   </div>
