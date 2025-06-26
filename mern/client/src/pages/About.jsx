@@ -34,7 +34,7 @@ export default function About() {
             <h2 className="text-3xl font-bold text-gray-800 mb-6">How It Works</h2>
             <div className="space-y-4">
               <div className="flex items-start space-x-4">
-                <div className="bg-[#4B548B] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   1
                 </div>
                 <div>
@@ -44,7 +44,7 @@ export default function About() {
               </div>
               
               <div className="flex items-start space-x-4">
-                <div className="bg-[#4B548B] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   2
                 </div>
                 <div>
@@ -54,7 +54,7 @@ export default function About() {
               </div>
               
               <div className="flex items-start space-x-4">
-                <div className="bg-[#4B548B] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   3
                 </div>
                 <div>
@@ -64,7 +64,7 @@ export default function About() {
               </div>
               
               <div className="flex items-start space-x-4">
-                <div className="bg-[#4B548B] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   4
                 </div>
                 <div>
@@ -117,19 +117,19 @@ export default function About() {
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Our Impact</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-[#4B548B] mb-2">1,247</div>
+              <div className="text-4xl font-bold text-base mb-2">1,247</div>
               <div className="text-gray-600 font-medium">Claims Verified</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#4B548B] mb-2">892</div>
+              <div className="text-4xl font-bold text-base mb-2">892</div>
               <div className="text-gray-600 font-medium">Reports Published</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#4B548B] mb-2">15,432</div>
+              <div className="text-4xl font-bold text-base mb-2">15,432</div>
               <div className="text-gray-600 font-medium">Active Users</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-[#4B548B] mb-2">94%</div>
+              <div className="text-4xl font-bold text-base mb-2">94%</div>
               <div className="text-gray-600 font-medium">Accuracy Rate</div>
             </div>
           </div>
@@ -144,13 +144,13 @@ export default function About() {
           </p>          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/claims"
-              className="px-8 py-4 bg-white border-2 border-[#4B548B] text-[#4B548B] font-semibold rounded-2xl shadow hover:bg-[#4B548B] hover:text-white transition"
+              className="px-8 py-4 bg-white border-2 border-base text-base font-semibold rounded-2xl shadow hover:bg-base hover:text-white transition"
             >
               Submit a Claim
             </Link>
             <Link
               to="/reports"
-              className="px-8 py-4 bg-[#4B548B] border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-[#4B548B] transition"
+              className="px-8 py-4 bg-base border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-base transition"
             >
               Browse Reports
             </Link>

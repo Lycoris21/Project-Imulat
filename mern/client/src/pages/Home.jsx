@@ -105,11 +105,11 @@ export default function Home() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports, claims, or topics..."
-              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border-[#FFFFFF80] border-1 focus:ring-1 focus:ring-[#1E275E] focus:outline-none"
+              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border-[#FFFFFF80] border-1 focus:ring-1 focus:ring-dark focus:outline-none"
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-[#FFF] border-0.5 border-white text-[#1E275E] font-semibold rounded-r-2xl hover:bg-[#1E275E] hover:text-white transition"
+              className="px-8 py-4 bg-[#FFF] border-0.5 border-white text-dark font-semibold rounded-r-2xl hover:bg-dark hover:text-white transition"
             >
               Search
             </button>
@@ -118,12 +118,13 @@ export default function Home() {
       </div>
 
       {/* Two Column Layout */}
+      
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Latest Reports Section */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Latest Reports</h2>
-            <Link to="/reports" className="text-[#4B548B] hover:text-[#1E275E] font-medium">
+            <Link to="/reports" className="text-base hover:text-dark font-medium">
               View All →
             </Link>
           </div>            
@@ -138,7 +139,7 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Latest Claims</h2>
-            <Link to="/claims" className="text-[#4B548B] hover:text-[#1E275E] font-medium">
+            <Link to="/claims" className="text-base hover:text-dark font-medium">
               View All →
             </Link>
           </div>            

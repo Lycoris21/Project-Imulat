@@ -3,11 +3,11 @@ import { getTruthIndexColor } from '../../utils/colors';
 import { formatRelativeTime } from '../../utils/time.js';
 
 const ClaimCardDetailed = ({ claim }) => (
-  <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-80 md:w-96 relative">
+  <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 relative transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/claims/${claim._id}`} className="block">
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-bold text-gray-800 text-lg leading-tight hover:text-blue-600 transition-colors flex-1 mr-3 line-clamp-2">
+          <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
             {claim.claimTitle}
           </h3>
           <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getTruthIndexColor(claim.aiTruthIndex)}`}>

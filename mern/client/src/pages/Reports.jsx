@@ -251,7 +251,7 @@ export default function Reports() {
             <div className="absolute top-0 right-0">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-[#1E275E] text-white font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2"
+                className="px-6 py-3 bg-dark text-white font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -271,11 +271,11 @@ export default function Reports() {
               onFocus={(e) => e.target.select()}
               onClick={(e) => e.target.select()}
               placeholder="Search reports by title, content, author, or verdict..."
-              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-[#1E275E] focus:outline-none"
+              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-dark focus:outline-none"
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-[#1E275E] font-semibold rounded-r-2xl hover:bg-gray-50 transition"
+              className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-dark font-semibold rounded-r-2xl hover:bg-gray-50 transition"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
@@ -473,7 +473,7 @@ export default function Reports() {
                 <button
                   type="submit"
                   form="report-form"
-                  className="px-6 py-2 bg-[#4B548B] text-white rounded-lg hover:bg-[#1E275E] transition-colors flex-1"
+                  className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1"
                 >
                   Submit Report
                 </button>

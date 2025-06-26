@@ -1,25 +1,24 @@
 import { Link } from 'react-router-dom';
 import { getVerdictColor } from '../../utils/colors';
-import { parseTruthVerdict } from "../../utils/strings";
 
 const ReportCardSimple = ({ report }) => (
-  <div key={report._id} className="bg-white rounded-lg shadow-md p-4 border-none flex">
+  <div key={report._id} className="bg-white rounded-lg shadow-md p-4 border-none flex hover:bg-[#EDEEF1] transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/reports/${report._id}`} className="flex-1 hover:text-blue-600 cursor-pointer">
       <div className="flex justify-start items-center">
         {report.reportCoverUrl && (
-            <div className="flex-shrink-0">
-                <img
-                    src={report.reportCoverUrl}
-                    alt={`Cover for ${report.title}`}
-                    className="w-24 h-16 mr-4" 
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                    }}
-                />
-            </div>
+          <div className="w-24 h-20 overflow-hidden rounded-lg flex-shrink-0 mr-4">
+            <img
+              src={report.reportCoverUrl}
+              alt={`Cover for ${report.reportTitle}`}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>  
         )}
 
-        <h3 className="font-bold text-gray-800 text-lg leading-tight hover:text-blue-600 transition-colors flex-1 mr-3 line-clamp-2">
+        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
           {report.reportTitle}
         </h3>
 

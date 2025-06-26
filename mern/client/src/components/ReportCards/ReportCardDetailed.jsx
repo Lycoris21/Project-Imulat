@@ -6,7 +6,7 @@ const ReportCardDetailed = ({ report }) => (
     <Link
         key={report.id}
         to={`/reports/${report.id}`}
-        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-80 md:w-96"
+        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 transition-all duration-300 transform hover:-translate-y-1 group"
     >
         {/* Cover Image */}
         {report.reportCoverUrl && (
@@ -14,7 +14,7 @@ const ReportCardDetailed = ({ report }) => (
                 <img
                     src={report.reportCoverUrl}
                     alt={`Cover for ${report.reportTitle}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                         e.target.parentElement.style.display = 'none';
                     }}
@@ -26,7 +26,7 @@ const ReportCardDetailed = ({ report }) => (
         <div className="p-6">
             {/* Header with Verdict */}
             <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-gray-800 text-lg leading-tight hover:text-blue-600 transition-colors flex-1 mr-3 line-clamp-2">
+                <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
                     {report.reportTitle}
                 </h3>
                 <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdict)}`}>

@@ -145,7 +145,16 @@ export default function ReportDetail() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2">{report.reportTitle}</h1>
-              <p className="text-gray-600 mb-2">By <span className="font-medium">{report.userId?.username}</span></p>
+              <p className="text-gray-600 mb-2">
+                By{" "}
+                <Link
+                  to={`/profile/${report.userId?._id}`}
+                  className="font-medium hover:text-selected hover:underline"
+                >
+                  {report.userId?.username}
+                </Link>
+              </p>
+
               <p className="text-gray-500 text-sm">{formatRelativeTime(report.createdAt)}</p>
             </div>
             <div className={`px-4 py-2 rounded-lg border ${getVerdictColor(report.truthVerdict)}`}>

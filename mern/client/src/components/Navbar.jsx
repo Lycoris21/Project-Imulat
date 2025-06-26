@@ -254,7 +254,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
     />
   </div>
-  <h1 className="text-xl font-bold text-[#4B548B] -m-5">Project IMULAT</h1>
+  <h1 className="text-xl font-bold text-base -m-5">Project IMULAT</h1>
 </Link>
 
         {/* Center - Navigation Items */}
@@ -264,8 +264,8 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
               key={item.name}
               to={item.to}
               className={({ isActive }) =>
-                `text-[#4B548B] hover:text-[#1E275E] font-medium transition-colors ${
-                  isActive ? "text-[#1E275E] opacity-60 border-b-2 border-[#1E275E] pb-1" : ""
+                `text-base hover:text-dark font-medium transition-colors ${
+                  isActive ? "text-dark opacity-60 border-b-2 border-dark pb-1" : ""
                 }`
               }
             >
@@ -308,7 +308,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                           disabled={unreadCount === 0}
                           className={`text-sm font-medium ${
                             unreadCount > 0 
-                              ? 'text-blue-600 hover:text-blue-800' 
+                              ? 'text-base hover:text-dark' 
                               : 'text-gray-400 cursor-not-allowed'
                           }`}
                         >
@@ -406,8 +406,8 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                   <div className="absolute -right-6 mt-1 min-w-[200px] bg-white shadow-lg z-50 border border-gray-200 text-sm rounded-lg">
                     <div className="rounded-lg hover:bg-gray-100">
                       <Link
-                        to="/profile"
-                        className="text-center block px-4 py-2 text-[#4B548B]"
+                        to={`/profile/${user?._id}`}
+                        className="text-center block px-4 py-2 text-base"
                       >
                         Profile
                       </Link>
@@ -417,7 +417,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                     <div className="hover:bg-gray-100">
                       <Link
                         to="/bookmarks"
-                        className="text-center block px-4 py-2 text-[#4B548B]"
+                        className="text-center block px-4 py-2 text-base"
                       >
                         Bookmarks
                       </Link>
@@ -426,7 +426,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
 
                     <div className="hover:bg-gray-100 rounded-b-lg">
                       <button
-                        className="text-center w-full px-4 py-2 text-[#4B548B] cursor-pointer"
+                        className="text-center w-full px-4 py-2 text-base cursor-pointer"
                         onClick={handleLogout}
                       >
                         Logout
@@ -440,7 +440,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"
-                className="px-4 py-2 border-1 border-[#4B548B] text-[#4B548B] hover:text-white hover:border-white hover:bg-[#4B548B] font-medium rounded-lg transition-colors"
+                className="px-4 py-2 border-1 border-base text-base hover:text-white hover:border-white hover:bg-base font-medium rounded-lg transition-colors"
               >
                 Login / Sign up
               </Link>

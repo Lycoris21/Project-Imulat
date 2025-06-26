@@ -104,12 +104,12 @@ export default function Login() {
   <label className="flex items-center">
     <input
       type="checkbox"
-      className="mr-2 accent-[#1E275E] focus:ring-0"
+      className="mr-2 accent-dark focus:ring-0"
       name="remember"
     />
     Remember me
   </label>
-  <a href="/forgot-password" className="text-[#1E275E] hover:underline font-medium">
+  <a href="/forgot-password" className="text-dark hover:underline font-medium">
     Forgot password?
   </a>
 </div>
@@ -127,7 +127,7 @@ export default function Login() {
 
         <p className="text-sm text-center text-gray-500 mt-6">
           Not a member?{" "}
-          <a href="/signup" className="text-[#4B548B] hover:underline font-medium">
+          <a href="/signup" className="text-base hover:underline font-medium">
             Register now!
           </a>
         </p>

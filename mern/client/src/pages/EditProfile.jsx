@@ -109,7 +109,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 bg-base-gradient">
       <div className="bg-white bg-opacity-90 rounded-2xl p-6 shadow-xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-[#4B548B] mb-4 text-center">
+        <h1 className="text-3xl font-bold text-base mb-4 text-center">
           Profile Settings
         </h1>
 
