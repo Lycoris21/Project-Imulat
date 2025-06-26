@@ -403,7 +403,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 min-w-[200px] bg-white shadow-lg z-50 text-sm rounded-lg">
+                  <div className="absolute -right-6 mt-1 min-w-[200px] bg-white shadow-lg z-50 border border-gray-200 text-sm rounded-lg">
                     <div className="rounded-lg hover:bg-gray-100">
                       <Link
                         to="/profile"
