@@ -112,12 +112,6 @@ export default function ClaimDetail() {
   return (
     <div className="min-h-screen bg-base-gradient py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-6">
-          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
-            ← Back
-          </button>
-        </div>
-
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">

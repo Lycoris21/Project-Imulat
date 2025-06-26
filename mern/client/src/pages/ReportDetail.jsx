@@ -154,12 +154,7 @@ export default function ReportDetail() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Back Navigation */}
-        <div className="mb-6">
-          <button onClick={() => navigate(-1)} className="text-white hover:text-gray-400 font-medium">
-            ← Back
-          </button>
-        </div>        {/* Report Header */}
+        {/* Report Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {/* Cover Image */}
           {report.reportCoverUrl && (
