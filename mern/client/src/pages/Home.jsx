@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 // Components
-import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard } from '../components';
+import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard, SearchBar } from '../components';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,23 +81,12 @@ export default function Home() {
         </p>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
-          <div className="relative flex">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search reports, claims, or topics..."
-              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border-[#FFFFFF80] border-1 focus:ring-1 focus:ring-dark focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="px-8 py-4 bg-[#FFF] border-0.5 border-white text-dark font-semibold rounded-r-2xl hover:bg-dark hover:text-white transition cursor-pointer"
-            >
-              Search
-            </button>
-          </div>
-        </form>
+        <SearchBar
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onSubmit={handleSearch}
+          placeholder="Search reports, claims, or topics..."
+        />
       </div>
 
       {/* Two Column Layout */}
@@ -113,7 +102,7 @@ export default function Home() {
           </div>            
           <div className="space-y-4">
             {latestReports.map((report) => ( 
-              <ReportCard key={report.id} report={report} variant="compact"/>            
+              <ReportCard key={report._id} report={report} variant="compact"/>            
             ))}
           </div>
         </div>
@@ -128,7 +117,7 @@ export default function Home() {
           </div>            
           <div className="space-y-4">
             {latestClaims.map((claim) => (
-               <ClaimCard key={claim.id} claim={claim} variant="compact"/>
+               <ClaimCard key={claim._id} claim={claim} variant="compact"/>
             ))}
           </div>
         </div>      

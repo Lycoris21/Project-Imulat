@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // Components
-import { LoadingScreen, ErrorScreen, ClaimCard } from '../components';
+import { LoadingScreen, ErrorScreen, ClaimCard, SearchBar } from '../components';
 
 export default function Claims() {
   const { user, isLoggedIn } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [claims, setClaims] = useState([]);
-  const [filteredClaims, setFilteredClaims] = useState([]);  const [loading, setLoading] = useState(true);
+  const [filteredClaims, setFilteredClaims] = useState([]); const [loading, setLoading] = useState(true);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   // Form state for submit claim modal
@@ -96,19 +96,19 @@ export default function Claims() {
   };
 
   const fetchClaims = async () => {
-      try {
-        const response = await fetch("http://localhost:5050/api/claims");
-        const data = await response.json();
-        // Sort by creation date
-        data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setClaims(data);
-        setFilteredClaims(data);
-      } catch (error) {
-        console.error("Failed to fetch claims:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      const response = await fetch("http://localhost:5050/api/claims");
+      const data = await response.json();
+      // Sort by creation date
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setClaims(data);
+      setFilteredClaims(data);
+    } catch (error) {
+      console.error("Failed to fetch claims:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Close claim modal and reset form
   const handleCloseClaimModal = () => {
@@ -144,7 +144,7 @@ export default function Claims() {
 
   if (loading) {
     return (
-      <LoadingScreen message="Loading claims..."/>
+      <LoadingScreen message="Loading claims..." />
     );
   }
 
@@ -161,7 +161,7 @@ export default function Claims() {
               Browse through all user-submitted claims for fact-checking
             </p>
           </div>
-          
+
           {/* Buttons - Absolute positioned to top right */}
           <div className="absolute top-0 right-0 flex gap-3">
             {/* Submit Claim Button - Available to all users */}
@@ -180,27 +180,12 @@ export default function Claims() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-4">
-          <div className="relative flex">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={(e) => e.target.select()}
-              onClick={(e) => e.target.select()}
-              placeholder="Search claims by title, content, author, or summary..."
-              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-dark focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-dark font-semibold rounded-r-2xl hover:bg-gray-50 transition"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-        </form>
+        <SearchBar
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onSubmit={handleSearch}
+          placeholder="Search claims by title, content, author, or summary..."
+        />
 
         {/* Results Counter */}
         <p className="text-gray-300 text-sm text-center">
@@ -218,7 +203,7 @@ export default function Claims() {
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredClaims.map((claim) => (
-                <ClaimCard key = {claim._id} claim={claim} variant="detailed"/>
+              <ClaimCard key={claim._id} claim={claim} variant="detailed" />
             ))}
           </div>
         )}
@@ -226,7 +211,7 @@ export default function Claims() {
 
       {/* Submit Claim Modal */}
       {showSubmitModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             {/* Modal Header - Fixed */}
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
@@ -320,7 +305,7 @@ export default function Claims() {
                 </button>
               </div>
             </div>
-          </div>        
+          </div>
         </div>
       )}
     </div>

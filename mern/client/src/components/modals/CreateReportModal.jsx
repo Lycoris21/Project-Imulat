@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
+export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, claimId = null }) {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -13,10 +13,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
         truthVerdict: "",
         reportConclusion: "",
         references: "",
-        claimId: "",
+        claimId: claimId || "",
         reportCoverFile: null
     });
-    
 
     const handleSubmitReport = async (e) => {
         e.preventDefault();
@@ -123,7 +122,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                 truthVerdict: "",
                 reportConclusion: "",
                 references: "",
-                claimId: "",
+                claimId: claimId || "",
                 reportCoverFile: null
             });
         }
@@ -157,7 +156,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                 {/* Modal Header - Fixed */}
                 <div className="p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold text-gray-800">Create New Report</h2>
+                        <h2 className="text-2xl font-bold text-gray-800">{claimId ? "Create a Report for this Claim" : "Create New Report"}</h2>
                         <button
                             onClick={onClose}
                             className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
@@ -287,18 +286,21 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                             {/* Claim ID (Optional) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Claim ID (Optional)
+                                    Claim ID {claimId ? "(Linked to Current Claim)" : "(Optional)"}
                                 </label>
                                 <input
                                     type="text"
                                     name="claimId"
                                     value={formData.claimId}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                    placeholder="Enter claim ID to reference..."
+                                    disabled={!!claimId} // Disable if passed in
+                                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg ${claimId ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
+                                    placeholder={claimId ? "Claim ID will be auto-filled..." : "Enter claim ID to reference..."}
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Optional: Link this report to a specific claim
+                                    {claimId
+                                        ? "This report will be automatically linked to the current claim"
+                                        : "Optional: Link this report to a specific claim"}
                                 </p>
                             </div>
                         </form>
