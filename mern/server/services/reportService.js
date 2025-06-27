@@ -2,6 +2,8 @@ import { Report, User, Claim, Comment } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
 
+let aiEnabled = true;
+
 class ReportService {
   // Get all reports
   static async getAllReports() {
@@ -62,7 +64,7 @@ class ReportService {
         }
       }
 
-      const aiReportSummary = await aiSummaryService.generateAISummary(reportContent);
+      const aiReportSummary = aiEnabled ? await aiSummaryService.generateAISummary(reportContent) : "SAMPLE AI SUMMARY";
 
       const newReport = new Report({
         ...reportData,

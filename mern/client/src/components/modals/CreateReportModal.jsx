@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-export default function CreateReportModal({ isOpen, onClose }) {
+export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,6 +83,10 @@ export default function CreateReportModal({ isOpen, onClose }) {
             });
             onClose();
             alert("Report created successfully!");
+
+            if (onSubmitFinish) {
+                await onSubmitFinish();
+            }
         } catch (error) {
             console.error("Error creating report:", error);
             alert(error.message || "Error creating report. Please try again.");

@@ -20,7 +20,6 @@ export default function Reports() {
     fetchReports();
   }, []);
 
-
   // Filter reports based on search query
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -136,7 +135,7 @@ export default function Reports() {
       </div>
 
       {/* Admin: Create Report Modal */}
-      <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
+      <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSubmitFinish = {fetchReports}/>
     </div>
   );
 }
