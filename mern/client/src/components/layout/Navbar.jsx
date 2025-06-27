@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate} from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import ConfirmLogout from "../modals/ConfirmLogout";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Navbar({ isLoggedIn = false, user = null }) {
@@ -12,6 +13,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
 
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -425,12 +427,13 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                     </div>
 
                     <div className="hover:bg-gray-100 rounded-b-lg">
-                      <button
-                        className="text-center w-full px-4 py-2 text-base cursor-pointer"
-                        onClick={handleLogout}
-                      >
-                        Logout
-                      </button>
+<button
+  className="text-center w-full px-4 py-2 text-base cursor-pointer"
+  onClick={() => setShowLogoutConfirm(true)}
+>
+  Logout
+</button>
+
                     </div>
                   </div>
                 )}
@@ -447,6 +450,17 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             </div>
           )}
         </div>
+        <ConfirmLogout
+  isOpen={showLogoutConfirm}
+  onCancel={() => setShowLogoutConfirm(false)}
+  onConfirm={() => {
+    setShowLogoutConfirm(false);
+    setDropdownOpen(false);
+    logout();
+    navigate("/login");
+  }}
+/>
+
       </nav>
     );
   }
