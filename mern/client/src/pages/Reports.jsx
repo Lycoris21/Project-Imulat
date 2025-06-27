@@ -28,8 +28,8 @@ export default function Reports() {
       const filtered = reports.filter(report =>
         report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.adminUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.truthVerdict.toLowerCase().includes(searchQuery.toLowerCase())
+        report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredReports(filtered);
     }

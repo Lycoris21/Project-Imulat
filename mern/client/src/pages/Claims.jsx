@@ -34,7 +34,7 @@ export default function Claims() {
       const filtered = claims.filter(claim =>
         claim.claimTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         claim.claimContent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.userUsername.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         claim.aiClaimSummary.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredClaims(filtered);
