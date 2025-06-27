@@ -21,12 +21,36 @@ class CommentController {
 
   static async getCommentsByTarget(req, res) {
     try {
-      const { targetType, targetId } = req.params;
+      const { targetType, targetId } = req.query; // Changed from req.params to req.query
       
       const comments = await CommentService.getCommentsByTarget(targetType, targetId);
       res.status(200).json(comments);
     } catch (err) {
       res.status(500).json({ message: err.message || "Failed to retrieve comments" });
+    }
+  }
+
+  static async likeComment(req, res) {
+    try {
+      const { commentId } = req.params;
+      const { userId } = req.body;
+      
+      const result = await CommentService.toggleLike(commentId, userId);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Failed to like comment" });
+    }
+  }
+
+  static async dislikeComment(req, res) {
+    try {
+      const { commentId } = req.params;
+      const { userId } = req.body;
+      
+      const result = await CommentService.toggleDislike(commentId, userId);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Failed to dislike comment" });
     }
   }
 

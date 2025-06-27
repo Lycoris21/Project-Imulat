@@ -18,3 +18,6 @@ export function formatRelativeTime (dateString) {
       return date.toLocaleDateString();
     }
 }
+
+// Alias for backward compatibility
+export const formatTimeAgo = formatRelativeTime;

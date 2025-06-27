@@ -6,7 +6,7 @@ import { formatRelativeTime } from '../utils/time.js';
 import { getVerdictColor } from '../utils/colors.js';
 
 // Components
-import { LoadingScreen, ErrorScreen, ReactionBar } from '../components'
+import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection } from '../components'
 
 export default function ReportDetail() {
   const { id } = useParams();
@@ -14,8 +14,6 @@ export default function ReportDetail() {
   const [loading, setLoading] = useState(true);
   const [userReaction, setUserReaction] = useState(null); // 'like', 'dislike', or null
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -42,9 +40,6 @@ export default function ReportDetail() {
         } else {
           setUserReaction(null);
         }
-
-        // Fetch comments last
-        await fetchComments();
       } catch (err) {
         console.error("Error loading data:", err);
         setReport(null);
@@ -99,57 +94,6 @@ export default function ReportDetail() {
     setIsBookmarked(!isBookmarked);
     // TODO: API call to save bookmark
   };
-
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    const commentPayload = {
-      userId: user?._id,
-      targetId: id,
-      targetType: "report",
-      commentContent: newComment
-    };
-
-    try {
-      const res = await fetch("http://localhost:5050/api/comments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(commentPayload)
-      });
-
-      if (!res.ok) throw new Error("Failed to submit comment");
-      const savedComment = await res.json();
-
-      await fetchComments(); 
-      setNewComment("");
-    } catch (err) {
-      console.error("Error submitting comment:", err);
-    }
-  };
-
-  const fetchComments = async () => {
-    try {
-      const response = await fetch(`http://localhost:5050/api/comments/report/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch comments");
-
-      const data = await response.json();
-      const normalized = data.map((comment) => ({
-        id: comment._id,
-        username: comment.userId?.username || "Unknown",
-        content: comment.commentContent,
-        createdAt: comment.createdAt,
-        likes: 0
-      }));
-      
-      setComments(normalized);
-    } catch (err) {
-      console.error("Error fetching comments:", err);
-    }
-  };
-
 
   if (loading) {
     return (
@@ -265,45 +209,10 @@ export default function ReportDetail() {
         />
 
         {/* Comments Section */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Comments ({comments.length})</h2>
-          
-          {/* Add Comment Form */}
-          <form onSubmit={handleCommentSubmit} className="mb-6">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Share your thoughts on this report..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none"
-              rows="3"
-            />
-            <button
-              type="submit"
-              className="mt-2 px-4 py-2 bg-dark text-white rounded-lg hover:bg-darker transition cursor-pointer"
-            >
-              Post Comment
-            </button>
-          </form>
-
-          {/* Comments List */}
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="font-medium text-gray-800">{comment.username}</span>
-                  <span className="text-sm text-gray-500">{formatRelativeTime(comment.createdAt)}</span>
-                </div>
-                <p className="text-gray-700 mb-2">{comment.content}</p>
-                <button className="text-sm text-gray-500 hover:text-blue-600">
-                  👍 {comment.likes}
-                </button>
-              </div>
-            ))}
-            {comments.length === 0 && (
-              <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
-            )}
-          </div>
-        </div>
+        <CommentsSection 
+          targetId={report?._id} 
+          targetType="report" 
+        />
       </div>
     </div>
   );
