@@ -170,7 +170,7 @@ export default function CommentsSection({ targetId, targetType }) {
             <p>No comments yet. Be the first to share your thoughts!</p>
           </div>
         ) : (
-          <div className="relative">
+          <div className="p-6">
             {topLevelComments.map((comment) => (
               <CommentItem
                 key={comment._id}

@@ -34,7 +34,7 @@ export default function CommentItem({
   };
 
   return (
-    <div className="group">
+    <div className="group relative">
       {/* Main Comment */}
       <div 
         className="flex space-x-3 py-3"
