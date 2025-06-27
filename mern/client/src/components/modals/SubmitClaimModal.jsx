@@ -99,7 +99,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
         {/* Modal Header - Fixed */}
         <div className="p-6 border-b border-gray-200 flex-shrink-0">

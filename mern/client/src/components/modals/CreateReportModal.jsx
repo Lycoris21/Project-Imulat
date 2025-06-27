@@ -151,7 +151,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Modal Header - Fixed */}
                 <div className="p-6 border-b border-gray-200 flex-shrink-0">
@@ -171,7 +171,8 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                 {/* Modal Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="p-6">                {/* Modal Form */}
-                        <form id="report-form" onSubmit={handleSubmitReport} className="space-y-4">                  {/* Report Cover Image Upload */}
+                        <form id="report-form" onSubmit={handleSubmitReport} className="space-y-4">                  
+                            {/* Report Cover Image Upload */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 ">
                                     Report Cover Image
