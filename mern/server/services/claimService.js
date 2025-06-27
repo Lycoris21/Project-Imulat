@@ -2,6 +2,8 @@ import { Claim, Comment} from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
 
+let aiEnabled = true;
+
 class ClaimService {
   static async getAllClaims() {
     const claims = await Claim.find({})
@@ -80,8 +82,8 @@ class ClaimService {
     try {
       console.log("Creating claim with content:", claimContent); // ✅ log input
 
-      const aiClaimSummary = await aiSummaryService.generateAISummary(claimContent);
-      const aiTruthIndex = await aiSummaryService.generateTruthIndex(claimContent);
+      const aiClaimSummary = aiEnabled ? await aiSummaryService.generateAISummary(claimContent) : "SAMPLE AI SUMMARY";
+      const aiTruthIndex = aiEnabled ? await aiSummaryService.generateTruthIndex(claimContent) : Math.floor(Math.random() * 101);;
 
       const newClaim = new Claim({
         ...claimData,
@@ -132,7 +134,6 @@ class ClaimService {
 
     return claimsWithMeta;
   }
-
 }
 
 export default ClaimService;

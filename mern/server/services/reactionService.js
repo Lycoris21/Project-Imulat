@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
-import Reaction from '../models/Reaction.js';
+import { Reaction, Claim, Report, Comment, Notification } from '../models/index.js';
 
-const ReactionService = {
-  async getReactionsByTarget(targetId, targetType) {
+class ReactionService {
+  static async getReactionsByTarget(targetId, targetType) {
     return Reaction.find({ targetId, targetType });
-  },
+  }
 
-  async countReactions(targetId, targetType) {
+  static async countReactions(targetId, targetType) {
     const counts = await Reaction.aggregate([
       { $match: { targetId: new mongoose.Types.ObjectId(targetId), targetType } },
       {
@@ -22,13 +22,13 @@ const ReactionService = {
       result[item._id] = item.count;
     });
     return result;
-  },
+  }
 
-  async getUserReaction(userId, targetId, targetType) {
+  static async getUserReaction(userId, targetId, targetType) {
     return Reaction.findOne({ userId, targetId, targetType });
-  },
+  }
 
-  async toggleReaction(userId, targetId, targetType, reactionType) {
+  static async toggleReaction(userId, targetId, targetType, reactionType) {
     const existing = await Reaction.findOne({ userId, targetId, targetType });
 
     if (existing) {
@@ -45,21 +45,75 @@ const ReactionService = {
       await newReaction.save();
       return { message: 'Reaction added', created: true };
     }
-  },
+  }
 
-  async setReaction(userId, targetId, targetType, reactionType) {
-    const existing = await Reaction.findOneAndUpdate(
+  static async setReaction(userId, targetId, targetType, reactionType, io = null) {
+    // Find existing reaction
+    const previous = await Reaction.findOne({ userId, targetId, targetType });
+
+    let isNew = false;
+
+    // If no previous or changing the reactionType, apply new reaction
+    const updated = await Reaction.findOneAndUpdate(
       { userId, targetId, targetType },
       { reactionType },
       { new: true, upsert: true }
     );
-    return existing;
-  },
 
-  async removeReaction(userId, targetId, targetType) {
+    // If it was new or changing from null, mark as new
+    if (!previous || !previous.reactionType || previous.reactionType !== reactionType) {
+      isNew = true;
+    }
+
+    // Determine the target's owner
+    let targetDoc = null;
+    let recipientId = null;
+
+    if (targetType === "claim") {
+      targetDoc = await Claim.findById(targetId).populate("userId");
+      recipientId = targetDoc?.userId?._id;
+    } else if (targetType === "report") {
+      targetDoc = await Report.findById(targetId).populate("userId");
+      recipientId = targetDoc?.userId?._id;
+    } else if (targetType === "comment") {
+      targetDoc = await Comment.findById(targetId).populate("userId");
+      recipientId = targetDoc?.userId?._id;
+    }
+
+    // Only notify on new "like" and not if you're liking your own stuff
+    if (
+      isNew &&
+      reactionType === "like" &&
+      recipientId &&
+      recipientId.toString() !== userId.toString()
+    ) {
+      // Prevent duplicate notifications
+      const alreadyExists = await Notification.exists({
+        recipientId,
+        senderId: userId,
+        type: "like",
+        targetType,
+        targetId,
+      });
+
+      if (!alreadyExists) {
+        const newNotif = await Notification.create({
+          recipientId,
+          senderId: userId,
+          type: "like",
+          targetType,
+          targetId,
+        });
+      }
+    }
+
+    return updated;
+  }
+
+  static async removeReaction(userId, targetId, targetType) {
     const deleted = await Reaction.findOneAndDelete({ userId, targetId, targetType });
     return deleted ? { message: 'Reaction deleted' } : { message: 'No reaction found' };
   }
-};
+}
 
 export default ReactionService;

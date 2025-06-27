@@ -1,7 +1,11 @@
-import { Link, NavLink, useNavigate} from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ConfirmLogout from "../modals/ConfirmLogout";
 import { useAuth } from "../../context/AuthContext";
+
+import NavItem from './NavItem';
+import NotificationBell from './NotificationBell';
+import UserDropdown from './UserDropdown';
 
 export default function Navbar({ isLoggedIn = false, user = null }) {
   const navItems = [
@@ -185,7 +189,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
-     setDropdownOpen(false);
+    setDropdownOpen(false);
     logout();
     navigate("/login");
   };
@@ -244,223 +248,162 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-    
-    return (
-      <nav className="h-20 bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">      
+
+  return (
+    <nav className="h-20 bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">
       {/* Left side - Logo and App Name */}
-        <Link to="/Home" className="flex items-center space-x-3">
-  <div style={{ height: '60px' }}>
-    <img 
-      src="/logo.png" 
-      alt="Project IMULAT Logo" 
-      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-    />
-  </div>
-  <h1 className="text-xl font-bold text-base -m-5">Project IMULAT</h1>
-</Link>
-
-        {/* Center - Navigation Items */}
-        <div className="flex items-center space-x-8">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.to}
-              className={({ isActive }) =>
-                `text-base hover:text-dark font-medium transition-colors ${
-                  isActive ? "text-dark opacity-60 border-b-2 border-dark pb-1" : ""
-                }`
-              }
-            >
-              {item.name}
-            </NavLink>
-          ))}
+      <Link to="/Home" className="flex items-center space-x-3">
+        <div style={{ height: '60px' }}>
+          <img
+            src="/logo.png"
+            alt="Project IMULAT Logo"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
         </div>
+        <h1 className="text-xl font-bold text-base -m-5">Project IMULAT</h1>
+      </Link>
 
-        {/* Right side - User Authentication */}
-        <div className="flex items-center">
-          {isLoggedIn && user ? (
-            <div className="flex items-center space-x-4">
-              {/* Notifications Bell */}
-              <div className="relative" ref={notificationsRef}>
-                <button
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="relative p-2 text-gray-600 hover:text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                  </svg>
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
+      {/* Center - Navigation Items */}
+      <div className="flex items-center space-x-8">
+        {navItems.map((item) => (
+          <NavItem
+            key={item.name}
+            to={item.to}
+            name={item.name} // ✅ pass this!
+          />
+        ))}
+      </div>
 
-                {/* Notifications Modal */}
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg z-50 rounded-lg border border-gray-200 max-h-136 overflow-hidden">
-                    <div className="p-4 border-b border-gray-200">
-                      <div className="flex items-start justify-between">
-                        <div className="flex flex-col space-y-0">
-                          <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-                          <span className="text-xs text-gray-500">{unreadCount} unread</span>
-                        </div>
-                        <button
-                          onClick={markAllAsRead}
-                          disabled={unreadCount === 0}
-                          className={`text-sm font-medium ${
-                            unreadCount > 0 
-                              ? 'text-base hover:text-dark cursor-pointer' 
-                              : 'text-gray-400 cursor-not-allowed'
+      {/* Right side - User Authentication */}
+      <div className="flex items-center">
+        {isLoggedIn && user ? (
+          <div className="flex items-center space-x-4">
+            {/* Notifications Bell */}
+            <NotificationBell notifications={notifications} setNotifications={setNotifications} />
+            
+            <div className="relative" ref={notificationsRef}>
+              <button
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                className="relative p-2 text-gray-600 hover:text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notifications Modal */}
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg z-50 rounded-lg border border-gray-200 max-h-136 overflow-hidden">
+                  <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col space-y-0">
+                        <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+                        <span className="text-xs text-gray-500">{unreadCount} unread</span>
+                      </div>
+                      <button
+                        onClick={markAllAsRead}
+                        disabled={unreadCount === 0}
+                        className={`text-sm font-medium ${unreadCount > 0
+                          ? 'text-base hover:text-dark cursor-pointer'
+                          : 'text-gray-400 cursor-not-allowed'
                           }`}
+                      >
+                        Mark all as read
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-gray-200 max-h-100 overflow-y-auto">
+                    {currentNotifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        onClick={() => handleNotificationClick(notification)}
+                        className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? 'bg-blue-50' : ''
+                          }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 mt-1">
+                            {getNotificationIcon(notification.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className={`text-sm font-medium ${!notification.read ? 'text-gray-900' : 'text-gray-700'
+                                }`}>
+                                {notification.title}
+                              </p>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-2">
+                              {notification.timestamp}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="p-3 border-t border-gray-200 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => goToPage(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Mark all as read
+                          Previous
+                        </button>
+                        <span className="text-sm text-gray-600">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => goToPage(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
                         </button>
                       </div>
                     </div>
-
-                    <div className="divide-y divide-gray-200 max-h-100 overflow-y-auto">
-                      {currentNotifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          onClick={() => handleNotificationClick(notification)}
-                          className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                            !notification.read ? 'bg-blue-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0 mt-1">
-                              {getNotificationIcon(notification.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <p className={`text-sm font-medium ${
-                                  !notification.read ? 'text-gray-900' : 'text-gray-700'
-                                }`}>
-                                  {notification.title}
-                                </p>
-                                {!notification.read && (
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-2">
-                                {notification.timestamp}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {totalPages > 1 && (
-                      <div className="p-3 border-t border-gray-200 bg-gray-50">
-                        <div className="flex items-center justify-between">
-                          <button
-                            onClick={() => goToPage(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Previous
-                          </button>
-                          <span className="text-sm text-gray-600">
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <button
-                            onClick={() => goToPage(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Next
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* User Profile Dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setDropdownOpen((prev) => !prev)}
-                  className="flex items-center space-x-3 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
-                >
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                    {user.profilePictureUrl ? (
-                      <img
-                        src={user.profilePictureUrl}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-600 font-medium text-sm">
-                        {user.username?.charAt(0).toUpperCase() || "U"}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-gray-700 font-medium">{user.username}</span>
-                </button>
-
-                {dropdownOpen && (
-                  <div className="absolute -right-6 mt-1 min-w-[200px] bg-white shadow-lg z-50 border border-gray-200 text-sm rounded-lg">
-                    <div className="rounded-lg hover:bg-gray-100">
-                      <Link
-                        to={`/profile/${user?._id}`}
-                        className="text-center block px-4 py-2 text-base"
-                      >
-                        Profile
-                      </Link>
-                      <div className="border-t border-gray-200 mx-10" />
-                    </div>
-
-                    <div className="hover:bg-gray-100">
-                      <Link
-                        to="/bookmarks"
-                        className="text-center block px-4 py-2 text-base"
-                      >
-                        Bookmarks
-                      </Link>
-                      <div className="border-t border-gray-200 mx-10" />
-                    </div>
-
-                    <div className="hover:bg-gray-100 rounded-b-lg">
-<button
-  className="text-center w-full px-4 py-2 text-base cursor-pointer"
-  onClick={() => setShowLogoutConfirm(true)}
->
-  Logout
-</button>
-
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="flex items-center space-x-3">
-              <Link
-                to="/login"
-                className="px-4 py-2 border-1 border-base text-base hover:text-white hover:border-white hover:bg-base font-medium rounded-lg transition-colors"
-              >
-                Login / Sign up
-              </Link>
-            </div>
-          )}
-        </div>
-        <ConfirmLogout
-  isOpen={showLogoutConfirm}
-  onCancel={() => setShowLogoutConfirm(false)}
-  onConfirm={() => {
-    setShowLogoutConfirm(false);
-    setDropdownOpen(false);
-    logout();
-    navigate("/login");
-  }}
-/>
 
-      </nav>
-    );
-  }
+            {/* User Profile Dropdown */}
+            <UserDropdown user={user} onLogout={() => setShowLogoutConfirm(true)} />
+          </div>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <Link
+              to="/login"
+              className="px-4 py-2 border-1 border-base text-base hover:text-white hover:border-white hover:bg-base font-medium rounded-lg transition-colors"
+            >
+              Login / Sign up
+            </Link>
+          </div>
+        )}
+      </div>
+      <ConfirmLogout
+        isOpen={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          setDropdownOpen(false);
+          logout();
+          navigate("/login");
+        }}
+      />
+
+    </nav>
+  );
+}

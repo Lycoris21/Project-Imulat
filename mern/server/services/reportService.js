@@ -36,17 +36,18 @@ class ReportService {
   // Get report by ID
   static async getReportById(id) {
     const report = await Report.findById(id)
-    .populate('userId', 'username email bio')
-    .populate('claimIds');
+      .populate('userId', 'username email bio')
+      .populate('claimIds');
 
     if (!report) return null;
 
     const reactionCounts = await ReactionService.countReactions(id, 'report');
+    const commentCount = await Comment.countDocuments({ targetType: 'report', targetId: id });
     const reportObj = report.toObject({ virtuals: true });
     reportObj.reactionCounts = reactionCounts;
+    reportObj.commentCount = commentCount;
 
     return reportObj;
-
   }
 
   // Create new report
@@ -110,8 +111,26 @@ class ReportService {
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
 
-    return reports.map(r => r.toObject({ virtuals: true }));
+    const reportsWithMeta = await Promise.all(
+      reports.map(async (report) => {
+        const count = await Comment.countDocuments({
+          targetType: 'report',
+          targetId: report._id,
+        });
+
+        const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+
+        return {
+          ...report.toObject({ virtuals: true }),
+          commentCount: count,
+          reactionCounts,
+        };
+      })
+    );
+
+    return reportsWithMeta;
   }
+
 
   // Get reports by user
   static async getReportsByUser(userId) {
@@ -120,7 +139,24 @@ class ReportService {
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
 
-    return reports.map(r => r.toObject({ virtuals: true }));
+    const reportsWithMeta = await Promise.all(
+      reports.map(async (report) => {
+        const count = await Comment.countDocuments({
+          targetType: 'report',
+          targetId: report._id,
+        });
+
+        const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+
+        return {
+          ...report.toObject({ virtuals: true }),
+          commentCount: count,
+          reactionCounts,
+        };
+      })
+    );
+
+    return reportsWithMeta;
   }
 
   // Get latest reports
