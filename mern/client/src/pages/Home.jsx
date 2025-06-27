@@ -17,19 +17,7 @@ export default function Home() {
         const data = await response.json();
         if (!Array.isArray(data)) throw new Error("Expected an array of reports");
 
-        const formatted = data.map((report) => ({
-          id: report._id,
-          title: report.reportTitle,
-          reportCoverUrl: report.reportCoverUrl || null,
-          summary: report.aiReportSummary || "No summary provided",
-          verdict: report?.truthVerdictParsed,
-          date: report.createdAt,
-          author: report.userId?.username || "Unknown",
-          commentCount: report.commentCount || 0,
-          reactionCounts: report.reactionCounts
-        }));
-
-        setLatestReports(formatted);
+        setLatestReports(data);
       } catch (err) {
         console.error("Failed to fetch reports:", err);
       }
@@ -54,7 +42,7 @@ export default function Home() {
           commentCount: claim.commentCount || 0
         }));
 
-        setLatestClaims(formatted);
+        setLatestClaims(data);
       } catch (err) {
         console.error("Failed to fetch claims:", err);
       }

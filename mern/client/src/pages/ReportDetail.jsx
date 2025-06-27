@@ -20,31 +20,22 @@ export default function ReportDetail() {
   const navigate = useNavigate();
 
   useEffect(() => {
-  const fetchInitialData = async () => {
-    setLoading(true);
+    const fetchInitialData = async () => {
+      setLoading(true);
 
-    const reportPromise = fetch(`http://localhost:5050/api/reports/${id}`);
-    const reactionPromise = user?._id
-      ? fetch(`http://localhost:5050/api/reactions/user/report/${id}/${user._id}`)
-      : null;
+      try {
+        // Fetch report first
+        const reportRes = await fetch(`http://localhost:5050/api/reports/${id}`);
+        if (!reportRes.ok) throw new Error("Failed to fetch report");
+        const reportData = await reportRes.json();
+        setReport(reportData);
 
-    try {
-        const [reportRes, reactionRes] = await Promise.all([
-          reportPromise,
-          reactionPromise
-        ]);
-
-        if (reportRes.ok) {
-          const reportData = await reportRes.json();
-          setReport(reportData);
-        } else {
-          throw new Error("Failed to fetch report");
-        }
-
-        if (reactionRes?.ok) {
-          const reactionData = await reactionRes.json();
-          if (reactionData && typeof reactionData === 'object') {
-            setUserReaction(reactionData.reactionType || null);
+        // Fetch user reaction (only if logged in)
+        if (user?._id) {
+          const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/report/${id}/${user._id}`);
+          if (reactionRes.ok) {
+            const reactionData = await reactionRes.json();
+            setUserReaction(reactionData?.reactionType || null);
           } else {
             setUserReaction(null);
           }
@@ -52,19 +43,19 @@ export default function ReportDetail() {
           setUserReaction(null);
         }
 
-
+        // Fetch comments last
         await fetchComments();
-
-        setLoading(false);
       } catch (err) {
         console.error("Error loading data:", err);
         setReport(null);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchInitialData();
   }, [id, user?._id]);
+
 
   const handleReaction = async (type) => {
     const newReaction = userReaction === type ? null : type;

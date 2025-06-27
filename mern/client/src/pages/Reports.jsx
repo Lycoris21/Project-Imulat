@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { parseTruthVerdict } from "../utils/strings";
 
 // Components
-import { LoadingScreen, ErrorScreen, ReportCard} from '../components';
+import { LoadingScreen, ErrorScreen, ReportCard, CreateReportModal } from '../components';
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
@@ -12,19 +12,6 @@ export default function Reports() {
   const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Form state for create report modal
-  const [formData, setFormData] = useState({
-    reportTitle: "",
-    reportContent: "",
-    truthVerdict: "",
-    reportConclusion: "",
-    references: "",
-    claimId: "",
-    reportCoverFile: null
-  });
 
   // Check if user is an admin
   const isAdmin = isLoggedIn && user?.role === "admin";
@@ -53,29 +40,11 @@ export default function Reports() {
     try {
       const response = await fetch("http://localhost:5050/api/reports");
       if (!response.ok) throw new Error("Failed to fetch reports");
-      
+
       const data = await response.json();
 
-      // Optional: map to format if necessary
-      const processedReports = data.map((report) => ({
-        id: report._id,
-        reportTitle: report.reportTitle,
-        aiReportSummary: report.aiReportSummary,
-        truthVerdict: parseTruthVerdict(report.truthVerdict) || "Unknown",
-        adminUsername: report.userId?.username || "Unknown", // ensure populated in backend
-        reportCoverUrl: report.reportCoverUrl || null, // adjust if field is different
-        createdAt: new Date(report.createdAt),
-        likes: report.likes?.length || 0,
-        dislikes: report.dislikes?.length || 0,
-        commentCount: report.commentCount || 0,
-        claimCount: report.claims?.length || 0,
-        reactionCounts: report.reactionCounts || {like: 0, dislike: 0}
-      }));
-
-      processedReports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-      setReports(processedReports);
-      setFilteredReports(processedReports);
+      setReports(data);
+      setFilteredReports(data);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching reports:", err);
@@ -88,167 +57,17 @@ export default function Reports() {
     // Search is handled by useEffect above
   };
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData(prev => ({
-      ...prev,
-      reportCoverFile: file
-    }));
-  };
-  
-  // Handle form submission
-  const handleSubmitReport = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      let uploadedCoverUrl = null;
-
-      if (formData.reportCoverFile) {
-        const uploadData = new FormData();
-        uploadData.append("image", formData.reportCoverFile);
-
-        const uploadRes = await fetch("http://localhost:5050/api/uploads/report-cover", {
-          method: "POST",
-          body: uploadData
-        });
-
-        if (!uploadRes.ok) throw new Error("Failed to upload cover image");
-        const uploadResult = await uploadRes.json();
-        uploadedCoverUrl = uploadResult.url;
-      }
-
-      const payload = {
-        userId: user._id,
-        claimIds: formData.claimIds ? [formData.claimIds] : [],
-        reportTitle: formData.reportTitle,
-        reportContent: formData.reportContent,
-        truthVerdict: formData.truthVerdict,
-        reportConclusion: formData.reportConclusion,
-        reportReferences: formData.references,
-        reportCoverUrl: uploadedCoverUrl
-      };
-
-      const response = await fetch("http://localhost:5050/api/reports", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        let message = "Validation failed.";
-        if (Array.isArray(errorData.details)) {
-          message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
-        } else if (errorData.error) {
-          message = errorData.error;
-        }
-
-        alert(message);
-        return;
-      }
-
-      // Clear form and close modal
-      setFormData({
-        reportTitle: "",
-        reportContent: "",
-        truthVerdict: "",
-        reportConclusion: "",
-        references: "",
-        claimIds: "",
-        reportCoverFile: null
-      });
-      setShowCreateModal(false);
-      alert("Report created successfully!");
-      fetchReports();
-    } catch (error) {
-      console.error("Error creating report:", error);
-      alert(error.message || "Error creating report. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Close modal and reset form
-  const handleCloseModal = () => {
-    setShowCreateModal(false);
-    setFormData({
-      reportTitle: "",
-      reportContent: "",
-      truthVerdict: "",
-      reportConclusion: "",
-      references: "",
-      claimId: "",
-      reportCoverFile: null
-    });
-  };
-
-  // Handle ESC key press to close modal
-  useEffect(() => {
-    const handleEscKey = (event) => {
-      if (event.key === 'Escape' && showCreateModal) {
-        handleCloseModal();
-      }
-    };
-
-    // Add event listener when modal is open
-    if (showCreateModal) {
-      document.addEventListener('keydown', handleEscKey);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
-
-    // Cleanup function
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-      // Restore body scroll when modal is closed
-      document.body.style.overflow = 'unset';
-    };
-  }, [showCreateModal]);
-
-  const formatRelativeTime = (dateString) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-    } else if (diffInSeconds < 604800) {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} day${days === 1 ? '' : 's'} ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
   if (loading) {
     return (
-      <LoadingScreen message="Loading reports..."/>
+      <LoadingScreen message="Loading reports..." />
     );
   }
 
-  return (    
-  <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
+  return (
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
       {/* Header */}
-      <div className="mb-8">        {/* Title and Admin Button Row */}
+      <div className="mb-8">
+        {/* Title and Admin Button Row */}
         <div className="relative mb-6">
           {/* Centered Title */}
           <div className="text-center">
@@ -257,7 +76,7 @@ export default function Reports() {
               Browse through all fact-checking reports created by our expert team
             </p>
           </div>
-          
+
           {/* Admin: Make A Report Button - Absolute positioned to top right */}
           {isAdmin && (
             <div className="absolute top-0 right-0">
@@ -277,14 +96,14 @@ export default function Reports() {
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-4">
           <div className="relative flex">            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={(e) => e.target.select()}
-              onClick={(e) => e.target.select()}
-              placeholder="Search reports by title, content, author, or verdict..."
-              className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-dark focus:outline-none"
-            />
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onClick={(e) => e.target.select()}
+            placeholder="Search reports by title, content, author, or verdict..."
+            className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-dark focus:outline-none"
+          />
             <button
               type="submit"
               className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-dark font-semibold rounded-r-2xl hover:bg-gray-50 transition"
@@ -310,191 +129,14 @@ export default function Reports() {
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredReports.map((report) => (
-              <ReportCard key={report.id} report={report} variant="detailed"/>            
-            ))}          
+              <ReportCard key={report.id} report={report} variant="detailed" />
+            ))}
           </div>
         )}
       </div>
 
       {/* Admin: Create Report Modal */}
-      {showCreateModal && (        
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>        
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            {/* Modal Header - Fixed */}
-            <div className="p-6 border-b border-gray-200 flex-shrink-0">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Create New Report</h2>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6">                {/* Modal Form */}
-                <form id="report-form" onSubmit={handleSubmitReport} className="space-y-4">                  {/* Report Cover Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Report Cover Image
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
-                        <span className="text-gray-600">Choose File</span>
-                        <span className="mx-2 text-gray-300">|</span>
-                        <span className={`${formData.reportCoverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate`}>
-                          {formData.reportCoverFile ? formData.reportCoverFile.name : 'No file chosen'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Report Title */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Report Title
-                    </label>
-                    <input
-                      type="text"
-                      name="reportTitle"
-                      value={formData.reportTitle}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                      placeholder="Enter report title..."
-                    />
-                  </div>
-
-                  {/* Report Content */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Report Content
-                    </label>
-                    <textarea
-                      name="reportContent"
-                      value={formData.reportContent}
-                      onChange={handleInputChange}
-                      required
-                      rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
-                      placeholder="Enter detailed report content..."
-                    />
-                  </div>                
-                    {/* Truth Verdict Dropdown */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Truth Verdict
-                    </label>
-                    <select
-                      name="truthVerdict"
-                      value={formData.truthVerdict}
-                      onChange={handleInputChange}
-                      required
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none ${
-                        formData.truthVerdict === '' ? 'text-gray-400' : 'text-gray-900'
-                      }`}
-                    >
-                      <option value="" disabled className="text-gray-400">Select a verdict...</option>
-                      <option value="unverified" className="text-gray-900">Unverified - Lacks sufficient evidence for verification</option>
-                      <option value="true" className="text-gray-900">True - Completely accurate and supported by evidence</option>
-                      <option value="false" className="text-gray-900">False - Completely inaccurate or fabricated</option>
-                      <option value="partially_true" className="text-gray-900">Partially True - Contains some truth but missing context</option>
-                      <option value="misleading" className="text-gray-900">Misleading - Technically accurate but deceptive in context</option>
-                      <option value="disputed" className="text-gray-900">Disputed - Credible sources disagree on the facts</option>
-                      <option value="debunked" className="text-gray-900">Debunked - Previously proven false with clear evidence</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Choose the verdict that best represents the factual accuracy of the claim
-                    </p>
-                  </div>
-
-                  {/* Report Conclusion */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Report Conclusion
-                    </label>
-                    <textarea
-                      name="reportConclusion"
-                      value={formData.reportConclusion}
-                      onChange={handleInputChange}
-                      required
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
-                      placeholder="Enter report conclusion..."
-                    />
-                  </div>
-
-                  {/* References */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      References
-                    </label>
-                    <textarea
-                      name="references"
-                      value={formData.references}
-                      onChange={handleInputChange}
-                      required
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
-                      placeholder="Enter references and sources..."
-                    />
-                  </div>
-
-                  {/* Claim ID (Optional) */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Claim ID (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      name="claimId"
-                      value={formData.claimId}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                      placeholder="Enter claim ID to reference..."
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Optional: Link this report to a specific claim
-                    </p>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            {/* Modal Actions - Fixed */}
-            <div className="p-6 border-t border-gray-200 flex-shrink-0">
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  form="report-form"
-                  className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1"
-                >
-                {isSubmitting ? 'Submitting...' : 'Submit Report'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
     </div>
   );
 }

@@ -39,11 +39,6 @@ export default function EditProfile() {
   const [status, setStatus] = useState("");
   const [coverFile, setcoverFile] = useState(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };

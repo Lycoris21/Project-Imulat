@@ -5,8 +5,8 @@ import { getVerdictColor } from '../../utils/colors';
 
 const ReportCardDetailed = ({ report }) => (
     <Link
-        key={report.id}
-        to={`/reports/${report.id}`}
+        key={report._id}
+        to={`/reports/${report._id}`}
         className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 transition-all duration-300 transform hover:-translate-y-1 group"
     >
         {/* Cover Image */}
@@ -27,11 +27,11 @@ const ReportCardDetailed = ({ report }) => (
         <div className="p-6">
             {/* Header with Verdict */}
             <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
+                <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.75em]">
                     {report.reportTitle}
                 </h3>
-                <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdict)}`}>
-                    {report.truthVerdict}
+                <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdictParsed)}`}>
+                    {report.truthVerdictParsed}
                 </span>
             </div>
 
@@ -41,10 +41,10 @@ const ReportCardDetailed = ({ report }) => (
             </p>                  
             {/* Author & Claim Count */}
             <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
-                <span>By <span className="font-medium">{report.adminUsername}</span></span>
-                {report.claimCount > 0 && (
+                <span>By <span className="font-medium">{report.userId?.username || "Unknown"}</span></span>
+                {report.claims?.length > 0 && (
                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                        {report.claimCount} claim{report.claimCount !== 1 ? 's' : ''}
+                        {report.claims?.length} claim{report.claims?.length !== 1 ? 's' : ''}
                     </span>
                 )}
             </div>
@@ -73,7 +73,7 @@ const ReportCardDetailed = ({ report }) => (
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
                         </svg>
-                        <span>{report.commentCount}</span>
+                        <span>{report.commentCount || 0}</span>
                     </span>
                 </div>
 
