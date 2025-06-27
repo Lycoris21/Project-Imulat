@@ -310,7 +310,7 @@ export default function Reports() {
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredReports.map((report) => (
-              <ReportCard report={report} variant="detailed"/>            
+              <ReportCard key={report.id} report={report} variant="detailed"/>            
             ))}          
           </div>
         )}

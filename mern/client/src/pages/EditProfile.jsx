@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate} from "react-router-dom";
 
 // Components
-import { LoadingScreen, ErrorScreen } from '../components';
+import { LoadingScreen, ErrorScreen, ConfirmPasswordModal } from '../components';
 
-export default function Profile() {
+export default function EditProfile() {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -20,6 +20,7 @@ export default function Profile() {
 
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -230,7 +231,7 @@ export default function Profile() {
             Cancel
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => setShowConfirmModal(true)}
             className="px-4 py-2 bg-dark text-white rounded hover:bg-darker"
           >
             Save Changes
@@ -239,6 +240,16 @@ export default function Profile() {
 
         {status && <p className="text-sm mt-2 text-center text-gray-600">{status}</p>}
       </div>
+
+      <ConfirmPasswordModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={(password) => {
+          setShowConfirmModal(false);
+          handleSave(password); // optionally pass this to backend for validation
+        }}
+      />
+
     </div>
   );
 }

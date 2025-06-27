@@ -218,7 +218,7 @@ export default function Claims() {
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {filteredClaims.map((claim) => (
-                <ClaimCard claim={claim} variant="detailed"/>
+                <ClaimCard key = {claim._id} claim={claim} variant="detailed"/>
             ))}
           </div>
         )}

@@ -125,7 +125,7 @@ export default function Home() {
           </div>            
           <div className="space-y-4">
             {latestReports.map((report) => ( 
-              <ReportCard report={report} variant="compact"/>            
+              <ReportCard key={report.id} report={report} variant="compact"/>            
             ))}
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function Home() {
           </div>            
           <div className="space-y-4">
             {latestClaims.map((claim) => (
-               <ClaimCard claim={claim} variant="compact"/>
+               <ClaimCard key={claim.id} claim={claim} variant="compact"/>
             ))}
           </div>
         </div>      
