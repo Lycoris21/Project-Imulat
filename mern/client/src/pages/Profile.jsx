@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
@@ -9,11 +9,27 @@ import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard  } from '../component
 export default function Profile() {
     const { user } = useAuth();
     const { id } = useParams();
+    const location = useLocation();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("claims");
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     const isAdmin = user?.role === "admin";
+
+    // Check for profile update success
+    useEffect(() => {
+        if (location.state?.profileUpdated) {
+            setShowSuccessMessage(true);
+            // Clear the state to prevent showing again on refresh
+            window.history.replaceState({}, document.title);
+            // Hide message after 4 seconds
+            const timer = setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 7000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         let isMounted = true;
@@ -61,6 +77,24 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-base-gradient px-4 pt-[0rem] flex justify-center">
+            {/* Success Notification */}
+            {showSuccessMessage && (
+                <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-in">
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Profile updated successfully!</span>
+                    <button 
+                        onClick={() => setShowSuccessMessage(false)}
+                        className="ml-2 text-green-200 hover:text-white"
+                    >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+
             <div className="w-[1000px] bg-white rounded shadow-xl pt-0 p-8">
 
                 <div className="relative h-60 bg-cover bg-center rounded-sm mb-6" style={{
@@ -72,15 +106,15 @@ export default function Profile() {
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center">
                         <div className="w-16 h-16 mr-4 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                            {user.profilePictureUrl ? (
+                            {profileData.profilePictureUrl ? (
                             <img
-                                src={user.profilePictureUrl}
-                                alt={user.username}
+                                src={profileData.profilePictureUrl}
+                                alt={profileData.username}
                                 className="w-full h-full object-cover"
                             />
                             ) : (
                             <span className="text-gray-600 font-medium text-sm">
-                                {user.username?.charAt(0).toUpperCase() || "U"}
+                                {profileData.username?.charAt(0).toUpperCase() || "U"}
                             </span>
                             )}
                         </div>

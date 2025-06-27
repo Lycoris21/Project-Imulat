@@ -89,8 +89,8 @@ export default function EditProfile() {
       setUser(updatedUser); // <- Update context
       localStorage.setItem("user", JSON.stringify(updatedUser)); 
 
-      alert("Profile updated successfully!");
-      window.location.reload();
+      // Redirect to profile with success state
+      navigate(`/profile/${user._id}`, { state: { profileUpdated: true } });
     } catch (err) {
       console.error("Error updating profile:", err);
       alert("Could not update profile.");
