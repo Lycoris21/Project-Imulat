@@ -15,7 +15,7 @@ const ClaimCardDetailed = ({ claim }) => (
             AI Truth Index: {claim.aiTruthIndex}%
           </span>
         </div>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2rem]">
           <span className="font-medium">AI-generated summary:</span> {truncateWords(claim.aiClaimSummary)}
         </p>
         <div className="flex justify-between items-center mb-4 text-sm text-gray-500">

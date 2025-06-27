@@ -6,6 +6,6 @@ export { default as SearchBar } from './common/SearchBar';
 export { default as ReactionBar } from './common/ReactionBar';
 export { default as ConfirmPasswordModal } from './modals/ConfirmPasswordModal';
 export { default as CreateReportModal } from './modals/CreateReportModal';
-export { default as CreateClaimModal } from './modals/CreateClaimModal';
+export { default as SubmitClaimModal } from './modals/SubmitClaimModal';
 // Add other components as needed
 
