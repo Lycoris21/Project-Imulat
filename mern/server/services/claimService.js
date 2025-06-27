@@ -2,7 +2,7 @@ import { Claim, Comment} from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
 
-let aiEnabled = true;
+let aiEnabled = false;
 
 class ClaimService {
   static async getAllClaims() {

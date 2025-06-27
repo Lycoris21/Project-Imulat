@@ -112,6 +112,47 @@ class UserController {
       res.status(500).json({ error: "Error deleting user" });
     }
   }
+
+  // Change user password
+  static async changePassword(req, res) {
+    try {
+      const { userId, oldPassword, newPassword } = req.body;
+
+      // Validation
+      if (!userId || !oldPassword || !newPassword) {
+        return res.status(400).json({ error: "User ID, old password, and new password are required" });
+      }
+
+      // Get user with password for verification
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Verify old password
+      const bcrypt = (await import('bcrypt')).default;
+      const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const saltRounds = 10;
+      const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password
+      const updatedUser = await UserService.updatePassword(userId, hashedNewPassword);
+      
+      res.status(200).json({ 
+        message: "Password changed successfully",
+        user: updatedUser 
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ error: "Error changing password" });
+    }
+  }
+
 }
 
 export default UserController;

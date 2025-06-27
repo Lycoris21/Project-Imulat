@@ -2,7 +2,7 @@ import { Report, User, Claim, Comment } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
 
-let aiEnabled = true;
+let aiEnabled = false;
 
 class ReportService {
   // Get all reports

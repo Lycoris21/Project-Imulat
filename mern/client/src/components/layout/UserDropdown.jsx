@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { ChangePasswordModal } from "../../components";
 
-export default function UserDropdown({ user, onLogout }) {
+export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
     const [open, setOpen] = useState(false);
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
     const ref = useRef();
     const navigate = useNavigate();
 
@@ -13,6 +15,17 @@ export default function UserDropdown({ user, onLogout }) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const handleChangePasswordClick = () => {
+        setShowChangePasswordModal(true);
+        setOpen(false); // Close dropdown when modal opens
+    };
+
+    const handlePasswordChanged = () => {
+        if (onPasswordChanged) {
+            onPasswordChanged();
+        }
+    };
 
     return (
         <div className="relative" ref={ref}>
@@ -54,6 +67,16 @@ export default function UserDropdown({ user, onLogout }) {
                         <div className="border-t border-gray-200 mx-10" />
                     </div>
 
+                    <div className="hover:bg-gray-100">
+                        <button
+                            className="text-center w-full px-4 py-2 text-base cursor-pointer"
+                            onClick={handleChangePasswordClick}
+                        >
+                            Change Password
+                        </button>
+                        <div className="border-t border-gray-200 mx-10" />
+                    </div>
+
                     <div className="hover:bg-gray-100 rounded-b-lg">
                         <button
                             className="text-center w-full px-4 py-2 text-base cursor-pointer"
@@ -65,6 +88,13 @@ export default function UserDropdown({ user, onLogout }) {
                     </div>
                 </div>
             )}
+            
+            {/* Change Password Modal */}
+            <ChangePasswordModal 
+                isOpen={showChangePasswordModal} 
+                onClose={() => setShowChangePasswordModal(false)} 
+                onPasswordChanged={handlePasswordChanged}
+            />
         </div>
     );
 }
