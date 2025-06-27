@@ -279,7 +279,7 @@ export default function ReportDetail() {
             />
             <button
               type="submit"
-              className="mt-2 px-4 py-2 bg-dark text-white rounded-lg hover:bg-darker transition"
+              className="mt-2 px-4 py-2 bg-dark text-white rounded-lg hover:bg-darker transition cursor-pointer"
             >
               Post Comment
             </button>

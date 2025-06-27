@@ -310,7 +310,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                           disabled={unreadCount === 0}
                           className={`text-sm font-medium ${
                             unreadCount > 0 
-                              ? 'text-base hover:text-dark' 
+                              ? 'text-base hover:text-dark cursor-pointer' 
                               : 'text-gray-400 cursor-not-allowed'
                           }`}
                         >
@@ -361,7 +361,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                           <button
                             onClick={() => goToPage(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Previous
                           </button>
@@ -371,7 +371,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
                           <button
                             onClick={() => goToPage(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Next
                           </button>
