@@ -220,7 +220,8 @@ export default function EditProfile() {
 
         <div className="flex justify-between mt-6">
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate(`/profile/${user._id}`)}
+
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
           >
             Cancel
