@@ -92,7 +92,7 @@ export default function Home() {
             />
             <button
               type="submit"
-              className="px-8 py-4 bg-[#FFF] border-0.5 border-white text-dark font-semibold rounded-r-2xl hover:bg-dark hover:text-white transition"
+              className="px-8 py-4 bg-[#FFF] border-0.5 border-white text-dark font-semibold rounded-r-2xl hover:bg-dark hover:text-white transition cursor-pointer"
             >
               Search
             </button>
