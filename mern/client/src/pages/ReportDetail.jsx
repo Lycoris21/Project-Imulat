@@ -184,7 +184,7 @@ export default function ReportDetail() {
           
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{report.reportTitle}</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 mr-2">{report.reportTitle}</h1>
               <p className="text-gray-600 mb-2">
                 By{" "}
                 <Link

@@ -22,7 +22,7 @@ const storage = new CloudinaryStorage({
 
     return {
       folder,
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif']
     };
   }
 });

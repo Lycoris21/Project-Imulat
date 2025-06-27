@@ -71,11 +71,19 @@ export default function Profile() {
                 {/* Profile Info */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center">
-                        <img
-                            src={profileData.profilePictureUrl}
-                            alt={`${profileData.username}'s profile`}
-                            className="w-16 h-16 rounded-full mr-4"
-                        />
+                        <div className="w-16 h-16 mr-4 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+                            {user.profilePictureUrl ? (
+                            <img
+                                src={user.profilePictureUrl}
+                                alt={user.username}
+                                className="w-full h-full object-cover"
+                            />
+                            ) : (
+                            <span className="text-gray-600 font-medium text-sm">
+                                {user.username?.charAt(0).toUpperCase() || "U"}
+                            </span>
+                            )}
+                        </div>
                         <div>
                             <h1 className="text-3xl font-bold">{profileData.username}</h1>
                             <p className="text-gray-500">

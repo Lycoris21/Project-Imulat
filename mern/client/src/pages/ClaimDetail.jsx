@@ -152,7 +152,7 @@ export default function ClaimDetail() {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{claim.claimTitle}</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2 mr-2">{claim.claimTitle}</h1>
               <p className="text-gray-600 mb-2"> By{" "}
                 <Link
                   to={`/profile/${claim.userId?._id}`}
