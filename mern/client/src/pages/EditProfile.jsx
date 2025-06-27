@@ -221,13 +221,13 @@ export default function EditProfile() {
         <div className="flex justify-between mt-6">
           <button
             onClick={() => navigate("/profile")}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={() => setShowConfirmModal(true)}
-            className="px-4 py-2 bg-dark text-white rounded hover:bg-darker"
+            className="px-4 py-2 bg-dark text-white rounded hover:bg-darker cursor-pointer"
           >
             Save Changes
           </button>
