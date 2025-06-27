@@ -9,6 +9,22 @@ export default function CommentsSection({ targetId, targetType }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Helper function to update comment reactions recursively
+  const updateCommentReaction = (comments, targetId, updateFn) => {
+    return comments.map(comment => {
+      if (comment._id === targetId) {
+        return updateFn(comment);
+      }
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: updateCommentReaction(comment.replies, targetId, updateFn)
+        };
+      }
+      return comment;
+    });
+  };
+
   // Fetch comments
   const fetchComments = async () => {
     // Don't fetch if targetId is not available
@@ -19,7 +35,14 @@ export default function CommentsSection({ targetId, targetType }) {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5050/api/comments?targetId=${targetId}&targetType=${targetType}`);
+      let url = `http://localhost:5050/api/comments?targetId=${targetId}&targetType=${targetType}`;
+      
+      // Add userId to get user reaction status
+      if (user?._id) {
+        url += `&userId=${user._id}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch comments');
@@ -59,8 +82,26 @@ export default function CommentsSection({ targetId, targetType }) {
     }
   };
 
-  // Like comment
+  // Like comment with optimistic update
   const handleLikeComment = async (commentId) => {
+    if (!user) return;
+
+    // Update UI immediately
+    setComments(prevComments => 
+      updateCommentReaction(prevComments, commentId, (comment) => {
+        const currentReaction = comment.userReaction;
+        const wasLiked = currentReaction === 'like';
+        const wasDisliked = currentReaction === 'dislike';
+        
+        return {
+          ...comment,
+          likes: wasLiked ? comment.likes - 1 : comment.likes + 1,
+          dislikes: wasDisliked ? comment.dislikes - 1 : comment.dislikes,
+          userReaction: wasLiked ? null : 'like'
+        };
+      })
+    );
+
     try {
       const response = await fetch(`http://localhost:5050/api/comments/${commentId}/like`, {
         method: 'PUT',
@@ -72,18 +113,36 @@ export default function CommentsSection({ targetId, targetType }) {
 
       if (!response.ok) {
         throw new Error('Failed to like comment');
+        // Revert optimistic update on error
+        await fetchComments();
       }
-
-      // Refresh comments to get updated counts
-      await fetchComments();
     } catch (err) {
       console.error('Error liking comment:', err);
-      throw err;
+      // Revert optimistic update on error
+      await fetchComments();
     }
   };
 
-  // Dislike comment
+  // Dislike comment with optimistic update
   const handleDislikeComment = async (commentId) => {
+    if (!user) return;
+
+    // Update UI immediately
+    setComments(prevComments => 
+      updateCommentReaction(prevComments, commentId, (comment) => {
+        const currentReaction = comment.userReaction;
+        const wasLiked = currentReaction === 'like';
+        const wasDisliked = currentReaction === 'dislike';
+        
+        return {
+          ...comment,
+          likes: wasLiked ? comment.likes - 1 : comment.likes,
+          dislikes: wasDisliked ? comment.dislikes - 1 : comment.dislikes + 1,
+          userReaction: wasDisliked ? null : 'dislike'
+        };
+      })
+    );
+
     try {
       const response = await fetch(`http://localhost:5050/api/comments/${commentId}/dislike`, {
         method: 'PUT',
@@ -95,20 +154,20 @@ export default function CommentsSection({ targetId, targetType }) {
 
       if (!response.ok) {
         throw new Error('Failed to dislike comment');
+        // Revert optimistic update on error
+        await fetchComments();
       }
-
-      // Refresh comments to get updated counts
-      await fetchComments();
     } catch (err) {
       console.error('Error disliking comment:', err);
-      throw err;
+      // Revert optimistic update on error
+      await fetchComments();
     }
   };
 
   // Fetch comments on component mount
   useEffect(() => {
     fetchComments();
-  }, [targetId, targetType]);
+  }, [targetId, targetType, user?._id]);
 
   if (loading) {
     return (

@@ -13,7 +13,7 @@ class CommentService {
     return await newComment.save();
   }
 
-  static async getCommentsByTarget(targetType, targetId) {
+  static async getCommentsByTarget(targetType, targetId, userId = null) {
     // Get all comments for the target
     const allComments = await Comment.find({
       targetType,
@@ -22,6 +22,23 @@ class CommentService {
       .sort({ createdAt: -1 })
       .populate('userId', 'username profilePictureUrl')
       .lean();
+
+    // Add user reaction status to each comment if userId is provided
+    if (userId) {
+      allComments.forEach(comment => {
+        // Convert ObjectIds to strings for comparison
+        const likedByStrings = (comment.likedBy || []).map(id => id.toString());
+        const dislikedByStrings = (comment.dislikedBy || []).map(id => id.toString());
+        
+        if (likedByStrings.includes(userId.toString())) {
+          comment.userReaction = 'like';
+        } else if (dislikedByStrings.includes(userId.toString())) {
+          comment.userReaction = 'dislike';
+        } else {
+          comment.userReaction = null;
+        }
+      });
+    }
 
     // Build nested structure
     const commentMap = new Map();

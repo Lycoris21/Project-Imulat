@@ -21,9 +21,9 @@ class CommentController {
 
   static async getCommentsByTarget(req, res) {
     try {
-      const { targetType, targetId } = req.query; // Changed from req.params to req.query
+      const { targetType, targetId, userId } = req.query; // Added userId from query
       
-      const comments = await CommentService.getCommentsByTarget(targetType, targetId);
+      const comments = await CommentService.getCommentsByTarget(targetType, targetId, userId);
       res.status(200).json(comments);
     } catch (err) {
       res.status(500).json({ message: err.message || "Failed to retrieve comments" });
