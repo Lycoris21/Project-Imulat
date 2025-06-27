@@ -1,7 +1,7 @@
 import Notification from "../models/Notification.js";
 
-const NotificationService = {
-  async createNotification({ recipientId, senderId, type, targetType, targetId }) {
+class NotificationService {
+  static async createNotification({ recipientId, senderId, type, targetType, targetId }) {
     const newNotification = new Notification({
       recipientId,
       senderId,
@@ -10,29 +10,34 @@ const NotificationService = {
       targetId,
     });
     return await newNotification.save();
-  },
+  }
 
-  async getNotificationsByUser(userId) {
-    return await Notification.find({ recipientId: userId })
+  static async getNotificationsByUser(userId) {
+    const notifications = await Notification.find({ recipientId: userId })
       .sort({ createdAt: -1 })
       .populate("senderId", "username")
       .lean();
-  },
 
-  async markAsRead(notificationId) {
+    console.log("Fetched notifications for user:", userId);
+    console.log("Notifications:", notifications);
+
+    return notifications;
+  }
+
+  static async markAsRead(notificationId) {
     return await Notification.findByIdAndUpdate(
       notificationId,
       { read: true },
       { new: true }
     );
-  },
+  }
 
-  async markAllAsRead(userId) {
+  static async markAllAsRead(userId) {
     return await Notification.updateMany(
       { recipientId: userId, read: false },
       { read: true }
     );
   }
-};
+}
 
 export default NotificationService;
