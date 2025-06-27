@@ -160,7 +160,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                         <h2 className="text-2xl font-bold text-gray-800">Create New Report</h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-500 hover:text-gray-700 transition-colors"
+                            className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
                         >
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -174,7 +174,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                     <div className="p-6">                {/* Modal Form */}
                         <form id="report-form" onSubmit={handleSubmitReport} className="space-y-4">                  {/* Report Cover Image Upload */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2 ">
                                     Report Cover Image
                                 </label>
                                 <div className="relative">
@@ -182,9 +182,9 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                                         type="file"
                                         accept="image/*"
                                         onChange={handleFileChange}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 "
                                     />
-                                    <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                                    <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center cursor-pointer">
                                         <span className="text-gray-600">Choose File</span>
                                         <span className="mx-2 text-gray-300">|</span>
                                         <span className={`${formData.reportCoverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate`}>
@@ -311,7 +311,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1"
+                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1 cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -319,7 +319,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish }) {
                             type="submit"
                             disabled={isSubmitting}
                             form="report-form"
-                            className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1"
+                            className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1 cursor-pointer"
                         >
                             {isSubmitting ? 'Submitting...' : 'Submit Report'}
                         </button>
