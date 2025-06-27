@@ -118,13 +118,13 @@ export default function Profile() {
                 {(isAdmin && Array.isArray(profileData.reports) && profileData.reports.length > 0) ? (
                 <div className="mt-8">
                     {/* Tabs */}
-                    <div className="flex border-b mb-4 space-x-4">
+                    <div className="flex border-b mb-4 space-x-4 ">
                     <button
                         onClick={() => setActiveTab("claims")}
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "claims"
                             ? "border-b-2 border-selected text-selected"
-                            : "text-gray-500 hover:text-selected"
+                            : "text-gray-500 hover:text-selected cursor-pointer"
                         }`}
                     >
                         Claims ({profileData.claims.length})
@@ -134,7 +134,7 @@ export default function Profile() {
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "reports"
                             ? "border-b-2 border-selected text-selected"
-                            : "text-gray-500 hover:text-selected"
+                            : "text-gray-500 hover:text-selected cursor-pointer"
                         }`}
                     >
                         Reports ({profileData.reports.length})
