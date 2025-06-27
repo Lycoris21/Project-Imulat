@@ -66,8 +66,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                     message = errorData.error;
                 }
 
-                alert(message);
-                return;
+                throw new Error(message);
             }
 
             // Reset and close
@@ -80,11 +79,11 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                 claimId: "",
                 reportCoverFile: null
             });
+            
             onClose();
-            alert("Report created successfully!");
-
+            
             if (onSubmitFinish) {
-                await onSubmitFinish();
+                await onSubmitFinish('reportSubmitted');
             }
         } catch (error) {
             console.error("Error creating report:", error);
@@ -152,7 +151,17 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            {/* Loading Overlay */}
+            {isSubmitting && (
+                <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
+                    <div className="bg-white rounded-lg p-8 flex flex-col items-center space-y-4">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <p className="text-gray-700 font-medium">Creating report...</p>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
                 {/* Modal Header - Fixed */}
                 <div className="p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex justify-between items-center">
@@ -322,9 +331,13 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                             type="submit"
                             disabled={isSubmitting}
                             form="report-form"
-                            className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1 cursor-pointer"
+                            className={`px-6 py-2 rounded-lg transition-colors flex-1 ${
+                                isSubmitting 
+                                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                    : 'bg-base text-white hover:bg-dark cursor-pointer'
+                            }`}
                         >
-                            {isSubmitting ? 'Submitting...' : 'Submit Report'}
+                            {isSubmitting ? 'Creating Report...' : 'Submit Report'}
                         </button>
                     </div>
                 </div>

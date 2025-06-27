@@ -12,6 +12,7 @@ export default function Reports() {
   const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // Check if user is an admin
   const isAdmin = isLoggedIn && user?.role === "admin";
@@ -56,6 +57,16 @@ export default function Reports() {
     // Search is handled by useEffect above
   };
 
+  const handleSubmitFinish = async (successType) => {
+    await fetchReports();
+    if (successType === 'reportSubmitted') {
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 4000);
+    }
+  };
+
   if (loading) {
     return (
       <LoadingScreen message="Loading reports..." />
@@ -64,6 +75,24 @@ export default function Reports() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
+      {/* Success Notification */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-in">
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <span className="font-medium">Report created successfully!</span>
+          <button 
+            onClick={() => setShowSuccessMessage(false)}
+            className="ml-2 text-green-200 hover:text-white"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         {/* Title and Admin Button Row */}
@@ -123,7 +152,7 @@ export default function Reports() {
       </div>
 
       {/* Admin: Create Report Modal */}
-      <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSubmitFinish = {fetchReports}/>
+      <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSubmitFinish={handleSubmitFinish}/>
     </div>
   );
 }

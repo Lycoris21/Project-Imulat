@@ -1,4 +1,4 @@
-// CreateReportModal.js
+// SubmitClaimModal.js
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -16,6 +16,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   // Handle claim submission
   const handleSubmitClaim = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const payload = {
@@ -46,14 +47,15 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       });
       
       onClose();
-      alert("Claim submitted successfully!");
 
       if (onSubmitFinish) {
-          await onSubmitFinish();
+          await onSubmitFinish('claimSubmitted');
       }
     } catch (error) {
       console.error("Error submitting claim:", error);
       alert(error.message || "Error submitting claim. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -100,7 +102,17 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      {/* Loading Overlay */}
+      {isSubmitting && (
+        <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-gray-700 font-medium">Submitting claim...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
         {/* Modal Header - Fixed */}
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center">
@@ -159,7 +171,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                   Sources (Optional)
                 </label>
                 <textarea
-                  name="sources"
+                  name="claimSources"
                   value={claimFormData.claimSources}
                   onChange={handleInputChange}
                   rows={3}
@@ -187,9 +199,14 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
             <button
               type="submit"
               form="claim-form"
-              className="px-6 py-2 bg-base text-white rounded-lg hover:bg-dark transition-colors flex-1"
+              disabled={isSubmitting}
+              className={`px-6 py-2 rounded-lg transition-colors flex-1 ${
+                isSubmitting 
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                  : 'bg-base text-white hover:bg-dark'
+              }`}
             >
-              Submit Claim
+              {isSubmitting ? 'Submitting...' : 'Submit Claim'}
             </button>
           </div>
         </div>
