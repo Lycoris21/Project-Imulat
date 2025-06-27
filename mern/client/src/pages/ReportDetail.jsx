@@ -42,11 +42,16 @@ export default function ReportDetail() {
         }
 
         if (reactionRes?.ok) {
-          const { reactionType } = await reactionRes.json();
-          setUserReaction(reactionType || null);
+          const reactionData = await reactionRes.json();
+          if (reactionData && typeof reactionData === 'object') {
+            setUserReaction(reactionData.reactionType || null);
+          } else {
+            setUserReaction(null);
+          }
         } else {
           setUserReaction(null);
         }
+
 
         await fetchComments();
 

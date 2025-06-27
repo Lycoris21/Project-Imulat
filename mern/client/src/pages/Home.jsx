@@ -9,7 +9,7 @@ export default function Home() {
   const [latestReports, setLatestReports] = useState([]);
   const [latestClaims, setLatestClaims] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Mock data for now - replace with actual API calls later
+
   useEffect(() => {
     const fetchReports = async () => {
       try {
