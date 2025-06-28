@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { LoginRequiredModal } from "../index";
+import { useState } from "react";
 
 export default function ReactionBar({
     likes,
@@ -15,6 +17,23 @@ export default function ReactionBar({
     const isClaimDetailPage = location.pathname.startsWith("/claims/");
     const { user } = useAuth();
     const isAdmin = user?.role === "admin"; // ✅ Fix this to check for role, not just _id
+    const [showLoginModal, setShowLoginModal] = useState(false);
+
+    const handleReaction = (reactionType) => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+        onReact(reactionType);
+    };
+
+    const handleBookmarkClick = () => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+        onBookmark();
+    };
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -22,7 +41,7 @@ export default function ReactionBar({
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                         <button
-                            onClick={() => onReact('like')}
+                            onClick={() => handleReaction('like')}
                             className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${userReaction === 'like'
                                 ? 'bg-green-100 text-green-600'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
@@ -34,7 +53,7 @@ export default function ReactionBar({
                             <span>{likes} {likes === 1 ? 'Like' : 'Likes'}</span>
                         </button>
                         <button
-                            onClick={() => onReact('dislike')}
+                            onClick={() => handleReaction('dislike')}
                             className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${userReaction === 'dislike'
                                 ? 'bg-red-100 text-red-600'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
@@ -49,7 +68,7 @@ export default function ReactionBar({
 
                     {/* Bookmark */}
                     <button
-                        onClick={onBookmark}
+                        onClick={handleBookmarkClick}
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition ${isBookmarked
                             ? 'bg-yellow-100 text-yellow-600'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer'
@@ -95,6 +114,12 @@ export default function ReactionBar({
                     </button>
                 )}
             </div>
+            
+            <LoginRequiredModal 
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                action="like, dislike, or bookmark content"
+            />
         </div >
     );
 }

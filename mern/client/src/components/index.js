@@ -9,6 +9,7 @@ export { default as ConfirmPasswordModal } from './modals/ConfirmPasswordModal';
 export { default as ChangePasswordModal } from './modals/ChangePasswordModal';
 export { default as CreateReportModal } from './modals/CreateReportModal';
 export { default as SubmitClaimModal } from './modals/SubmitClaimModal';
+export { default as LoginRequiredModal } from './modals/LoginRequiredModal';
 // Comments components
 export { default as CommentsSection } from './comments/CommentsSection';
 export { default as CommentItem } from './comments/CommentItem';
