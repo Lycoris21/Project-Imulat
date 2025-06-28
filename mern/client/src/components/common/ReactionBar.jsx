@@ -82,7 +82,7 @@ export default function ReactionBar({
                 {isAdmin && isClaimDetailPage && handleOpenModal && (
                     <button
                         onClick={handleOpenModal}
-                        className="px-4 py-2 bg-dark text-white font-semibold rounded-lg shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2"
+                        className="px-4 py-2 bg-dark text-white font-semibold rounded-lg shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"
                     >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path
