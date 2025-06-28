@@ -224,7 +224,7 @@ export default function CommentsSection({ targetId, targetType }) {
         {topLevelComments.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
             <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.955 8.955 0 01-2.126-.275c-1.667-.52-3.06-1.91-3.579-3.579C6.973 15.955 6 14.418 6 12s.973-3.955 1.295-4.146c.52-1.667 1.912-3.06 3.579-3.579A8.955 8.955 0 0112 4c4.418 0 8 3.582 8 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
             <p>No comments yet. Be the first to share your thoughts!</p>
           </div>
