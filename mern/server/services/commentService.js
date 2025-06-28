@@ -1,4 +1,6 @@
 import Comment from '../models/Comment.js';
+import NotificationService from './notificationService.js';
+
 
 class CommentService {
   static async createComment({ userId, targetId, targetType, parentCommentId = null, commentContent }) {
@@ -10,7 +12,24 @@ class CommentService {
       commentContent
     });
 
-    return await newComment.save();
+    const savedComment = await newComment.save();
+
+    // Only send notification if this is a reply to another comment
+    if (parentCommentId) {
+      const parentComment = await Comment.findById(parentCommentId).populate("userId");
+
+      if (parentComment && parentComment.userId && String(parentComment.userId._id) !== String(userId)) {
+        await NotificationService.createNotification({
+          recipientId: parentComment.userId._id,
+          senderId: userId,
+          type: "comment",
+          targetType: "comment",
+          targetId: savedComment._id,
+        });
+      }
+    }
+
+    return savedComment;
   }
 
   static async getCommentsByTarget(targetType, targetId, userId = null) {
@@ -96,6 +115,16 @@ class CommentService {
       if (hasDisliked) {
         comment.dislikedBy.pull(userId);
         comment.dislikes = Math.max(0, comment.dislikes - 1);
+      }
+
+      if (String(comment.userId._id) !== String(userId)) {
+        await NotificationService.createNotification({
+          recipientId: comment.userId._id,
+          senderId: userId,
+          type: "like",
+          targetType: "comment",
+          targetId: comment._id,
+        });
       }
     }
 
