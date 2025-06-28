@@ -1,8 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import io from "socket.io-client";
 import NotificationList from "../notifications/NotificationList";
 
-export default function NotificationBell({ notifications, setNotifications, refreshNotifications }) {
+const socket = io("http://localhost:5050");
+
+export default function NotificationBell({ user, notifications, setNotifications, refreshNotifications }) {
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const ref = useRef();
@@ -13,6 +16,21 @@ export default function NotificationBell({ notifications, setNotifications, refr
   const current = notifications.slice((currentPage - 1) * notificationsPerPage, currentPage * notificationsPerPage);
   const totalPages = Math.ceil(notifications.length / notificationsPerPage);
 
+  // Join the socket room and listen for new notifications
+  useEffect(() => {
+    if (!user?._id) return;
+
+    socket.emit("join", user._id);
+
+    socket.on("new-notification", (newNotif) => {
+      setNotifications(prev => [newNotif, ...prev]);
+    });
+
+    return () => {
+      socket.off("new-notification");
+    };
+  }, [user?._id]);
+
   const markAllAsRead = async () => {
     try {
       await fetch(`/api/notifications/read-all/${user._id}`, {
@@ -22,13 +40,12 @@ export default function NotificationBell({ notifications, setNotifications, refr
       // Optimistically update UI
       refreshNotifications();
       setNotifications(prev =>
-        prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
+        prev.map(n => ({ ...n, read: true }))
       );
     } catch (err) {
       console.error("Failed to mark all notifications as read", err);
     }
   };
-
 
   const handleClickOutside = (e) => {
     if (ref.current && !ref.current.contains(e.target)) setOpen(false);

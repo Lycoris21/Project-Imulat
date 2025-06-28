@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./db/connection.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
+import http from 'http';
+import { Server } from 'socket.io';
 
 // Import routes
 import auth from "./routes/auth.js";
@@ -29,6 +31,27 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Or set to your frontend URL
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join", (userId) => {
+    socket.join(userId); // user joins their personal room
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
 
 // // Serve static files (uploaded images)
 // app.use('/uploads', express.static('uploads'));
@@ -57,7 +80,10 @@ app.get("/api/health", (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
     console.log(`Health check available at: http://localhost:${PORT}/api/health`);
 });
+
+export { io };
+export default server;

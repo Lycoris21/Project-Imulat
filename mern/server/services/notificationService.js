@@ -1,4 +1,5 @@
 import Notification from "../models/Notification.js";
+import { io } from "../server.js";
 
 class NotificationService {
   static async createNotification({ recipientId, senderId, type, targetType, targetId }) {
@@ -9,7 +10,13 @@ class NotificationService {
       targetType,
       targetId,
     });
-    return await newNotification.save();
+
+    const saved = await newNotification.save();
+
+    // Emit to recipient via Socket.IO
+    io.to(recipientId.toString()).emit("new-notification", saved);
+
+    return saved;
   }
 
   static async getNotificationsByUser(userId) {
@@ -17,9 +24,6 @@ class NotificationService {
       .sort({ createdAt: -1 })
       .populate("senderId", "username")
       .lean();
-
-    console.log("Fetched notifications for user:", userId);
-    console.log("Notifications:", notifications);
 
     return notifications;
   }

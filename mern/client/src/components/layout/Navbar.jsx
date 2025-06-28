@@ -96,6 +96,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           <div className="flex items-center space-x-4">
             {/* Notifications Bell */}
             <NotificationBell
+              user={user}
               notifications={notifications}
               setNotifications={setNotifications}
               refreshNotifications={fetchNotifications}

@@ -1,4 +1,4 @@
-import Comment from '../models/Comment.js';
+import { Comment, Notification, Report, Claim } from '../models/index.js';
 import NotificationService from './notificationService.js';
 
 
@@ -14,23 +14,51 @@ class CommentService {
 
     const savedComment = await newComment.save();
 
-    // Only send notification if this is a reply to another comment
-    if (parentCommentId) {
-      const parentComment = await Comment.findById(parentCommentId).populate("userId");
+    try {
+      let recipientId = null;
+      let finalTargetType = targetType; // e.g. "report" or "claim"
 
-      if (parentComment && parentComment.userId && String(parentComment.userId._id) !== String(userId)) {
-        await NotificationService.createNotification({
-          recipientId: parentComment.userId._id,
+      if (parentCommentId) {
+        // Replying to another comment — notify comment owner
+        const parentComment = await Comment.findById(parentCommentId).populate("userId");
+        if (parentComment && parentComment.userId && String(parentComment.userId._id) !== String(userId)) {
+          recipientId = parentComment.userId._id;
+          finalTargetType = "comment"; // override targetType
+        }
+      } else {
+        // Commenting on a report/claim — notify its author
+        // You need to fetch the parent object based on targetType
+        const Model = targetType === "claim"
+          ? Claim
+          : Report;
+
+        const parent = await Model.findById(targetId).populate("userId");
+        if (parent && parent.userId && String(parent.userId._id) !== String(userId)) {
+          recipientId = parent.userId._id;
+        }
+      }
+
+      if (recipientId) {
+        const notif = await Notification.create({
+          recipientId,
           senderId: userId,
           type: "comment",
-          targetType: "comment",
-          targetId: savedComment._id,
+          targetType: finalTargetType,
+          targetId: targetId,
+          read: false,
         });
+
+        // Emit via socket
+        const { io } = await import("../server.js");
+        io.to(recipientId.toString()).emit("new-notification", notif);
       }
+    } catch (err) {
+      console.error("⚠️ Failed to create or emit notification:", err.message);
     }
 
     return savedComment;
   }
+
 
   static async getCommentsByTarget(targetType, targetId, userId = null) {
     // Get all comments for the target
@@ -118,13 +146,25 @@ class CommentService {
       }
 
       if (String(comment.userId._id) !== String(userId)) {
-        await NotificationService.createNotification({
-          recipientId: comment.userId._id,
-          senderId: userId,
-          type: "like",
-          targetType: "comment",
-          targetId: comment._id,
-        });
+        await Notification.findOneAndUpdate(
+          {
+            recipientId: comment.userId._id,
+            senderId: userId,
+            type: "like",
+            targetType: "comment",
+            targetId: comment._id,
+          },
+          {
+            $set: {
+              read: false,
+              createdAt: new Date(),
+            },
+          },
+          {
+            upsert: true,
+            new: true,
+          }
+        );
       }
     }
 
