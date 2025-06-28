@@ -166,12 +166,12 @@ useEffect(() => {
           onSubmit={handleSearch}
           placeholder="Search claims by title, content, author, or summary..."
         />
-<div className="flex justify-center items-center gap-4 mb-4">
-  <label className="text-white text-sm font-medium">Sort by:</label>
+<div className="flex justify-center items-center gap-4 mb-4 ">
+  <label className="text-white text-sm font-medium ">Sort by:</label>
   <select
     value={selectedFilter}
     onChange={(e) => setSelectedFilter(e.target.value)}
-    className="px-4 py-2 rounded-lg bg-white text-dark border border-gray-300"
+    className="px-4 py-2 rounded-lg bg-white text-dark border border-gray-300 cursor-pointer"
   >
     <option value="newest">Newest</option>
     <option value="oldest">Oldest</option>
