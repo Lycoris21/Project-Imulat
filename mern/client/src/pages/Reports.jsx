@@ -13,6 +13,8 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("newest");
+
 
   // Check if user is an admin
   const isAdmin = isLoggedIn && user?.role === "admin";
@@ -22,19 +24,57 @@ export default function Reports() {
   }, []);
 
   // Filter reports based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredReports(reports);
-    } else {
-      const filtered = reports.filter(report =>
-        report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
+useEffect(() => {
+  let filtered = [...reports];
+
+  // Keyword filter
+  if (searchQuery.trim() !== "") {
+    filtered = filtered.filter(report =>
+      report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // Sorting/Filtering
+  const now = new Date();
+  switch (selectedFilter) {
+    case "oldest":
+      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      break;
+    case "today":
+      filtered = filtered.filter(r => new Date(r.createdAt).toDateString() === now.toDateString());
+      break;
+    case "thisWeek":
+      const weekAgo = new Date();
+      weekAgo.setDate(now.getDate() - 7);
+      filtered = filtered.filter(r => new Date(r.createdAt) > weekAgo);
+      break;
+    case "thisMonth":
+      const monthAgo = new Date();
+      monthAgo.setMonth(now.getMonth() - 1);
+      filtered = filtered.filter(r => new Date(r.createdAt) > monthAgo);
+      break;
+    case "mostLiked":
+      filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      break;
+    case "mostCommented":
+      filtered.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
+      break;
+    case "hottest":
+      filtered.sort((a, b) =>
+        ((b.likes || 0) + (b.commentCount || 0)) -
+        ((a.likes || 0) + (a.commentCount || 0))
       );
-      setFilteredReports(filtered);
-    }
-  }, [searchQuery, reports]);
+      break;
+    default: // newest
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  setFilteredReports(filtered);
+}, [searchQuery, reports, selectedFilter]);
+
 
   const fetchReports = async () => {
     try {
@@ -128,6 +168,25 @@ export default function Reports() {
           onSubmit={handleSearch}
           placeholder="Search reports by title, content, author, or verdict...."
         />
+
+        {/*Filter */}
+    <div className="flex justify-center items-center gap-4 mb-4">
+      <label className="text-white text-sm font-medium">Sort by:</label>
+      <select
+        value={selectedFilter}
+        onChange={(e) => setSelectedFilter(e.target.value)}
+        className="px-4 py-2 rounded-lg bg-white text-dark border border-gray-300"
+      >
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="today">Today</option>
+        <option value="thisWeek">This Week</option>
+        <option value="thisMonth">This Month</option>
+        <option value="mostLiked">Most Liked</option>
+        <option value="mostCommented">Most Commented</option>
+        <option value="hottest">Hottest</option>
+      </select>
+    </div>
 
         {/* Results Counter */}
         <p className="text-gray-300 text-sm text-center">

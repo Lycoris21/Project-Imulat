@@ -12,25 +12,67 @@ export default function Claims() {
   const [filteredClaims, setFilteredClaims] = useState([]); const [loading, setLoading] = useState(true);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+const [selectedFilter, setSelectedFilter] = useState("newest");
 
   useEffect(() => {
     fetchClaims();
   }, []);
 
   // Filter claims based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredClaims(claims);
-    } else {
-      const filtered = claims.filter(claim =>
-        claim.claimTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.claimContent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        claim.aiClaimSummary.toLowerCase().includes(searchQuery.toLowerCase())
+useEffect(() => {
+  let filtered = [...claims];
+
+  // Keyword-based filtering
+  if (searchQuery.trim() !== "") {
+    filtered = filtered.filter(claim =>
+      claim.claimTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      claim.claimContent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      claim.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      claim.aiClaimSummary.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  // Sorting and filters
+  const now = new Date();
+  switch (selectedFilter) {
+    case "oldest":
+      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      break;
+    case "today":
+      filtered = filtered.filter(c => new Date(c.createdAt).toDateString() === now.toDateString());
+      break;
+    case "thisWeek":
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(now.getDate() - 7);
+      filtered = filtered.filter(c => new Date(c.createdAt) > oneWeekAgo);
+      break;
+    case "thisMonth":
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(now.getMonth() - 1);
+      filtered = filtered.filter(c => new Date(c.createdAt) > oneMonthAgo);
+      break;
+    case "mostLiked":
+      filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      break;
+    case "mostCommented":
+      filtered.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
+      break;
+    case "hottest":
+      filtered.sort((a, b) =>
+        ((b.likes || 0) + (b.commentCount || 0)) -
+        ((a.likes || 0) + (a.commentCount || 0))
       );
-      setFilteredClaims(filtered);
-    }
-  }, [searchQuery, claims]);
+      break;
+    case "highestTruth":
+      filtered.sort((a, b) => (b.aiTruthIndex || 0) - (a.aiTruthIndex || 0));
+      break;
+    default: // newest
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  setFilteredClaims(filtered);
+}, [searchQuery, claims, selectedFilter]);
+
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -124,6 +166,24 @@ export default function Claims() {
           onSubmit={handleSearch}
           placeholder="Search claims by title, content, author, or summary..."
         />
+<div className="flex justify-center items-center gap-4 mb-4">
+  <label className="text-white text-sm font-medium">Sort by:</label>
+  <select
+    value={selectedFilter}
+    onChange={(e) => setSelectedFilter(e.target.value)}
+    className="px-4 py-2 rounded-lg bg-white text-dark border border-gray-300"
+  >
+    <option value="newest">Newest</option>
+    <option value="oldest">Oldest</option>
+    <option value="today">Today</option>
+    <option value="thisWeek">This Week</option>
+    <option value="thisMonth">This Month</option>
+    <option value="mostLiked">Most Liked</option>
+    <option value="mostCommented">Most Commented</option>
+    <option value="hottest">Hottest</option>
+    <option value="highestTruth">Highest Truth Index</option>
+  </select>
+</div>
 
         {/* Results Counter */}
         <p className="text-gray-300 text-sm text-center">

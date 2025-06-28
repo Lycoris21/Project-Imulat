@@ -9,6 +9,9 @@ export default function Home() {
   const [latestReports, setLatestReports] = useState([]);
   const [latestClaims, setLatestClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reportFilter, setReportFilter] = useState("newest");
+  const [claimFilter, setClaimFilter] = useState("newest");
+
 
   useEffect(() => {
     const fetchReports = async () => {
