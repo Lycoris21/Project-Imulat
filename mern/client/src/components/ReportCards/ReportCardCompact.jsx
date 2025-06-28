@@ -15,7 +15,7 @@ const ReportCardCompact = ({ report }) => (
                     <img
                         src={report.reportCoverUrl}
                         alt={`Cover for ${report.reportTitle}`}
-                        className="w-25 h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-105 group"
+                        className="w-25 h-25 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105 group"
                         onError={(e) => {
                             e.target.style.display = 'none';
                         }}
