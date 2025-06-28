@@ -1,5 +1,6 @@
 import { User } from "../models/index.js";
 import UserService from "../services/userService.js";
+import bcrypt from "bcrypt";
 
 class UserController {
   // Get all users
@@ -130,7 +131,6 @@ class UserController {
       }
 
       // Verify old password
-      const bcrypt = (await import('bcrypt')).default;
       const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
       if (!isMatch) {
         return res.status(400).json({ error: "Current password is incorrect" });
@@ -150,6 +150,42 @@ class UserController {
     } catch (error) {
       console.error("Error changing password:", error);
       res.status(500).json({ error: "Error changing password" });
+    }
+  }
+
+  // Verify user password
+  static async verifyPassword(req, res) {
+    try {
+      const { userId, password } = req.body;
+
+      // Validation
+      if (!userId || !password) {
+        return res.status(400).json({ error: "User ID and password are required" });
+      }
+
+      // Get user with password for verification
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Verify password
+      const isMatch = await bcrypt.compare(password, user.passwordHash);
+      
+      if (isMatch) {
+        res.status(200).json({ 
+          message: "Password verified successfully",
+          verified: true 
+        });
+      } else {
+        res.status(400).json({ 
+          error: "Password is incorrect",
+          verified: false 
+        });
+      }
+    } catch (error) {
+      console.error("Error verifying password:", error);
+      res.status(500).json({ error: "Error verifying password" });
     }
   }
 

@@ -19,6 +19,9 @@ router.patch("/:id", validateObjectId, validateUserUpdate, UserController.update
 // Change user password
 router.put("/change-password", UserController.changePassword);
 
+// Verify user password
+router.post("/verify-password", UserController.verifyPassword);
+
 // Delete a user
 router.delete("/:id", validateObjectId, UserController.deleteUser);
 
