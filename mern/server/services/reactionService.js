@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Reaction, Claim, Report, Comment, Notification } from '../models/index.js';
+import { Reaction, Claim, Report, Comment, User, Notification } from '../models/index.js';
 
 class ReactionService {
   static async getReactionsByTarget(targetId, targetType) {
@@ -78,6 +78,9 @@ class ReactionService {
     } else if (targetType === "comment") {
       targetDoc = await Comment.findById(targetId).populate("userId");
       recipientId = targetDoc?.userId?._id;
+    } else if (targetType === "user") {
+      // For user reactions, the target user is the recipient
+      recipientId = targetId;
     }
 
     // Only notify on new "like" and not if you're liking your own stuff
