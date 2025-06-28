@@ -1,9 +1,14 @@
 import { Comment, Notification, Report, Claim } from '../models/index.js';
 import NotificationService from './notificationService.js';
 
-
 class CommentService {
-  static async createComment({ userId, targetId, targetType, parentCommentId = null, commentContent }) {
+  static async createComment({
+    userId,
+    targetId,
+    targetType,
+    parentCommentId = null,
+    commentContent
+  }) {
     const newComment = new Comment({
       userId,
       targetId,
@@ -16,35 +21,41 @@ class CommentService {
 
     try {
       let recipientId = null;
-      let finalTargetType = targetType; // e.g. "report" or "claim"
+      let postType = targetType;
+      let postId = targetId;
 
+      // If replying to a comment
       if (parentCommentId) {
-        // Replying to another comment — notify comment owner
         const parentComment = await Comment.findById(parentCommentId).populate("userId");
-        if (parentComment && parentComment.userId && String(parentComment.userId._id) !== String(userId)) {
-          recipientId = parentComment.userId._id;
-          finalTargetType = "comment"; // override targetType
+        if (parentComment) {
+          // Override postType/postId with root comment's context
+          postType = parentComment.targetType;
+          postId = parentComment.targetId;
+
+          // Notify parent comment's author (if not self)
+          if (String(parentComment.userId._id) !== String(userId)) {
+            recipientId = parentComment.userId._id;
+          }
         }
       } else {
-        // Commenting on a report/claim — notify its author
-        // You need to fetch the parent object based on targetType
-        const Model = targetType === "claim"
-          ? Claim
-          : Report;
-
+        // Not a reply, notify post owner (report/claim author)
+        const Model = targetType === "claim" ? Claim : Report;
         const parent = await Model.findById(targetId).populate("userId");
-        if (parent && parent.userId && String(parent.userId._id) !== String(userId)) {
+        if (parent && String(parent.userId._id) !== String(userId)) {
           recipientId = parent.userId._id;
         }
       }
 
+      // ✅ Create notification
       if (recipientId) {
         const notif = await Notification.create({
           recipientId,
           senderId: userId,
           type: "comment",
-          targetType: finalTargetType,
-          targetId: targetId,
+          targetType: "comment", // still pointing to the comment created
+          targetId: savedComment._id,
+          postType,
+          postId,
           read: false,
         });
 
@@ -59,14 +70,15 @@ class CommentService {
     return savedComment;
   }
 
-
   static async getCommentsByTarget(targetType, targetId, userId = null) {
     // Get all comments for the target
     const allComments = await Comment.find({
       targetType,
       targetId
     })
-      .sort({ createdAt: -1 })
+      .sort({
+        createdAt: -1
+      })
       .populate('userId', 'username profilePictureUrl')
       .lean();
 
@@ -76,7 +88,7 @@ class CommentService {
         // Convert ObjectIds to strings for comparison
         const likedByStrings = (comment.likedBy || []).map(id => id.toString());
         const dislikedByStrings = (comment.dislikedBy || []).map(id => id.toString());
-        
+
         if (likedByStrings.includes(userId.toString())) {
           comment.userReaction = 'like';
         } else if (dislikedByStrings.includes(userId.toString())) {
@@ -125,7 +137,8 @@ class CommentService {
 
   static async toggleLike(commentId, userId) {
     const comment = await Comment.findById(commentId);
-    if (!comment) throw new Error("Comment not found");
+    if (!comment)
+      throw new Error("Comment not found");
 
     const hasLiked = comment.likedBy.includes(userId);
     const hasDisliked = comment.dislikedBy.includes(userId);
@@ -138,39 +151,44 @@ class CommentService {
       // Add like
       comment.likedBy.push(userId);
       comment.likes += 1;
-      
-      // Remove dislike if exists
+
       if (hasDisliked) {
         comment.dislikedBy.pull(userId);
         comment.dislikes = Math.max(0, comment.dislikes - 1);
       }
 
-      if (String(comment.userId._id) !== String(userId)) {
-        await Notification.findOneAndUpdate(
-          {
-            recipientId: comment.userId._id,
-            senderId: userId,
-            type: "like",
-            targetType: "comment",
-            targetId: comment._id,
+      if (String(comment.userId._id || comment.userId) !== String(userId)) {
+        // Trace the comment back to its post (claim/report)
+        const postType = comment.targetType;
+        const postId = comment.targetId;
+
+        const notif = await Notification.findOneAndUpdate({
+          recipientId: comment.userId,
+          senderId: userId,
+          type: "like",
+          targetType: "comment",
+          targetId: comment._id,
+        }, {
+          $set: {
+            read: false,
+            createdAt: new Date(),
+            postType,
+            postId,
           },
-          {
-            $set: {
-              read: false,
-              createdAt: new Date(),
-            },
-          },
-          {
-            upsert: true,
-            new: true,
-          }
-        );
+        }, {
+          upsert: true,
+          new: true,
+        });
+
+        // Emit it
+        const { io } = await import("../server.js");
+        io.to(comment.userId.toString()).emit("new-notification", notif);
       }
     }
 
     await comment.save();
-    return { 
-      likes: comment.likes, 
+    return {
+      likes: comment.likes,
       dislikes: comment.dislikes,
       userReaction: hasLiked ? null : 'like'
     };
@@ -178,7 +196,8 @@ class CommentService {
 
   static async toggleDislike(commentId, userId) {
     const comment = await Comment.findById(commentId);
-    if (!comment) throw new Error("Comment not found");
+    if (!comment)
+      throw new Error("Comment not found");
 
     const hasLiked = comment.likedBy.includes(userId);
     const hasDisliked = comment.dislikedBy.includes(userId);
@@ -191,7 +210,7 @@ class CommentService {
       // Add dislike
       comment.dislikedBy.push(userId);
       comment.dislikes += 1;
-      
+
       // Remove like if exists
       if (hasLiked) {
         comment.likedBy.pull(userId);
@@ -200,8 +219,8 @@ class CommentService {
     }
 
     await comment.save();
-    return { 
-      likes: comment.likes, 
+    return {
+      likes: comment.likes,
       dislikes: comment.dislikes,
       userReaction: hasDisliked ? null : 'dislike'
     };
@@ -209,10 +228,14 @@ class CommentService {
 
   static async deleteComment(commentId, userId) {
     const comment = await Comment.findById(commentId);
-    if (!comment) throw new Error("Comment not found");
-    if (comment.userId.toString() !== userId.toString()) throw new Error("Unauthorized");
+    if (!comment)
+      throw new Error("Comment not found");
+    if (comment.userId.toString() !== userId.toString())
+      throw new Error("Unauthorized");
 
-    await Comment.deleteMany({ parentCommentId: comment._id }); // Delete replies
+    await Comment.deleteMany({
+      parentCommentId: comment._id
+    }); // Delete replies
     return await comment.deleteOne();
   }
 }

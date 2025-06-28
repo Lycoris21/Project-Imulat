@@ -51,6 +51,25 @@ export default function CommentsSection({ targetId, targetType }) {
       const data = await response.json();
       setComments(data);
       setError(null);
+
+      const params = new URLSearchParams(window.location.search);
+      const highlightId = params.get("highlight");
+
+      if (highlightId) {
+        // Wait a bit to ensure DOM renders
+        setTimeout(() => {
+          const el = document.getElementById(`comment-${highlightId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.classList.add("ring", "ring-blue-500", "ring-offset-2", "transition");
+
+            // Optional: remove highlight after a few seconds
+            setTimeout(() => {
+              el.classList.remove("ring", "ring-blue-500", "ring-offset-2");
+            }, 3000);
+          }
+        }, 200); // small delay ensures element is in DOM
+      }
     } catch (err) {
       console.error('Error fetching comments:', err);
       setError('Failed to load comments');

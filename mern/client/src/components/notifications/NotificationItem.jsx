@@ -50,11 +50,18 @@ export default function NotificationItem({ notification, onClose, refreshNotific
       case "report":
         return `/reports/${notification.targetId}`;
       case "comment":
-        return `/comments/${notification.targetId}`; // or wherever your comment details are
+        if (notification.postType === "claim") {
+          return `/claims/${notification.postId}?highlight=${notification.targetId}`;
+        } else if (notification.postType === "report") {
+          return `/reports/${notification.postId}?highlight=${notification.targetId}`;
+        }
+        return "/";
       default:
         return "/";
     }
   };
+
+
 
   const handleClick = async () => {
     try {

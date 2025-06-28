@@ -48,49 +48,50 @@ class ReactionService {
   }
 
   static async setReaction(userId, targetId, targetType, reactionType, io = null) {
-    // Find existing reaction
     const previous = await Reaction.findOne({ userId, targetId, targetType });
 
     let isNew = false;
 
-    // If no previous or changing the reactionType, apply new reaction
     const updated = await Reaction.findOneAndUpdate(
       { userId, targetId, targetType },
       { reactionType },
       { new: true, upsert: true }
     );
 
-    // If it was new or changing from null, mark as new
     if (!previous || !previous.reactionType || previous.reactionType !== reactionType) {
       isNew = true;
     }
 
-    // Determine the target's owner
     let targetDoc = null;
     let recipientId = null;
+    let postType = null;
+    let postId = null;
 
     if (targetType === "claim") {
       targetDoc = await Claim.findById(targetId).populate("userId");
       recipientId = targetDoc?.userId?._id;
+      postType = "claim";
+      postId = targetId;
     } else if (targetType === "report") {
       targetDoc = await Report.findById(targetId).populate("userId");
       recipientId = targetDoc?.userId?._id;
+      postType = "report";
+      postId = targetId;
     } else if (targetType === "comment") {
       targetDoc = await Comment.findById(targetId).populate("userId");
       recipientId = targetDoc?.userId?._id;
+      postType = targetDoc?.targetType;
+      postId = targetDoc?.targetId;
     } else if (targetType === "user") {
-      // For user reactions, the target user is the recipient
       recipientId = targetId;
     }
 
-    // Only notify on new "like" and not if you're liking your own stuff
     if (
       isNew &&
       reactionType === "like" &&
       recipientId &&
       recipientId.toString() !== userId.toString()
     ) {
-      // Prevent duplicate notifications
       const alreadyExists = await Notification.exists({
         recipientId,
         senderId: userId,
@@ -106,7 +107,13 @@ class ReactionService {
           type: "like",
           targetType,
           targetId,
+          postType,
+          postId,
         });
+
+        if (io) {
+          io.to(recipientId.toString()).emit("new-notification", newNotif);
+        }
       }
     }
 
