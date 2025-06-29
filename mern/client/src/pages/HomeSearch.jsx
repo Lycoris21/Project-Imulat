@@ -28,6 +28,7 @@ export default function HomeSearch() {
     const {
         suggestions,
         isLoading: suggestionsLoading,
+        isDisabled,
         disableSuggestions
     } = useHomeSearchSuggestions(localSearchQuery);
 
@@ -140,6 +141,8 @@ export default function HomeSearch() {
                         showDropdown={true}
                         suggestions={suggestions}
                         isLoading={suggestionsLoading}
+                        isDisabled={isDisabled}
+                        disableSuggestions={disableSuggestions}
                     />
 
                     {/* Stats and Tabs */}

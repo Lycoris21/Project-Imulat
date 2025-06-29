@@ -11,6 +11,7 @@ export default function SearchBar({
   onSuggestionClick,
   isLoading = false,
   disableSuggestions,
+  isDisabled = false,
   defaultSearchRoute = "/bookmarks/search", // Allow customization of default search route
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,13 +40,13 @@ export default function SearchBar({
   // Show dropdown only when input is focused AND has suggestions
   useEffect(() => {
     if (showDropdown && suggestions.length > 0 && value.trim() && 
-        isInputFocused && !disableSuggestions) {
+        isInputFocused && !isDisabled) {
       setIsDropdownOpen(true);
     } else {
       setIsDropdownOpen(false);
     }
     setSelectedIndex(-1);
-  }, [showDropdown, suggestions, value, isInputFocused, disableSuggestions]);
+  }, [showDropdown, suggestions, value, isInputFocused, isDisabled]);
 
   const handleInputChange = (e) => {
     onChange(e);

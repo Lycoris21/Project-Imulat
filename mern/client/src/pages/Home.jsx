@@ -19,6 +19,7 @@ export default function Home() {
   const {
     suggestions,
     isLoading: suggestionsLoading,
+    isDisabled,
     disableSuggestions
   } = useHomeSearchSuggestions(searchQuery);
 
@@ -107,6 +108,7 @@ export default function Home() {
           showDropdown={true}
           suggestions={suggestions}
           isLoading={searchLoading || suggestionsLoading}
+          isDisabled={isDisabled}
           disableSuggestions={disableSuggestions}
           defaultSearchRoute="/search"
         />

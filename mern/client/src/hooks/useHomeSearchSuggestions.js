@@ -127,6 +127,7 @@ export function useHomeSearchSuggestions(initialQuery = "", debounceMs = 300) {
     suggestions,
     isLoading,
     error,
+    isDisabled,
     disableSuggestions
   };
 }
