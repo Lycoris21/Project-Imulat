@@ -4,7 +4,7 @@ const fetchStats = async () => {
   const [claimsCount, reportsCount, usersCount] = await Promise.all([
     Claim.countDocuments({ deletedAt: null }),
     Report.countDocuments({ deletedAt: null }),
-    User.countDocuments()
+    User.countDocuments({ deletedAt: null })
   ]);
 
   return {
