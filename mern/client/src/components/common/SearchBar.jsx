@@ -111,7 +111,8 @@ export default function SearchBar({
   const handleSuggestionSelect = (suggestion) => {
     setIsDropdownOpen(false);
     setSelectedIndex(-1);
-    setJustSubmitted(true);
+    setIsInputFocused(false);
+    setHasBeenClicked(false);
     
     // Disable suggestions to prevent them from reopening
     if (disableSuggestions) {
@@ -212,7 +213,10 @@ export default function SearchBar({
           {suggestions.map((suggestion, index) => (
             <div
               key={`${suggestion.type}-${suggestion._id}`}
-              onClick={() => handleSuggestionSelect(suggestion)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // Prevent input blur
+                handleSuggestionSelect(suggestion);
+              }}
               className={`px-4 py-3 flex items-center space-x-3 cursor-pointer transition-colors ${
                 index === selectedIndex 
                   ? 'bg-blue-50 text-blue-700' 
