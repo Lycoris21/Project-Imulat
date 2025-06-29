@@ -161,7 +161,9 @@ export default function SearchBar({
   return (
     <div className="max-w-2xl mx-auto mb-4 relative" ref={dropdownRef}>
       <form onSubmit={handleSubmit}>
-        <div className="relative flex">
+        <div className={`relative flex rounded-2xl transition-all duration-200 ${
+          isInputFocused ? 'ring-2 ring-dark' : ''
+        }`}>
           <input
             ref={inputRef}
             type="text"
@@ -182,7 +184,7 @@ export default function SearchBar({
               // Don't reset hasBeenClicked here to allow for keyboard navigation
             }}
             placeholder={placeholder}
-            className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-2 focus:ring-dark focus:outline-none"
+            className="w-full px-6 py-4 text-lg rounded-l-2xl text-white border border-gray-300 focus:ring-0 focus:outline-none"
             autoComplete="off"
           />
           <button
