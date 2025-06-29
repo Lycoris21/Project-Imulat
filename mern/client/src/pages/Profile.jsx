@@ -46,6 +46,8 @@ export default function Profile() {
             const res = await fetch(`http://localhost:5050/api/users/${targetUserId}`);
             if (!res.ok) throw new Error("Failed to fetch user profile");
             const data = await res.json();
+
+            if (data.deletedAt != null) throw new Error("User is deleted");
             if (isMounted) {
                 setProfileData(data);
                 setReactionCounts({ likes: data.likes || 0, dislikes: data.dislikes || 0 });
