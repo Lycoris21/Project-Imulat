@@ -8,6 +8,7 @@ import { Server } from 'socket.io';
 
 // Import routes
 import auth from "./routes/auth.js";
+import bookmarks from "./routes/bookmarks.js";
 import claims from "./routes/claims.js";
 import comments from "./routes/comments.js";
 import notifications from "./routes/notifications.js";
@@ -58,6 +59,7 @@ io.on("connection", (socket) => {
 
 // API Routes
 app.use("/api/auth", auth);
+app.use("/api/bookmarks", bookmarks);
 app.use("/api/claims", claims);
 app.use("/api/comments", comments);
 app.use("/api/notifications", notifications);

@@ -12,10 +12,10 @@ const collectionSchema = new mongoose.Schema({
     trim: true,
     maxlength: 100
   },
-  collectionDescription: {
+  collectionBanner: {
     type: String,
     trim: true,
-    maxlength: 500
+    default: null // URL to the banner image
   }
 }, {
   timestamps: true // This automatically adds createdAt and updatedAt
@@ -23,7 +23,7 @@ const collectionSchema = new mongoose.Schema({
 
 // Create indexes for better query performance
 collectionSchema.index({ userId: 1 });
-collectionSchema.index({ collectionName: 'text', collectionDescription: 'text' });
+collectionSchema.index({ collectionName: 'text' });
 
 const Collection = mongoose.model('Collection', collectionSchema);
 

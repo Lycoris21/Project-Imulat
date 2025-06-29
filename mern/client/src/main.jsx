@@ -21,6 +21,8 @@ import ReportDetail from "./pages/ReportDetail";
 import ClaimDetail from "./pages/ClaimDetail";
 import EditProfile from "./pages/EditProfile";
 import Bookmarks from "./pages/Bookmarks";
+import AllBookmarks from "./pages/AllBookmarks";
+import CollectionView from "./pages/CollectionView";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +41,8 @@ const router = createBrowserRouter([
       { path: "profile/:id", element: <Profile /> },
       { path: "editprofile", element: <EditProfile /> },
       { path: "bookmarks", element: <Bookmarks /> },
+      { path: "bookmarks/all", element: <AllBookmarks /> },
+      { path: "bookmarks/collection/:collectionId", element: <CollectionView /> },
     ],
   },
 ]);
