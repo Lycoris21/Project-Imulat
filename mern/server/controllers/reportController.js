@@ -4,7 +4,10 @@ class ReportController {
   // Get all reports
   static async getAllReports(req, res) {
     try {
-      const reports = await ReportService.getAllReports();
+      const { search } = req.query;
+      const reports = search 
+        ? await ReportService.searchReports(search)
+        : await ReportService.getAllReports();
       res.status(200).json(reports);
     } catch (error) {
       console.error("Error fetching reports:", error);

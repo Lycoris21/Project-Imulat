@@ -3,7 +3,10 @@ import ClaimService from "../services/claimService.js";
 class ClaimController {
   static async getAllClaims(req, res) {
     try {
-      const claims = await ClaimService.getAllClaims();
+      const { search } = req.query;
+      const claims = search 
+        ? await ClaimService.searchClaims(search)
+        : await ClaimService.getAllClaims();
       res.status(200).json(claims);
     } catch (error) {
       console.error("Error fetching claims:", error);

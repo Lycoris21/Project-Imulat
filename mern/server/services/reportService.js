@@ -187,6 +187,44 @@ class ReportService {
     return reportsWithMeta;
   }
 
+  // Search reports
+  static async searchReports(query) {
+    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+    
+    const reports = await Report.find({
+      $or: [
+        { reportTitle: { $regex: searchRegex } },
+        { reportContent: { $regex: searchRegex } },
+        { reportDescription: { $regex: searchRegex } },
+        { aiReportSummary: { $regex: searchRegex } }
+      ]
+    })
+    .populate('userId', 'username email')
+    .populate('claimIds', 'claimTitle aiTruthIndex')
+    .sort({ createdAt: -1 })
+    .limit(50); // Limit results
+
+    const reportsWithMeta = await Promise.all(
+      reports.map(async (report) => {
+        const count = await Comment.countDocuments({
+          targetType: 'report',
+          targetId: report._id,
+        });
+
+        const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+        const plainReport = report.toObject({ virtuals: true });
+
+        return {
+          ...plainReport,
+          commentCount: count,
+          reactionCounts
+        };
+      })
+    );
+
+    return reportsWithMeta;
+  }
+
 }
 
 export default ReportService;

@@ -9,10 +9,12 @@ export default function Claims() {
   const { user, isLoggedIn } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [claims, setClaims] = useState([]);
-  const [filteredClaims, setFilteredClaims] = useState([]); const [loading, setLoading] = useState(true);
+  const [filteredClaims, setFilteredClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-const [selectedFilter, setSelectedFilter] = useState("newest");
+  const [selectedFilter, setSelectedFilter] = useState("newest");
 
   useEffect(() => {
     fetchClaims();
@@ -20,17 +22,21 @@ const [selectedFilter, setSelectedFilter] = useState("newest");
 
   // Filter claims based on search query
 useEffect(() => {
-  let filtered = [...claims];
+  setSearchLoading(true);
+  
+  // Add a small delay to show loading animation
+  const timeoutId = setTimeout(() => {
+    let filtered = [...claims];
 
-  // Keyword-based filtering
-  if (searchQuery.trim() !== "") {
-    filtered = filtered.filter(claim =>
-      claim.claimTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      claim.claimContent.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      claim.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      claim.aiClaimSummary.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+    // Keyword-based filtering
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter(claim =>
+        claim.claimTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.claimContent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        claim.aiClaimSummary.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
   // Sorting and filters
   const now = new Date();
@@ -70,7 +76,11 @@ useEffect(() => {
       filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
-  setFilteredClaims(filtered);
+    setFilteredClaims(filtered);
+    setSearchLoading(false);
+  }, 300); // 300ms delay to show loading animation
+  
+  return () => clearTimeout(timeoutId);
 }, [searchQuery, claims, selectedFilter]);
 
 
@@ -165,6 +175,7 @@ useEffect(() => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onSubmit={handleSearch}
           placeholder="Search claims by title, content, author, or summary..."
+          isLoading={searchLoading}
         />
 <div className="flex justify-center items-center gap-4 mb-4 ">
   <label className="text-white text-sm font-medium ">Sort by:</label>

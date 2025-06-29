@@ -90,6 +90,39 @@ class UserService {
       { new: true, runValidators: true }
     ).select('-passwordHash');
   }
+
+  // Search users
+  static async searchUsers(query) {
+    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+    
+    const users = await User.find({
+      $or: [
+        { username: { $regex: searchRegex } },
+        { email: { $regex: searchRegex } },
+        { firstName: { $regex: searchRegex } },
+        { lastName: { $regex: searchRegex } }
+      ]
+    }, '-passwordHash') // Exclude password hash
+    .limit(20) // Limit results to 20 users
+    .sort({ username: 1 }) // Sort by username
+    .lean();
+
+    // Add like and dislike counts for each user
+    const usersWithReactions = await Promise.all(users.map(async (user) => {
+      const [likes, dislikes] = await Promise.all([
+        Reaction.countDocuments({ targetId: user._id, targetType: 'user', reactionType: 'like' }),
+        Reaction.countDocuments({ targetId: user._id, targetType: 'user', reactionType: 'dislike' }),
+      ]);
+      
+      return {
+        ...user,
+        likes,
+        dislikes
+      };
+    }));
+
+    return usersWithReactions;
+  }
 }
 
 export default UserService;

@@ -4,6 +4,9 @@ import { validateUser, validateUserUpdate, validateObjectId } from "../middlewar
 
 const router = express.Router();
 
+// Search users (must come before /:id route)
+router.get("/search", UserController.searchUsers);
+
 // Get all users
 router.get("/", UserController.getAllUsers);
 

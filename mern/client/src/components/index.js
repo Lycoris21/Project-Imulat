@@ -16,4 +16,5 @@ export { default as CommentItem } from './comments/CommentItem';
 export { default as CommentForm } from './comments/CommentForm';
 export { default as CommentActions } from './comments/CommentActions';
 // Add other components as needed
+export { default as UserCard } from './common/UserCard';
 

@@ -11,6 +11,7 @@ import App from "./App.jsx";
 import "./index.css";
 
 import Home from "./pages/Home";
+import HomeSearch from "./pages/HomeSearch";
 import Reports from "./pages/Reports";
 import Claims from "./pages/Claims";
 import About from "./pages/About";
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "home", element: <Home /> },
+      { path: "search", element: <HomeSearch /> },
       { path: "reports", element: <Reports /> },
       { path: "reports/:id", element: <ReportDetail /> },
       { path: "claims", element: <Claims /> },

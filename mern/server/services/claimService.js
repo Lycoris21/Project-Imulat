@@ -134,6 +134,41 @@ class ClaimService {
 
     return claimsWithMeta;
   }
+
+  // Search claims
+  static async searchClaims(query) {
+    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+    
+    const claims = await Claim.find({
+      $or: [
+        { claimTitle: { $regex: searchRegex } },
+        { claimContent: { $regex: searchRegex } },
+        { aiClaimSummary: { $regex: searchRegex } }
+      ]
+    })
+    .populate('userId', 'username email')
+    .populate("reportId", "reportTitle")
+    .sort({ createdAt: -1 })
+    .limit(50) // Limit results
+    .lean();
+
+    const claimsWithMeta = await Promise.all(
+      claims.map(async (claim) => {
+        const [commentCount, reactionCounts] = await Promise.all([
+          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+          ReactionService.countReactions(claim._id, 'claim'),
+        ]);
+
+        return {
+          ...claim,
+          commentCount,
+          reactionCounts,
+        };
+      })
+    );
+
+    return claimsWithMeta;
+  }
 }
 
 export default ClaimService;

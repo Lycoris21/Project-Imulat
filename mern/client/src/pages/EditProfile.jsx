@@ -106,7 +106,7 @@ export default function EditProfile() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 bg-base-gradient">
       <div className="bg-white bg-opacity-90 rounded-2xl p-6 shadow-xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-base mb-4 text-center">
+        <h1 className="text-3xl font-bold mb-4 text-center">
           Profile Settings
         </h1>
 
@@ -228,7 +228,7 @@ export default function EditProfile() {
           </button>
           <button
             onClick={() => setShowConfirmModal(true)}
-            className="px-4 py-2 bg-dark text-white rounded hover:bg-darker cursor-pointer"
+            className="px-4 py-2 bg-[#1E275E] text-white rounded hover:bg-[#4B548B] cursor-pointer"
           >
             Save Changes
           </button>

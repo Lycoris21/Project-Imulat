@@ -189,6 +189,23 @@ class UserController {
     }
   }
 
+  // Search users
+  static async searchUsers(req, res) {
+    try {
+      const { q } = req.query;
+      
+      if (!q || q.trim() === '') {
+        return res.status(200).json([]);
+      }
+
+      const users = await UserService.searchUsers(q.trim());
+      res.status(200).json(users);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ error: "Error searching users" });
+    }
+  }
+
 }
 
 export default UserController;

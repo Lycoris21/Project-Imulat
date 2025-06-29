@@ -11,6 +11,7 @@ export default function SearchBar({
   onSuggestionClick,
   isLoading = false,
   disableSuggestions,
+  defaultSearchRoute = "/bookmarks/search", // Allow customization of default search route
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -35,16 +36,16 @@ export default function SearchBar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Show dropdown only when input is focused AND clicked AND has suggestions
+  // Show dropdown only when input is focused AND has suggestions
   useEffect(() => {
     if (showDropdown && suggestions.length > 0 && value.trim() && 
-        isInputFocused && hasBeenClicked && !disableSuggestions) {
+        isInputFocused && !disableSuggestions) {
       setIsDropdownOpen(true);
     } else {
       setIsDropdownOpen(false);
     }
     setSelectedIndex(-1);
-  }, [showDropdown, suggestions, value, isInputFocused, hasBeenClicked, disableSuggestions]);
+  }, [showDropdown, suggestions, value, isInputFocused, disableSuggestions]);
 
   const handleInputChange = (e) => {
     onChange(e);
@@ -104,7 +105,10 @@ export default function SearchBar({
       onSubmit(e);
     } else if (value.trim()) {
       // Default behavior: navigate to search page
-      navigate(`/bookmarks/search?q=${encodeURIComponent(value.trim())}`);
+      const route = defaultSearchRoute.includes('?') 
+        ? `${defaultSearchRoute}&q=${encodeURIComponent(value.trim())}`
+        : `${defaultSearchRoute}?q=${encodeURIComponent(value.trim())}`;
+      navigate(route);
     }
   };
 
@@ -129,6 +133,8 @@ export default function SearchBar({
         navigate(`/reports/${suggestion._id}`);
       } else if (suggestion.type === 'claim') {
         navigate(`/claims/${suggestion._id}`);
+      } else if (suggestion.type === 'user') {
+        navigate(`/profile/${suggestion._id}`);
       }
     }
   };
@@ -151,6 +157,12 @@ export default function SearchBar({
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'user':
+        return (
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
           </svg>
         );
       default:

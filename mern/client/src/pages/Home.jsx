@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useHomeSearchSuggestions } from "../hooks/useHomeSearchSuggestions";
 
 // Components
 import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard, SearchBar } from '../components';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [latestReports, setLatestReports] = useState([]);
   const [latestClaims, setLatestClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [reportFilter, setReportFilter] = useState("newest");
   const [claimFilter, setClaimFilter] = useState("newest");
+
+  // Search suggestions for the search bar
+  const {
+    suggestions,
+    isLoading: suggestionsLoading,
+    disableSuggestions
+  } = useHomeSearchSuggestions(searchQuery);
 
 
   useEffect(() => {
@@ -63,8 +73,13 @@ export default function Home() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Implement search functionality here
-      console.log("Searching for:", searchQuery);
+      setSearchLoading(true);
+      
+      // Navigate to search page with query
+      setTimeout(() => {
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchLoading(false);
+      }, 300); // Small delay to show loading animation
     }
   };
 
@@ -88,7 +103,12 @@ export default function Home() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onSubmit={handleSearch}
-          placeholder="Search reports, claims, or topics..."
+          placeholder="Search reports, claims, users, or topics..."
+          showDropdown={true}
+          suggestions={suggestions}
+          isLoading={searchLoading || suggestionsLoading}
+          disableSuggestions={disableSuggestions}
+          defaultSearchRoute="/search"
         />
       </div>
 

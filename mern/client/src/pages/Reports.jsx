@@ -11,6 +11,7 @@ export default function Reports() {
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("newest");
@@ -25,54 +26,62 @@ export default function Reports() {
 
   // Filter reports based on search query
 useEffect(() => {
-  let filtered = [...reports];
+  setSearchLoading(true);
+  
+  // Add a small delay to show loading animation
+  const timeoutId = setTimeout(() => {
+    let filtered = [...reports];
 
-  // Keyword filter
-  if (searchQuery.trim() !== "") {
-    filtered = filtered.filter(report =>
-      report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
-
-  // Sorting/Filtering
-  const now = new Date();
-  switch (selectedFilter) {
-    case "oldest":
-      filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      break;
-    case "today":
-      filtered = filtered.filter(r => new Date(r.createdAt).toDateString() === now.toDateString());
-      break;
-    case "thisWeek":
-      const weekAgo = new Date();
-      weekAgo.setDate(now.getDate() - 7);
-      filtered = filtered.filter(r => new Date(r.createdAt) > weekAgo);
-      break;
-    case "thisMonth":
-      const monthAgo = new Date();
-      monthAgo.setMonth(now.getMonth() - 1);
-      filtered = filtered.filter(r => new Date(r.createdAt) > monthAgo);
-      break;
-    case "mostLiked":
-      filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      break;
-    case "mostCommented":
-      filtered.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
-      break;
-    case "hottest":
-      filtered.sort((a, b) =>
-        ((b.likes || 0) + (b.commentCount || 0)) -
-        ((a.likes || 0) + (a.commentCount || 0))
+    // Keyword filter
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter(report =>
+        report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      break;
-    default: // newest
-      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }
+    }
 
-  setFilteredReports(filtered);
+    // Sorting/Filtering
+    const now = new Date();
+    switch (selectedFilter) {
+      case "oldest":
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        break;
+      case "today":
+        filtered = filtered.filter(r => new Date(r.createdAt).toDateString() === now.toDateString());
+        break;
+      case "thisWeek":
+        const weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+        filtered = filtered.filter(r => new Date(r.createdAt) > weekAgo);
+        break;
+      case "thisMonth":
+        const monthAgo = new Date();
+        monthAgo.setMonth(now.getMonth() - 1);
+        filtered = filtered.filter(r => new Date(r.createdAt) > monthAgo);
+        break;
+      case "mostLiked":
+        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        break;
+      case "mostCommented":
+        filtered.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
+        break;
+      case "hottest":
+        filtered.sort((a, b) =>
+          ((b.likes || 0) + (b.commentCount || 0)) -
+          ((a.likes || 0) + (a.commentCount || 0))
+        );
+        break;
+      default: // newest
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    setFilteredReports(filtered);
+    setSearchLoading(false);
+  }, 300); // 300ms delay to show loading animation
+  
+  return () => clearTimeout(timeoutId);
 }, [searchQuery, reports, selectedFilter]);
 
 
@@ -167,6 +176,7 @@ useEffect(() => {
           onChange={(e) => setSearchQuery(e.target.value)}
           onSubmit={handleSearch}
           placeholder="Search reports by title, content, author, or verdict...."
+          isLoading={searchLoading}
         />
 
         {/*Filter */}
