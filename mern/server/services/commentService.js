@@ -46,7 +46,7 @@ class CommentService {
         }
       }
 
-      // ✅ Create notification
+      // Create notification
       if (recipientId) {
         const notif = await Notification.create({
           recipientId,

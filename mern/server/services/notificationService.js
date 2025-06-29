@@ -22,7 +22,7 @@ class NotificationService {
   static async getNotificationsByUser(userId) {
     const notifications = await Notification.find({ recipientId: userId })
       .sort({ createdAt: -1 })
-      .populate("senderId", "username")
+      .populate("senderId", "username profilePictureUrl")
       .lean();
 
     return notifications;

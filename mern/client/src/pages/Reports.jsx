@@ -16,8 +16,8 @@ export default function Reports() {
   const [selectedFilter, setSelectedFilter] = useState("newest");
 
 
-  // Check if user is an admin
-  const isAdmin = isLoggedIn && user?.role === "admin";
+  // Check if user is a researcher
+ const canResearch = isLoggedIn && (user?.role === "admin" || user?.role === "researcher");
 
   useEffect(() => {
     fetchReports();
@@ -135,7 +135,7 @@ useEffect(() => {
 
       {/* Header */}
       <div className="mb-8">
-        {/* Title and Admin Button Row */}
+        {/* Title and Researcher Button Row */}
         <div className="relative mb-6">
           {/* Centered Title */}
           <div className="text-center">
@@ -145,8 +145,8 @@ useEffect(() => {
             </p>
           </div>
 
-          {/* Admin: Make A Report Button - Absolute positioned to top right */}
-          {isAdmin && (
+          {/* Reseracher: Make A Report Button - Absolute positioned to top right */}
+          {canResearch && (
             <div className="absolute top-0 right-0">
               <button
                 onClick={() => setShowCreateModal(true)}
@@ -210,7 +210,7 @@ useEffect(() => {
         )}
       </div>
 
-      {/* Admin: Create Report Modal */}
+      {/* Researcher: Create Report Modal */}
       <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} onSubmitFinish={handleSubmitFinish}/>
     </div>
   );

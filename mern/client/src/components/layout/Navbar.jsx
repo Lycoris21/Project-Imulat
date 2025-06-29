@@ -85,7 +85,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           <NavItem
             key={item.name}
             to={item.to}
-            name={item.name} // ✅ pass this!
+            name={item.name}
           />
         ))}
       </div>

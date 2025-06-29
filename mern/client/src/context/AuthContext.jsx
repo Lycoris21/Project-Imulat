@@ -10,28 +10,27 @@ export function useAuth() {
 
 // Provider component
 export function AuthProvider({ children }) {
-  const [user, setUser ] = useState(null);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser  = localStorage.getItem("user");
-    if (storedUser ) {
-      const parsed = JSON.parse(storedUser );
-      console.log("🔍 Loaded user from localStorage:", parsed);
-      setUser (parsed);
-    }
-  }, []);
+  const [user, setUser] = useState(() => {
+    const local = localStorage.getItem("user");
+    const session = sessionStorage.getItem("user");
+    return local ? JSON.parse(local) : session ? JSON.parse(session) : null;
+  });
 
   // Login function
-  const login = (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser (userData);
+  const login = (userData, remember = false) => {
+    if (remember) {
+      localStorage.setItem("user", JSON.stringify(userData));
+    } else {
+      sessionStorage.setItem("user", JSON.stringify(userData));
+    }
+    setUser(userData);
   };
 
   // Logout function
   const logout = () => {
     localStorage.removeItem("user");
-    setUser (null);
+    sessionStorage.removeItem("user");
+    setUser(null);
   };
 
   const value = {

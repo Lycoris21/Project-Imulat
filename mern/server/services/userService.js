@@ -18,8 +18,8 @@ class UserService {
     const claims = await claimService.getClaimsByUser(id); // must use .lean({ virtuals: true }) internally
     user.claims = claims;
 
-    // Step 3: If admin, get reports using service
-    if (user?.role === 'admin') {
+    // Step 3: If researcher, get reports using service
+    if (user?.role === 'admin' || user?.role === 'researcher') {
       const reports = await reportService.getReportsByUser(id); // already populates and returns virtuals
       user.reports = reports;
     }

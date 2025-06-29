@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({  username: {
+const userSchema = new mongoose.Schema({
+  username: {
     type: String,
     required: true,
     unique: true,
@@ -23,21 +24,19 @@ const userSchema = new mongoose.Schema({  username: {
   birthdate: {
     type: Date,
     required: false
-  },  
+  },
   bio: {
     type: String,
     maxlength: 500,
     trim: true
-  },  
+  },
   profilePictureUrl: {
     type: String,
     trim: true,
     default: null,
     validate: {
-      validator: function(v) {
-        // Only validate if a URL is provided
+      validator: function (v) {
         if (!v) return true;
-        // Basic URL validation
         return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
       },
       message: 'Profile picture must be a valid image URL (jpg, jpeg, png, gif, webp)'
@@ -48,22 +47,31 @@ const userSchema = new mongoose.Schema({  username: {
     trim: true,
     default: null,
     validate: {
-      validator: function(v) {
-        // Only validate if a URL is provided
+      validator: function (v) {
         if (!v) return true;
-        // Basic URL validation
         return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
       },
-      message: 'Background image must be a valid image URL (jpg, jpeg, png, gif, webp)'
+      message: 'Cover photo must be a valid image URL (jpg, jpeg, png, gif, webp)'
     }
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'researcher'],
     default: 'user'
+  },
+
+  // Password reset fields
+  resetToken: {
+    type: String,
+    default: null
+  },
+  resetTokenExpiry: {
+    type: Date,
+    default: null
   }
+
 }, {
-  timestamps: true // This automatically adds createdAt and updatedAt
+  timestamps: true
 });
 
 // Create indexes for better query performance

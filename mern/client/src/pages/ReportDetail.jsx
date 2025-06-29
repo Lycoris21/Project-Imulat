@@ -73,14 +73,14 @@ export default function ReportDetail() {
         });
       }
 
-      // ✅ Update user reaction state immediately
+      // Update user reaction state immediately
       setUserReaction(newReaction);
 
-      // ✅ Refetch fresh reaction counts
+      // Refetch fresh reaction counts
       const countsRes = await fetch(`http://localhost:5050/api/reactions/counts/report/${id}`);
       const counts = await countsRes.json();
 
-      // ✅ Apply updated counts to report state
+      // Apply updated counts to report state
       setReport((prev) => ({
         ...prev,
         reactionCounts: counts,

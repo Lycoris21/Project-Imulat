@@ -16,7 +16,7 @@ export default function Profile() {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [reactionCounts, setReactionCounts] = useState({ likes: 0, dislikes: 0 });
 
-    const isAdmin = user?.role === "admin";
+    const canResearch = user?.role === "admin" || user?.role === "researcher";
 
     // Check for profile update success
     useEffect(() => {
@@ -137,7 +137,7 @@ export default function Profile() {
                         {/* Show Edit Profile only for current user's own profile */}
                         {user && profileData && user._id === profileData._id ? (
                             <Link
-                                to="/EditProfile"
+                                to="/edit-profile"
                                 className="border-[0.5px] border-dark bg-white text-dark py-1 px-4 rounded hover:bg-dark hover:text-white hover:border-white">
                                 Edit Profile
                             </Link>
@@ -154,7 +154,7 @@ export default function Profile() {
                 </div>
 
                 {/* Claims / Reports Tabs */}
-                {(isAdmin && Array.isArray(profileData.reports) && profileData.reports.length > 0) ? (
+                {(canResearch && Array.isArray(profileData.reports) && profileData.reports.length > 0) ? (
                 <div className="mt-8">
                     {/* Tabs */}
                     <div className="flex border-b mb-4 space-x-4 ">
@@ -199,7 +199,7 @@ export default function Profile() {
                     )}
                 </div>
                 ) : (
-                // Show just Claims if user is not admin or has no reports
+                // Show just Claims if user is not researcher or has no reports
                 <div className="mt-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
                     <div className="space-y-4">

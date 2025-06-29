@@ -160,7 +160,7 @@ export default function ClaimDetail() {
           targetType="claim" 
         />
 
-        {/* Admin: Create Report Modal */}
+        {/* Researcher: Create Report Modal */}
         <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} claimId={claim?._id}/>
       </div>
     </div>

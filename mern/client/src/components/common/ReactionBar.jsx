@@ -11,12 +11,12 @@ export default function ReactionBar({
     onReact,
     onBookmark,
     onShare,
-    handleOpenModal, // ✅ optional
+    handleOpenModal,
 }) {
     const location = useLocation();
     const isClaimDetailPage = location.pathname.startsWith("/claims/");
     const { user } = useAuth();
-    const isAdmin = user?.role === "admin"; // ✅ Fix this to check for role, not just _id
+    const canResearch = user?.role === "admin" || user?.role === "researcher";
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     const handleReaction = (reactionType) => {
@@ -97,8 +97,8 @@ export default function ReactionBar({
                     </button>
                 </div>
 
-                {/* Admin-only Report Button (optional) */}
-                {isAdmin && isClaimDetailPage && handleOpenModal && (
+                {/* Researcher-only Report Button (optional) */}
+                {canResearch && isClaimDetailPage && handleOpenModal && (
                     <button
                         onClick={handleOpenModal}
                         className="px-4 py-2 bg-dark text-white font-semibold rounded-lg shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"

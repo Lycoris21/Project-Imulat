@@ -70,7 +70,7 @@ mern/server/
 
 ## Key Features
 
-### ✅ **Implemented**
+### **Implemented**
 - Clean separation of concerns
 - Input validation with express-validator
 - Global error handling middleware

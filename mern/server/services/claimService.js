@@ -80,7 +80,7 @@ class ClaimService {
     const { claimContent } = claimData;
 
     try {
-      console.log("Creating claim with content:", claimContent); // ✅ log input
+      console.log("Creating claim with content:", claimContent); // log input
 
       const aiClaimSummary = aiEnabled ? await aiSummaryService.generateAISummary(claimContent) : "SAMPLE AI SUMMARY";
       const aiTruthIndex = aiEnabled ? await aiSummaryService.generateTruthIndex(claimContent) : Math.floor(Math.random() * 101);;
@@ -92,7 +92,7 @@ class ClaimService {
       });
 
       const savedClaim = await newClaim.save();
-      console.log("Saved Claim:", savedClaim); // ✅ confirm successful DB save
+      console.log("Saved Claim:", savedClaim); // confirm successful DB save
 
       return savedClaim;
     } catch (err) {
