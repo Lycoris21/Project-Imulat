@@ -23,6 +23,7 @@ import EditProfile from "./pages/EditProfile";
 import Bookmarks from "./pages/Bookmarks";
 import AllBookmarks from "./pages/AllBookmarks";
 import CollectionView from "./pages/CollectionView";
+import BookmarksSearch from "./pages/BookmarksSearch";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: "edit-profile", element: <EditProfile /> },
       { path: "bookmarks", element: <Bookmarks /> },
       { path: "bookmarks/all", element: <AllBookmarks /> },
+      { path: "bookmarks/search", element: <BookmarksSearch /> },
       { path: "bookmarks/collection/:collectionId", element: <CollectionView /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "reset-password/:token", element: <ResetPassword /> },

@@ -1,19 +1,24 @@
 import BookmarkService from '../services/bookmarkService.js';
+import mongoose from 'mongoose';
 
 class BookmarkController {
   // Get user bookmarks
   static async getUserBookmarks(req, res) {
     try {
       const { userId } = req.params;
-      const { collectionId, search } = req.query;
+      const { collectionId, search, limit } = req.query;
+
+      console.log('BookmarkController.getUserBookmarks params:', { userId, collectionId, search, limit });
 
       let bookmarks;
       if (search) {
-        bookmarks = await BookmarkService.searchBookmarks(userId, search, collectionId);
+        const parsedLimit = limit ? parseInt(limit, 10) : null;
+        bookmarks = await BookmarkService.searchBookmarks(userId, search, collectionId, parsedLimit);
       } else {
         bookmarks = await BookmarkService.getUserBookmarks(userId, collectionId);
       }
 
+      console.log('BookmarkController.getUserBookmarks result:', bookmarks.length, 'bookmarks');
       res.status(200).json(bookmarks);
     } catch (error) {
       console.error('Error fetching bookmarks:', error);

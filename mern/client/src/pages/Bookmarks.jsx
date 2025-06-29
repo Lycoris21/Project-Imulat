@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSearchSuggestions } from "../hooks/useSearchSuggestions";
 
 // Components
 import { LoadingScreen, ErrorScreen, SearchBar } from '../components';
@@ -15,7 +16,14 @@ export default function Bookmarks() {
     const [error, setError] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingCollection, setEditingCollection] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    
+    // Search functionality with suggestions
+    const {
+        query: searchQuery,
+        updateQuery: setSearchQuery,
+        suggestions,
+        isLoading: suggestionsLoading
+    } = useSearchSuggestions();
 
     // Redirect if not logged in
     useEffect(() => {
@@ -126,11 +134,15 @@ export default function Bookmarks() {
     };
 
     // Handle search
-    const handleSearch = (query) => {
-        setSearchQuery(query);
-        if (query.trim()) {
-            navigate(`/bookmarks/search?q=${encodeURIComponent(query)}`);
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/bookmarks/search?q=${encodeURIComponent(searchQuery)}`);
         }
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
     };
 
     useEffect(() => {
@@ -163,14 +175,15 @@ export default function Bookmarks() {
                     <h1 className="text-3xl font-bold text-white mb-4 text-center">My Bookmarks</h1>
                     
                     {/* Search Bar */}
-                    <div className="mb-6">
-                        <SearchBar 
-                            onSearch={handleSearch}
-                            placeholder="Search bookmarks..."
-                            value={searchQuery}
-                            onChange={setSearchQuery}
-                        />
-                    </div>
+                    <SearchBar 
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onSubmit={handleSearch}
+                        placeholder="Search bookmarks and collections..."
+                        showDropdown={true}
+                        suggestions={suggestions}
+                        isLoading={suggestionsLoading}
+                    />
                 </div>
 
                 {/* Quick Actions */}

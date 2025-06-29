@@ -296,7 +296,7 @@ export default function ReportDetail() {
         onSave={handleSaveBookmark}
         itemId={report?._id}
         itemType="report"
-        itemTitle={report?.title}
+        itemTitle={report?.reportTitle}
       />
     </div>
   );

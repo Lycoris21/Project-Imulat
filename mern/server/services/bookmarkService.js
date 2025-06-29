@@ -1,27 +1,82 @@
-import { Bookmark, Collection, Claim, Report } from '../models/index.js';
+import { Bookmark, Collection, Claim, Report, Comment } from '../models/index.js';
+import ReactionService from './reactionService.js';
 
 class BookmarkService {
   // Get all bookmarks for a user
-  static async getUserBookmarks(userId, collectionId = null) {
-    const query = { userId };
-    if (collectionId) {
-      query.collectionId = collectionId;
-    } else if (collectionId === null) {
-      // Only get bookmarks without collection when explicitly looking for uncategorized
-      query.collectionId = null;
+  static async getUserBookmarks(userId, collectionId = undefined) {
+    try {
+      const query = { userId };
+      
+      // Only filter by collection if collectionId is explicitly provided
+      if (collectionId !== undefined) {
+        query.collectionId = collectionId;
+      }
+      // If collectionId is undefined, show ALL bookmarks (both with and without collections)
+
+      console.log('BookmarkService.getUserBookmarks query:', query);
+      
+      const bookmarks = await Bookmark.find(query).sort({ createdAt: -1 });
+
+      console.log('BookmarkService.getUserBookmarks found bookmarks:', bookmarks.length);
+      
+      // Manually populate targetId based on targetType
+      const populatedBookmarks = await Promise.all(
+        bookmarks.map(async (bookmark) => {
+          let populatedTarget = null;
+          
+          if (bookmark.targetType === 'report') {
+            const report = await Report.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
+            if (report) {
+              // Add reaction counts and comment count like in reportService
+              const commentCount = await Comment.countDocuments({
+                targetType: 'report',
+                targetId: report._id,
+              });
+              const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+              
+              populatedTarget = {
+                ...report.toObject({ virtuals: true }),
+                commentCount,
+                reactionCounts
+              };
+            }
+          } else if (bookmark.targetType === 'claim') {
+            const claim = await Claim.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
+            if (claim) {
+              // Add reaction counts and comment count like in claimService
+              const commentCount = await Comment.countDocuments({
+                targetType: 'claim',
+                targetId: claim._id,
+              });
+              const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
+              
+              populatedTarget = {
+                ...claim.toObject({ virtuals: true }),
+                commentCount,
+                reactionCounts
+              };
+            }
+          }
+          
+          if (populatedTarget) {
+            return {
+              ...bookmark.toObject(),
+              targetId: populatedTarget
+            };
+          }
+          return null; // Will be filtered out
+        })
+      );
+      
+      // Filter out bookmarks where target was not found (deleted reports/claims)
+      const filteredBookmarks = populatedBookmarks.filter(bookmark => bookmark !== null);
+      console.log('BookmarkService.getUserBookmarks after filtering:', filteredBookmarks.length);
+      
+      return filteredBookmarks;
+    } catch (error) {
+      console.error('Error in BookmarkService.getUserBookmarks:', error);
+      throw error;
     }
-
-    const bookmarks = await Bookmark.find(query)
-      .populate({
-        path: 'targetId',
-        populate: {
-          path: 'userId',
-          select: 'username profilePictureUrl'
-        }
-      })
-      .sort({ createdAt: -1 });
-
-    return bookmarks;
   }
 
   // Get all collections for a user
@@ -78,31 +133,91 @@ class BookmarkService {
   }
 
   // Search bookmarks
-  static async searchBookmarks(userId, searchQuery, collectionId = null) {
-    const query = { userId };
-    if (collectionId) {
-      query.collectionId = collectionId;
+  static async searchBookmarks(userId, searchQuery, collectionId = undefined, limit = null) {
+    try {
+      const query = { userId };
+      
+      // Only filter by collection if collectionId is explicitly provided
+      if (collectionId !== undefined) {
+        query.collectionId = collectionId;
+      }
+      // If collectionId is undefined, search ALL bookmarks (both with and without collections)
+
+      const bookmarks = await Bookmark.find(query).sort({ createdAt: -1 });
+
+      // Manually populate and filter based on search query
+      const searchResults = await Promise.all(
+        bookmarks.map(async (bookmark) => {
+          let populatedTarget = null;
+          
+          if (bookmark.targetType === 'report') {
+            const report = await Report.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
+            if (report) {
+              // Add reaction counts and comment count like in reportService
+              const commentCount = await Comment.countDocuments({
+                targetType: 'report',
+                targetId: report._id,
+              });
+              const reactionCounts = await ReactionService.countReactions(report._id, 'report');
+              
+              populatedTarget = {
+                ...report.toObject({ virtuals: true }),
+                commentCount,
+                reactionCounts
+              };
+            }
+          } else if (bookmark.targetType === 'claim') {
+            const claim = await Claim.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
+            if (claim) {
+              // Add reaction counts and comment count like in claimService
+              const commentCount = await Comment.countDocuments({
+                targetType: 'claim',
+                targetId: claim._id,
+              });
+              const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
+              
+              populatedTarget = {
+                ...claim.toObject({ virtuals: true }),
+                commentCount,
+                reactionCounts
+              };
+            }
+          }
+          
+          if (populatedTarget) {
+            // Check if the populated target matches the search query
+            const searchLower = searchQuery.toLowerCase();
+            const matchesSearch = 
+              (populatedTarget.reportTitle && populatedTarget.reportTitle.toLowerCase().includes(searchLower)) ||
+              (populatedTarget.claimTitle && populatedTarget.claimTitle.toLowerCase().includes(searchLower)) ||
+              (populatedTarget.reportContent && populatedTarget.reportContent.toLowerCase().includes(searchLower)) ||
+              (populatedTarget.claimContent && populatedTarget.claimContent.toLowerCase().includes(searchLower)) ||
+              (populatedTarget.reportDescription && populatedTarget.reportDescription.toLowerCase().includes(searchLower));
+            
+            if (matchesSearch) {
+              return {
+                ...bookmark.toObject(),
+                targetId: populatedTarget,
+                target: populatedTarget // For suggestions compatibility
+              };
+            }
+          }
+          return null;
+        })
+      );
+      
+      // Filter out non-matching bookmarks and apply limit if specified
+      const filteredResults = searchResults.filter(bookmark => bookmark !== null);
+      
+      if (limit && typeof limit === 'number' && limit > 0) {
+        return filteredResults.slice(0, limit);
+      }
+      
+      return filteredResults;
+    } catch (error) {
+      console.error('Error in BookmarkService.searchBookmarks:', error);
+      throw error;
     }
-
-    const bookmarks = await Bookmark.find(query)
-      .populate({
-        path: 'targetId',
-        match: {
-          $or: [
-            { title: { $regex: searchQuery, $options: 'i' } },
-            { content: { $regex: searchQuery, $options: 'i' } },
-            { description: { $regex: searchQuery, $options: 'i' } }
-          ]
-        },
-        populate: {
-          path: 'userId',
-          select: 'username profilePictureUrl'
-        }
-      })
-      .sort({ createdAt: -1 });
-
-    // Filter out bookmarks where populate didn't match
-    return bookmarks.filter(bookmark => bookmark.targetId);
   }
 
   // Update collection

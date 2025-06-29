@@ -3,8 +3,7 @@ import { useNavigate, Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // Components
-import { LoadingScreen, ErrorScreen, SearchBar } from '../components';
-import BookmarkSection from '../components/bookmarks/BookmarkSection';
+import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard } from '../components';
 import CreateCollectionModal from '../components/bookmarks/CreateCollectionModal';
 
 export default function CollectionView() {
@@ -16,8 +15,8 @@ export default function CollectionView() {
     const [bookmarks, setBookmarks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [showEditModal, setShowEditModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Redirect if not logged in
     useEffect(() => {
@@ -150,22 +149,32 @@ export default function CollectionView() {
         }
     };
 
-    // Handle search (filter locally for now)
-    const handleSearch = (query) => {
-        setSearchQuery(query);
+    // Handle search change for local filtering only
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    // No-op for form submission since we only do local filtering
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        // Do nothing - search is handled in real-time by filtering
     };
 
     // Filter bookmarks based on search
     const filteredBookmarks = bookmarks.filter(bookmark => {
-        if (!searchQuery.trim()) return true;
+        if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) return true;
         
         const searchLower = searchQuery.toLowerCase();
         const target = bookmark.targetId;
         
         return (
-            target.title?.toLowerCase().includes(searchLower) ||
-            target.description?.toLowerCase().includes(searchLower) ||
-            target.content?.toLowerCase().includes(searchLower)
+            target.reportTitle?.toLowerCase().includes(searchLower) ||
+            target.claimTitle?.toLowerCase().includes(searchLower) ||
+            target.reportContent?.toLowerCase().includes(searchLower) ||
+            target.claimContent?.toLowerCase().includes(searchLower) ||
+            target.reportDescription?.toLowerCase().includes(searchLower) ||
+            target.aiReportSummary?.toLowerCase().includes(searchLower) ||
+            target.aiClaimSummary?.toLowerCase().includes(searchLower)
         );
     });
 
@@ -208,7 +217,7 @@ export default function CollectionView() {
                     <div className="flex items-center mb-4">
                         <Link
                             to="/bookmarks"
-                            className="inline-flex items-center text-blue-600 hover:text-blue-800 mr-4"
+                            className="inline-flex items-center text-white hover:text-gray-300 mr-4"
                         >
                             <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -219,7 +228,7 @@ export default function CollectionView() {
                     
                     {/* Banner Section */}
                     {collection.collectionBanner && (
-                        <div className="h-48 bg-gray-200 rounded-lg overflow-hidden mb-6">
+                        <div className="h-60 bg-gray-200 rounded-lg overflow-hidden mb-6">
                             <img 
                                 src={collection.collectionBanner} 
                                 alt={`${collection.collectionName} banner`}
@@ -236,7 +245,7 @@ export default function CollectionView() {
                                         <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                                     </svg>
                                 </div>
-                                <h1 className="text-3xl font-bold text-gray-900">
+                                <h1 className="text-3xl font-bold text-white">
                                     {collection.collectionName}
                                 </h1>
                             </div>
@@ -245,7 +254,7 @@ export default function CollectionView() {
                         <div className="flex items-center space-x-2 ml-4">
                             <button
                                 onClick={() => setShowEditModal(true)}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center px-3 py-2 border bg-white border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
                             >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -255,7 +264,7 @@ export default function CollectionView() {
                             
                             <button
                                 onClick={handleDeleteCollection}
-                                className="inline-flex items-center px-3 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                                className="inline-flex items-center px-3 py-2 border bg-white border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
                             >
                                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clipRule="evenodd" />
@@ -267,17 +276,16 @@ export default function CollectionView() {
                     </div>
                     
                     {/* Search Bar */}
-                    <div className="mb-6">
-                        <SearchBar 
-                            onSearch={handleSearch}
-                            placeholder="Search in this collection..."
-                            value={searchQuery}
-                            onChange={setSearchQuery}
-                        />
-                    </div>
+                    <SearchBar
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onSubmit={handleSearchSubmit}
+                        placeholder="Search in this collection..."
+                        disableSuggestions={true}
+                    />
 
                     {/* Stats */}
-                    <div className="flex items-center space-x-6 text-sm text-gray-600">
+                    <div className="flex items-center justify-center space-x-6 text-sm text-gray-300">
                         <span>
                             {filteredBookmarks.length} {filteredBookmarks.length === 1 ? 'bookmark' : 'bookmarks'} 
                             {searchQuery ? ' found' : ' in collection'}
@@ -295,11 +303,11 @@ export default function CollectionView() {
                 {filteredBookmarks.length === 0 ? (
                     <div className="text-center py-12">
                         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            <svg className="w-12 h-12 text-p-[#4B548B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 002-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        <h3 className="text-lg font-medium text-gray-300 mb-2">
                             {searchQuery ? 'No bookmarks found' : 'Collection is empty'}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -310,20 +318,76 @@ export default function CollectionView() {
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-8">
-                        <BookmarkSection
-                            title="Reports"
-                            bookmarks={filteredBookmarks}
-                            onRemoveBookmark={handleRemoveBookmark}
-                            emptyMessage={searchQuery ? "No reports found matching your search" : "No reports in this collection"}
-                        />
-                        
-                        <BookmarkSection
-                            title="Claims"
-                            bookmarks={filteredBookmarks}
-                            onRemoveBookmark={handleRemoveBookmark}
-                            emptyMessage={searchQuery ? "No claims found matching your search" : "No claims in this collection"}
-                        />
+                    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Reports Section */}
+                        <div className="bg-white rounded-2xl shadow-xl p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800">
+                                    Reports ({filteredBookmarks.filter(b => b.targetType === 'report').length})
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                {filteredBookmarks
+                                    .filter(bookmark => bookmark.targetType === 'report')
+                                    .map((bookmark) => (
+                                        <div key={`report-${bookmark.targetId._id}`} className="relative group">
+                                            <ReportCard report={bookmark.targetId} variant="compact" />
+                                            <button
+                                                onClick={() => handleRemoveBookmark(bookmark)}
+                                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                                                title="Remove bookmark"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))
+                                }
+                                {filteredBookmarks.filter(b => b.targetType === 'report').length === 0 && (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">
+                                            {searchQuery ? "No reports found matching your search" : "No reports in this collection"}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Claims Section */}
+                        <div className="bg-white rounded-2xl shadow-xl p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800">
+                                    Claims ({filteredBookmarks.filter(b => b.targetType === 'claim').length})
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                {filteredBookmarks
+                                    .filter(bookmark => bookmark.targetType === 'claim')
+                                    .map((bookmark) => (
+                                        <div key={`claim-${bookmark.targetId._id}`} className="relative group">
+                                            <ClaimCard claim={bookmark.targetId} variant="compact" />
+                                            <button
+                                                onClick={() => handleRemoveBookmark(bookmark)}
+                                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                                                title="Remove bookmark"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))
+                                }
+                                {filteredBookmarks.filter(b => b.targetType === 'claim').length === 0 && (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">
+                                            {searchQuery ? "No claims found matching your search" : "No claims in this collection"}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
