@@ -33,10 +33,12 @@ const userSchema = new mongoose.Schema({
   profilePictureUrl: {
     type: String,
     trim: true,
-    default: null,
+  default:
+    null,
     validate: {
       validator: function (v) {
-        if (!v) return true;
+        if (!v)
+          return true;
         return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
       },
       message: 'Profile picture must be a valid image URL (jpg, jpeg, png, gif, webp)'
@@ -45,10 +47,12 @@ const userSchema = new mongoose.Schema({
   coverPhotoUrl: {
     type: String,
     trim: true,
-    default: null,
+  default:
+    null,
     validate: {
       validator: function (v) {
-        if (!v) return true;
+        if (!v)
+          return true;
         return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
       },
       message: 'Cover photo must be a valid image URL (jpg, jpeg, png, gif, webp)'
@@ -57,17 +61,26 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['user', 'admin', 'researcher'],
-    default: 'user'
+  default:
+    'user'
   },
 
   // Password reset fields
   resetToken: {
     type: String,
-    default: null
+  default:
+    null
   },
   resetTokenExpiry: {
     type: Date,
-    default: null
+  default:
+    null
+  },
+
+  deletedAt: {
+    type: Date,
+  default:
+    null
   }
 
 }, {
@@ -80,7 +93,7 @@ const userSchema = new mongoose.Schema({
 // userSchema.index({ email: 1 });
 
 // Virtual to get user's age from birthdate
-userSchema.virtual('age').get(function() {
+userSchema.virtual('age').get(function () {
   if (this.birthdate) {
     return Math.floor((Date.now() - this.birthdate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   }

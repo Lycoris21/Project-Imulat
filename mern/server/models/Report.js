@@ -8,9 +8,10 @@ const reportSchema = new mongoose.Schema({
     required: true
   },
   claimIds: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Claim'
-  }], // Array to handle "can be many" relationship
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Claim'
+    }
+  ], // Array to handle "can be many" relationship
   reportTitle: {
     type: String,
     required: true,
@@ -20,11 +21,13 @@ const reportSchema = new mongoose.Schema({
   reportCoverUrl: {
     type: String,
     trim: true,
-    default: null,
+  default:
+    null,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         // Only validate if a URL is provided
-        if (!v) return true;
+        if (!v)
+          return true;
         // Basic URL validation for image formats
         return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v);
       },
@@ -50,14 +53,24 @@ const reportSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },  reportReferences: {
+  },
+  reportReferences: {
     type: String,
     trim: true
+  },
+  deletedAt: {
+    type: Date,
+  default:
+    null
   }
 }, {
   timestamps: true, // This automatically adds createdAt and updatedAt
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toJSON: {
+    virtuals: true
+  },
+  toObject: {
+    virtuals: true
+  }
 });
 
 reportSchema.virtual('truthVerdictParsed').get(function () {
@@ -65,10 +78,19 @@ reportSchema.virtual('truthVerdictParsed').get(function () {
 });
 
 // Create indexes for better query performance
-reportSchema.index({ userId: 1 });
-reportSchema.index({ truthVerdict: 1 });
-reportSchema.index({ reportTitle: 'text', reportContent: 'text' }); // Text search
-reportSchema.index({ createdAt: -1 }); // For sorting by date
+reportSchema.index({
+  userId: 1
+});
+reportSchema.index({
+  truthVerdict: 1
+});
+reportSchema.index({
+  reportTitle: 'text',
+  reportContent: 'text'
+}); // Text search
+reportSchema.index({
+  createdAt: -1
+}); // For sorting by date
 
 const Report = mongoose.model('Report', reportSchema);
 

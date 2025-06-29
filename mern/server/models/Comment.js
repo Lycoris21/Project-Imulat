@@ -19,7 +19,8 @@ const commentSchema = new mongoose.Schema({
   parentCommentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comment',
-    default: null // For replies - null means it's a top-level comment
+  default:
+    null // For replies - null means it's a top-level comment
   },
   commentContent: {
     type: String,
@@ -29,29 +30,47 @@ const commentSchema = new mongoose.Schema({
   },
   likes: {
     type: Number,
-    default: 0
+  default:
+    0
   },
   dislikes: {
     type: Number,
-    default: 0
+  default:
+    0
   },
   likedBy: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
   dislikedBy: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ],
+  deletedAt: {
+    type: Date,
+  default:
+    null
+  }
 }, {
   timestamps: true // This automatically adds createdAt and updatedAt
 });
 
 // Create indexes for better query performance
-commentSchema.index({ userId: 1 });
-commentSchema.index({ targetId: 1, targetType: 1 });
-commentSchema.index({ parentCommentId: 1 });
-commentSchema.index({ createdAt: -1 }); // For sorting by date
+commentSchema.index({
+  userId: 1
+});
+commentSchema.index({
+  targetId: 1,
+  targetType: 1
+});
+commentSchema.index({
+  parentCommentId: 1
+});
+commentSchema.index({
+  createdAt: -1
+}); // For sorting by date
 
 // Virtual to get replies to this comment
 commentSchema.virtual('replies', {

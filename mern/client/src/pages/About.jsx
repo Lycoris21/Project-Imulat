@@ -1,7 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function About() {
+  const [stats, setStats] = useState({
+    claimsVerified: 0,
+    reportsPublished: 0,
+    activeUsers: 0,
+    accuracyRate: "—",
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:5050/api/stats");
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -19,12 +40,12 @@ export default function About() {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Mission</h2>
             <p className="text-gray-600 text-lg leading-relaxed mb-6">
-              In an era of information overload, Project IMULAT stands as a beacon of truth. 
-              We combine advanced AI technology with human expertise to verify claims, 
+              In an era of information overload, Project IMULAT stands as a beacon of truth.
+              We combine advanced AI technology with human expertise to verify claims,
               debunk misinformation, and provide reliable, fact-based reporting.
             </p>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Our platform empowers users to submit claims for verification while accessing 
+              Our platform empowers users to submit claims for verification while accessing
               comprehensive fact-check reports backed by credible sources and evidence.
             </p>
           </div>
@@ -42,7 +63,7 @@ export default function About() {
                   <p className="text-gray-600">Users submit claims they want verified</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4">
                 <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   2
@@ -52,7 +73,7 @@ export default function About() {
                   <p className="text-gray-600">Our AI generates initial assessments and truth indices</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4">
                 <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   3
@@ -62,7 +83,7 @@ export default function About() {
                   <p className="text-gray-600">Human fact-checkers create comprehensive reports</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4">
                 <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   4
@@ -117,19 +138,19 @@ export default function About() {
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Our Impact</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-base mb-2">1,247</div>
+              <div className="text-4xl font-bold text-base mb-2">{stats.claimsVerified}</div>
               <div className="text-gray-600 font-medium">Claims Verified</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">892</div>
+              <div className="text-4xl font-bold text-base mb-2">{stats.reportsPublished}</div>
               <div className="text-gray-600 font-medium">Reports Published</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">15,432</div>
+              <div className="text-4xl font-bold text-base mb-2">{stats.activeUsers}</div>
               <div className="text-gray-600 font-medium">Active Users</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">94%</div>
+              <div className="text-4xl font-bold text-base mb-2">{stats.accuracyRate}</div>
               <div className="text-gray-600 font-medium">Accuracy Rate</div>
             </div>
           </div>
@@ -139,7 +160,7 @@ export default function About() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Join the Fight Against Misinformation</h2>
           <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-            Be part of a community dedicated to truth and transparency. Submit claims, access verified reports, 
+            Be part of a community dedicated to truth and transparency. Submit claims, access verified reports,
             and help build a more informed world.
           </p>          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

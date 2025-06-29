@@ -9,7 +9,8 @@ const claimSchema = new mongoose.Schema({
   reportId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Report',
-    default: null // Nullable as per your ERD
+  default:
+    null // Nullable as per your ERD
   },
   claimTitle: {
     type: String,
@@ -25,7 +26,8 @@ const claimSchema = new mongoose.Schema({
   },
   claimSources: {
     type: String,
-    default: null // Nullable as per your ERD
+  default:
+    null // Nullable as per your ERD
   },
   aiClaimSummary: {
     type: String,
@@ -35,21 +37,36 @@ const claimSchema = new mongoose.Schema({
     type: Number,
     min: 0.0,
     max: 99.9, // Assuming truth index is between 0 and 99.9%
-    default: null
+  default:
+    null
   },
   aiClaimAnalysis: {
     type: String,
     trim: true
+  },
+  deletedAt: {
+    type: Date,
+  default:
+    null
   }
 }, {
   timestamps: true // This automatically adds createdAt and updatedAt
 });
 
 // Create indexes for better query performance
-claimSchema.index({ userId: 1 });
-claimSchema.index({ reportId: 1 });
-claimSchema.index({ aiTruthIndex: 1 });
-claimSchema.index({ claimTitle: 'text', claimContent: 'text' }); // Text search
+claimSchema.index({
+  userId: 1
+});
+claimSchema.index({
+  reportId: 1
+});
+claimSchema.index({
+  aiTruthIndex: 1
+});
+claimSchema.index({
+  claimTitle: 'text',
+  claimContent: 'text'
+}); // Text search
 
 const Claim = mongoose.model('Claim', claimSchema);
 
