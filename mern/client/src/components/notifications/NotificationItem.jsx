@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { formatRelativeTime } from '../../utils/time';
 
 export default function NotificationItem({ notification, onClose, refreshNotifications }) {
@@ -78,7 +78,6 @@ export default function NotificationItem({ notification, onClose, refreshNotific
 
   return (
     <div
-      onClick={handleClick}
       className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? "bg-blue-50" : ""}`}
     >
       <div className="flex items-center space-x-3">
@@ -101,7 +100,8 @@ export default function NotificationItem({ notification, onClose, refreshNotific
           </div>
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0"
+          onClick={handleClick}>
           <p className="text-sm text-gray-600 line-clamp-2">{getMessage()}</p>
           <p className="text-xs text-gray-500 mt-2">
             {formatRelativeTime(notification.createdAt)}
