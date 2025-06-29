@@ -6,6 +6,7 @@ import { formatRelativeTime } from '../utils/time.js';
 
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CreateReportModal, CommentsSection } from '../components';
+import BookmarkModal from '../components/modals/BookmarkModal';
 
 export default function ClaimDetail() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function ClaimDetail() {
   const [loading, setLoading] = useState(true);
   const [userReaction, setUserReaction] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     reportTitle: "",
@@ -38,6 +40,17 @@ export default function ClaimDetail() {
         if (reactionRes.ok) {
           const { reactionType } = await reactionRes.json();
           setUserReaction(reactionType || null);
+        }
+
+        // Check bookmark status
+        try {
+          const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user._id}/${id}/claim`);
+          if (bookmarkRes.ok) {
+            const bookmarkData = await bookmarkRes.json();
+            setIsBookmarked(bookmarkData.isBookmarked);
+          }
+        } catch (err) {
+          console.error('Error checking bookmark status:', err);
         }
       }
     } catch (err) {
@@ -82,8 +95,68 @@ export default function ClaimDetail() {
     }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+  const handleBookmark = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // If already bookmarked, remove it directly without modal
+    if (isBookmarked) {
+      try {
+        const response = await fetch('http://localhost:5050/api/bookmarks', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user._id,
+            targetId: id,
+            targetType: 'claim',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to remove bookmark');
+        }
+
+        setIsBookmarked(false);
+      } catch (error) {
+        console.error('Error removing bookmark:', error);
+        // You could show a toast notification here for the error
+      }
+    } else {
+      // If not bookmarked, open modal to select collection
+      setShowBookmarkModal(true);
+    }
+  };
+
+  const handleSaveBookmark = async ({ itemId, itemType, collectionId }) => {
+    try {
+      // Only handle adding bookmarks since removal is now handled directly
+      const response = await fetch('http://localhost:5050/api/bookmarks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          targetId: itemId,
+          targetType: itemType,
+          collectionId: collectionId || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add bookmark');
+      }
+
+      setIsBookmarked(true);
+    } catch (error) {
+      console.error('Error saving bookmark:', error);
+      throw error; // Re-throw to let modal handle the error
+    }
   };
 
   if (loading) {
@@ -162,6 +235,16 @@ export default function ClaimDetail() {
 
         {/* Researcher: Create Report Modal */}
         <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} claimId={claim?._id}/>
+
+        {/* Bookmark Modal */}
+        <BookmarkModal
+          isOpen={showBookmarkModal}
+          onClose={() => setShowBookmarkModal(false)}
+          onSave={handleSaveBookmark}
+          itemId={claim?._id}
+          itemType="claim"
+          itemTitle={claim?.claimTitle}
+        />
       </div>
     </div>
   );

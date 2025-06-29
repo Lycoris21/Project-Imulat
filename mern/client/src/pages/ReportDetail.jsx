@@ -7,6 +7,7 @@ import { getVerdictColor } from '../utils/colors.js';
 
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection } from '../components'
+import BookmarkModal from '../components/modals/BookmarkModal';
 
 export default function ReportDetail() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function ReportDetail() {
   const [loading, setLoading] = useState(true);
   const [userReaction, setUserReaction] = useState(null); // 'like', 'dislike', or null
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -27,6 +29,19 @@ export default function ReportDetail() {
         if (!reportRes.ok) throw new Error("Failed to fetch report");
         const reportData = await reportRes.json();
         setReport(reportData);
+
+        // Check bookmark status if user is logged in
+        if (user?._id) {
+          try {
+            const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user._id}/${id}/report`);
+            if (bookmarkRes.ok) {
+              const bookmarkData = await bookmarkRes.json();
+              setIsBookmarked(bookmarkData.isBookmarked);
+            }
+          } catch (err) {
+            console.error('Error checking bookmark status:', err);
+          }
+        }
 
         // Fetch user reaction (only if logged in)
         if (user?._id) {
@@ -90,9 +105,68 @@ export default function ReportDetail() {
     }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    // TODO: API call to save bookmark
+  const handleBookmark = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // If already bookmarked, remove it directly without modal
+    if (isBookmarked) {
+      try {
+        const response = await fetch('http://localhost:5050/api/bookmarks', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user._id,
+            targetId: id,
+            targetType: 'report',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to remove bookmark');
+        }
+
+        setIsBookmarked(false);
+      } catch (error) {
+        console.error('Error removing bookmark:', error);
+        // You could show a toast notification here for the error
+      }
+    } else {
+      // If not bookmarked, open modal to select collection
+      setShowBookmarkModal(true);
+    }
+  };
+
+  const handleSaveBookmark = async ({ itemId, itemType, collectionId }) => {
+    try {
+      // Only handle adding bookmarks since removal is now handled directly
+      const response = await fetch('http://localhost:5050/api/bookmarks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          targetId: itemId,
+          targetType: itemType,
+          collectionId: collectionId || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add bookmark');
+      }
+
+      setIsBookmarked(true);
+    } catch (error) {
+      console.error('Error saving bookmark:', error);
+      throw error; // Re-throw to let modal handle the error
+    }
   };
 
   if (loading) {
@@ -202,10 +276,10 @@ export default function ReportDetail() {
         <ReactionBar
           likes={report.reactionCounts.like}
           dislikes={report.reactionCounts.dislike}
-          isBookmarked={report.bookmarkedUsers?.includes(user?._id)}
+          isBookmarked={isBookmarked}
           userReaction={userReaction}
           onReact={handleReaction} // or "Report"
-          onBookmark={() => handleBookmark(report._id, "Report")}
+          onBookmark={handleBookmark}
         />
 
         {/* Comments Section */}
@@ -214,6 +288,16 @@ export default function ReportDetail() {
           targetType="report" 
         />
       </div>
+
+      {/* Bookmark Modal */}
+      <BookmarkModal
+        isOpen={showBookmarkModal}
+        onClose={() => setShowBookmarkModal(false)}
+        onSave={handleSaveBookmark}
+        itemId={report?._id}
+        itemType="report"
+        itemTitle={report?.title}
+      />
     </div>
   );
 }

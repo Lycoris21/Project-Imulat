@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function CreateCollectionModal({ isOpen, onClose, onCreate, collection = null }) {
   const [name, setName] = useState('');
   const [bannerUrl, setBannerUrl] = useState('');
+  const [bannerFile, setBannerFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const isEdit = !!collection;
 
@@ -17,6 +19,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
         setName('');
         setBannerUrl('');
       }
+      setBannerFile(null);
       setError('');
     }
   }, [isOpen, collection]);
@@ -51,12 +54,6 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
     };
   }, [isOpen, onClose]);
 
-  const handleBackdropClick = (event) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -69,7 +66,22 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
     setError('');
 
     try {
-      await onCreate({ name: name.trim(), bannerUrl: bannerUrl.trim() });
+      let finalBannerUrl = bannerUrl;
+
+      // Upload banner file if selected
+      if (bannerFile) {
+        const formData = new FormData();
+        formData.append("image", bannerFile);
+        const response = await fetch('http://localhost:5050/api/uploads/cover-photo', {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Banner upload failed");
+        finalBannerUrl = data.url;
+      }
+
+      await onCreate({ name: name.trim(), bannerUrl: finalBannerUrl || null });
       onClose();
     } catch (err) {
       setError(err.message || 'Failed to create collection');
@@ -83,7 +95,6 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
   return (
     <div 
       className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50"
-      onClick={handleBackdropClick}
     >
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative">
         {/* Close button */}
@@ -130,34 +141,102 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
           </div>
 
           <div className="mb-6">
-            <label htmlFor="bannerUrl" className="block text-sm font-medium text-gray-700 mb-2">
-              Banner Image URL (Optional)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Banner Image (Optional)
             </label>
-            <input
-              type="url"
-              id="bannerUrl"
-              value={bannerUrl}
-              onChange={(e) => setBannerUrl(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://example.com/banner-image.jpg"
-              disabled={loading}
-            />
-            {bannerUrl && (
+            
+            {/* File Upload Option */}
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Upload Image File
+              </label>
+              <div className="relative">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    setBannerFile(e.target.files[0]);
+                    if (e.target.files[0]) {
+                      setBannerUrl(''); // Clear URL when file is selected
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  disabled={loading}
+                />
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 bg-white flex items-center">
+                  <span className="text-gray-900">Choose File</span>
+                  <span className="mx-2 text-gray-400">|</span>
+                  <span className={`${bannerFile ? 'text-gray-600' : 'text-gray-400'} flex-1 truncate text-left`}>
+                    {bannerFile ? bannerFile.name : 'No file chosen'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* URL Input Option */}
+            <div className="mb-3">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Or Enter Image URL
+              </label>
+              <input
+                type="url"
+                value={bannerUrl}
+                onChange={(e) => {
+                  setBannerUrl(e.target.value);
+                  if (e.target.value.trim()) {
+                    setBannerFile(null); // Clear file when URL is entered
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/banner-image.jpg"
+                disabled={loading}
+              />
+            </div>
+
+            {/* Preview */}
+            {(bannerUrl || bannerFile) && (
               <div className="mt-3">
-                <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                <div className="w-full h-24 bg-gray-100 rounded-lg overflow-hidden">
-                  <img 
-                    src={bannerUrl} 
-                    alt="Banner preview" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm text-gray-600">Preview:</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBannerUrl('');
+                      setBannerFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
                     }}
-                  />
-                  <div className="w-full h-full hidden items-center justify-center text-gray-500 text-sm">
-                    Invalid image URL
-                  </div>
+                    className="text-xs text-red-600 hover:text-red-800 transition-colors"
+                    disabled={loading}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="w-full h-24 bg-gray-100 rounded-lg overflow-hidden">
+                  {bannerFile ? (
+                    <img 
+                      src={URL.createObjectURL(bannerFile)} 
+                      alt="Banner preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : bannerUrl ? (
+                    <>
+                      <img 
+                        src={bannerUrl} 
+                        alt="Banner preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="w-full h-full hidden items-center justify-center text-gray-500 text-sm">
+                        Invalid image URL
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
             )}
@@ -175,14 +254,14 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 bg-[#1E275E] text-white rounded-lg hover:bg-[#4B548B] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {loading ? (
                 <>

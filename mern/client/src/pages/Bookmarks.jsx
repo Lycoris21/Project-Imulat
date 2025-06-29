@@ -156,7 +156,7 @@ export default function Bookmarks() {
     }
 
     return (
-        <div className="min-h-screen bg-base-gradient py-8">
+        <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
             <div className="max-w-6xl mx-auto px-4">
                 {/* Header */}
                 <div className="mb-8">
@@ -200,7 +200,7 @@ export default function Bookmarks() {
                     {/* Create Collection Card */}
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left group"
+                        className="bg-white rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left group"
                     >
                         <div className="flex items-center mb-3">
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -223,7 +223,7 @@ export default function Bookmarks() {
                 {/* Collections */}
                 {collections.length > 0 && (
                     <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                        <h2 className="text-xl font-semibold text-gray-100 mb-4">
                             My Collections ({collections.length})
                         </h2>
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
