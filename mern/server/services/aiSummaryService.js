@@ -29,7 +29,7 @@ class aiSummaryService {
             },
             body: JSON.stringify({
             model: "command-r-plus-08-2024",
-            prompt: `Rate the following statement on a scale of 0 to 100 in terms of factual truthfulness (0 = completely false, 100 = completely true). Only return the number.\n\nStatement:\n"${text}"\n\nTruthfulness score:`,
+            prompt: `Rate the following statement on a scale of 0 to 99.9 in terms of factual truthfulness (0 = completely false, 100 = completely true). Only return the number.\n\nStatement:\n"${text}"\n\nTruthfulness score:`,
             temperature: 0.3,
             max_tokens: 5,
             stop_sequences: ["\n"]

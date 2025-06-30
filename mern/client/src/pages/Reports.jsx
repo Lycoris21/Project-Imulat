@@ -9,95 +9,65 @@ export default function Reports() {
   const { user, isLoggedIn } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [reports, setReports] = useState([]);
-  const [filteredReports, setFilteredReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalReports, setTotalReports] = useState(0);
+  const itemsPerPage = 6; // Number of items per page
 
 
   // Check if user is a researcher
  const canResearch = isLoggedIn && (user?.role === "admin" || user?.role === "researcher");
 
+  // Effect for handling search and filter changes (reset to page 1)
   useEffect(() => {
-    fetchReports();
-  }, []);
+    setCurrentPage(1);
+  }, [searchQuery, selectedFilter]);
 
-  // Filter reports based on search query
-useEffect(() => {
-  setSearchLoading(true);
-  
-  // Add a small delay to show loading animation
-  const timeoutId = setTimeout(() => {
-    let filtered = [...reports];
-
-    // Keyword filter
-    if (searchQuery.trim() !== "") {
-      filtered = filtered.filter(report =>
-        report.reportTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.aiReportSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.userId?.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.truthVerdictParsed.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Sorting/Filtering
-    const now = new Date();
-    switch (selectedFilter) {
-      case "oldest":
-        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-        break;
-      case "today":
-        filtered = filtered.filter(r => new Date(r.createdAt).toDateString() === now.toDateString());
-        break;
-      case "thisWeek":
-        const weekAgo = new Date();
-        weekAgo.setDate(now.getDate() - 7);
-        filtered = filtered.filter(r => new Date(r.createdAt) > weekAgo);
-        break;
-      case "thisMonth":
-        const monthAgo = new Date();
-        monthAgo.setMonth(now.getMonth() - 1);
-        filtered = filtered.filter(r => new Date(r.createdAt) > monthAgo);
-        break;
-      case "mostLiked":
-        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        break;
-      case "mostCommented":
-        filtered.sort((a, b) => (b.commentCount || 0) - (a.commentCount || 0));
-        break;
-      case "hottest":
-        filtered.sort((a, b) =>
-          ((b.likes || 0) + (b.commentCount || 0)) -
-          ((a.likes || 0) + (a.commentCount || 0))
-        );
-        break;
-      default: // newest
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-
-    setFilteredReports(filtered);
-    setSearchLoading(false);
-  }, 300); // 300ms delay to show loading animation
-  
-  return () => clearTimeout(timeoutId);
-}, [searchQuery, reports, selectedFilter]);
+  // Effect for fetching data when page, search, or filter changes
+  useEffect(() => {
+    setSearchLoading(true);
+    
+    // Add debounce only for search queries
+    const delay = searchQuery && searchQuery.length > 0 ? 300 : 0;
+    const timeoutId = setTimeout(() => {
+      fetchReports();
+    }, delay);
+    
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, selectedFilter, searchQuery]);
 
 
   const fetchReports = async () => {
     try {
-      const response = await fetch("http://localhost:5050/api/reports");
+      setLoading(true);
+      
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        sort: selectedFilter
+      });
+      
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+      
+      const response = await fetch(`http://localhost:5050/api/reports?${params}`);
       if (!response.ok) throw new Error("Failed to fetch reports");
 
       const data = await response.json();
-
-      setReports(data);
-      setFilteredReports(data);
-      setLoading(false);
+      
+      setReports(data.reports || data); // Handle both paginated and non-paginated responses
+      setTotalReports(data.total || data.length || 0);
     } catch (err) {
       console.error("Error fetching reports:", err);
+    } finally {
       setLoading(false);
+      setSearchLoading(false);
     }
   };
 
@@ -114,6 +84,85 @@ useEffect(() => {
         setShowSuccessMessage(false);
       }, 4000);
     }
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(totalReports / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Pagination component
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+
+    const getVisiblePages = () => {
+      const delta = 2;
+      const range = [];
+      const rangeWithDots = [];
+
+      for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+        range.push(i);
+      }
+
+      if (currentPage - delta > 2) {
+        rangeWithDots.push(1, '...');
+      } else {
+        rangeWithDots.push(1);
+      }
+
+      rangeWithDots.push(...range);
+
+      if (currentPage + delta < totalPages - 1) {
+        rangeWithDots.push('...', totalPages);
+      } else {
+        rangeWithDots.push(totalPages);
+      }
+
+      return rangeWithDots;
+    };
+
+    return (
+      <div className="flex justify-center items-center space-x-2 my-8">
+        {/* Previous button */}
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Previous
+        </button>
+
+        {/* Page numbers */}
+        {getVisiblePages().map((page, index) => (
+          <button
+            key={index}
+            onClick={() => typeof page === 'number' && handlePageChange(page)}
+            disabled={page === '...'}
+            className={`px-3 py-2 rounded-lg transition-colors ${
+              page === currentPage
+                ? 'bg-[color:var(--color-dark)] text-white'
+                : page === '...'
+                ? 'bg-transparent text-gray-400 cursor-default'
+                : 'bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Next button */}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Next
+        </button>
+      </div>
+    );
   };
 
   if (loading) {
@@ -200,24 +249,35 @@ useEffect(() => {
 
         {/* Results Counter */}
         <p className="text-gray-300 text-sm text-center">
-          {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''} found
+          {totalReports} report{totalReports !== 1 ? 's' : ''} found
+          {totalPages > 1 && (
+            <span className="ml-2">
+              (Page {currentPage} of {totalPages})
+            </span>
+          )}
         </p>
+
+        {/* Top Pagination Controls */}
+        <PaginationControls />
       </div>
 
       {/* Reports Grid */}
       <div className="max-w-7xl mx-auto">
-        {filteredReports.length === 0 ? (
+        {reports.length === 0 && !loading ? (
           <div className="text-center py-12">
             <div className="text-gray-300 text-lg mb-4">No reports found</div>
             <p className="text-gray-400">Try adjusting your search terms</p>
           </div>
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
-            {filteredReports.map((report) => (
+            {reports.map((report) => (
               <ReportCard key={report.id} report={report} variant="detailed" />
             ))}
           </div>
         )}
+
+        {/* Bottom Pagination Controls */}
+        <PaginationControls />
       </div>
 
       {/* Researcher: Create Report Modal */}

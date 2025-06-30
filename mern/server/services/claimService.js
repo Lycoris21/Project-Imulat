@@ -2,15 +2,73 @@ import { Claim, Comment} from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
 
-let aiEnabled = false;
+let aiEnabled = true;
 
 class ClaimService {
-  static async getAllClaims() {
-    const claims = await Claim.find({deletedAt: null})
-      .populate('userId', 'username email')
-      .populate("reportId", "reportTitle")
-      .sort({ createdAt: -1 })
-      .lean();
+  static async getAllClaims(page = 1, limit = 24, sort = 'newest') {
+    const skip = (page - 1) * limit;
+    
+    // Build sort criteria
+    let sortCriteria = { createdAt: -1 }; // default: newest
+    switch (sort) {
+      case 'oldest':
+        sortCriteria = { createdAt: 1 };
+        break;
+      case 'today':
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        break;
+      case 'thisWeek':
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        break;
+      case 'thisMonth':
+        const monthAgo = new Date();
+        monthAgo.setMonth(monthAgo.getMonth() - 1);
+        break;
+      case 'mostLiked':
+        sortCriteria = { 'reactionCounts.like': -1 };
+        break;
+      case 'mostCommented':
+        sortCriteria = { commentCount: -1 };
+        break;
+      case 'highestTruth':
+        sortCriteria = { aiTruthIndex: -1 };
+        break;
+      default:
+        sortCriteria = { createdAt: -1 };
+    }
+
+    // Base query
+    let query = { deletedAt: null };
+    
+    // Add date filters for time-based sorts
+    if (sort === 'today') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      query.createdAt = { $gte: today, $lt: tomorrow };
+    } else if (sort === 'thisWeek') {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      query.createdAt = { $gte: weekAgo };
+    } else if (sort === 'thisMonth') {
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      query.createdAt = { $gte: monthAgo };
+    }
+
+    const [claims, total] = await Promise.all([
+      Claim.find(query)
+        .populate('userId', 'username email')
+        .populate("reportId", "reportTitle")
+        .sort(sortCriteria)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Claim.countDocuments(query)
+    ]);
 
     const claimsWithMeta = await Promise.all(
       claims.map(async (claim) => {
@@ -27,7 +85,12 @@ class ClaimService {
       })
     );
 
-    return claimsWithMeta;
+    return {
+      claims: claimsWithMeta,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   static async getClaimById(id) {
@@ -140,10 +203,30 @@ class ClaimService {
   }
 
   // Search claims
-  static async searchClaims(query) {
-  const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+  static async searchClaims(query, page = 1, limit = 24, sort = 'newest') {
+    const skip = (page - 1) * limit;
+    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
 
-  const claims = await Claim.find({
+    // Build sort criteria
+    let sortCriteria = { createdAt: -1 }; // default: newest
+    switch (sort) {
+      case 'oldest':
+        sortCriteria = { createdAt: 1 };
+        break;
+      case 'mostLiked':
+        sortCriteria = { 'reactionCounts.like': -1 };
+        break;
+      case 'mostCommented':
+        sortCriteria = { commentCount: -1 };
+        break;
+      case 'highestTruth':
+        sortCriteria = { aiTruthIndex: -1 };
+        break;
+      default:
+        sortCriteria = { createdAt: -1 };
+    }
+
+    const searchQuery = {
       $and: [
         {
           $or: [
@@ -154,12 +237,18 @@ class ClaimService {
         },
         { deletedAt: null }
       ]
-    })
-      .populate('userId', 'username email')
-      .populate("reportId", "reportTitle")
-      .sort({ createdAt: -1 })
-      .limit(50) // Limit results
-      .lean();
+    };
+
+    const [claims, total] = await Promise.all([
+      Claim.find(searchQuery)
+        .populate('userId', 'username email')
+        .populate("reportId", "reportTitle")
+        .sort(sortCriteria)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Claim.countDocuments(searchQuery)
+    ]);
 
     const claimsWithMeta = await Promise.all(
       claims.map(async (claim) => {
@@ -176,7 +265,12 @@ class ClaimService {
       })
     );
 
-    return claimsWithMeta;
+    return {
+      claims: claimsWithMeta,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
 }
