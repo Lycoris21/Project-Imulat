@@ -6,20 +6,36 @@ class BookmarkController {
   static async getUserBookmarks(req, res) {
     try {
       const { userId } = req.params;
-      const { collectionId, search, limit } = req.query;
+      const { collectionId, search, limit, page, targetType, paginated } = req.query;
 
-      console.log('BookmarkController.getUserBookmarks params:', { userId, collectionId, search, limit });
+      console.log('BookmarkController.getUserBookmarks params:', { userId, collectionId, search, limit, page, targetType, paginated });
 
-      let bookmarks;
-      if (search) {
-        const parsedLimit = limit ? parseInt(limit, 10) : null;
-        bookmarks = await BookmarkService.searchBookmarks(userId, search, collectionId, parsedLimit);
+      // Check if paginated request
+      if (paginated === 'true') {
+        const options = {
+          page: parseInt(page, 10) || 1,
+          limit: parseInt(limit, 10) || 10,
+          targetType: targetType || null,
+          collectionId,
+          search
+        };
+        
+        const result = await BookmarkService.getUserBookmarksPaginated(userId, options);
+        console.log('BookmarkController.getUserBookmarks paginated result:', result.bookmarks.length, 'bookmarks');
+        res.status(200).json(result);
       } else {
-        bookmarks = await BookmarkService.getUserBookmarks(userId, collectionId);
-      }
+        // Legacy non-paginated request
+        let bookmarks;
+        if (search) {
+          const parsedLimit = limit ? parseInt(limit, 10) : null;
+          bookmarks = await BookmarkService.searchBookmarks(userId, search, collectionId, parsedLimit);
+        } else {
+          bookmarks = await BookmarkService.getUserBookmarks(userId, collectionId);
+        }
 
-      console.log('BookmarkController.getUserBookmarks result:', bookmarks.length, 'bookmarks');
-      res.status(200).json(bookmarks);
+        console.log('BookmarkController.getUserBookmarks result:', bookmarks.length, 'bookmarks');
+        res.status(200).json(bookmarks);
+      }
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
       res.status(500).json({ error: 'Failed to fetch bookmarks' });

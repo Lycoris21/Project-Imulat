@@ -11,10 +11,16 @@ export default function AllBookmarks() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
     
-    const [bookmarks, setBookmarks] = useState([]);
+    const [reportsData, setReportsData] = useState({ bookmarks: [], pagination: {} });
+    const [claimsData, setClaimsData] = useState({ bookmarks: [], pagination: {} });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+    
+    // Pagination state
+    const [reportsPage, setReportsPage] = useState(1);
+    const [claimsPage, setClaimsPage] = useState(1);
+    const itemsPerPage = 10;
 
     // Redirect if not logged in
     useEffect(() => {
@@ -23,18 +29,23 @@ export default function AllBookmarks() {
         }
     }, [user, navigate]);
 
-    // Fetch bookmarks
-    const fetchBookmarks = async () => {
-        if (!user?._id) return;
+    // Fetch paginated bookmarks for a specific type
+    const fetchBookmarksByType = async (targetType, page) => {
+        if (!user?._id) return { bookmarks: [], pagination: {} };
 
         try {
-            setLoading(true);
-            let url = `http://localhost:5050/api/bookmarks/user/${user._id}`;
-            
+            const params = new URLSearchParams({
+                paginated: 'true',
+                page: page.toString(),
+                limit: itemsPerPage.toString(),
+                targetType
+            });
+
             if (searchQuery) {
-                url += `?search=${encodeURIComponent(searchQuery)}`;
+                params.append('search', searchQuery);
             }
-            
+
+            const url = `http://localhost:5050/api/bookmarks/user/${user._id}?${params}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -42,7 +53,28 @@ export default function AllBookmarks() {
             }
             
             const data = await response.json();
-            setBookmarks(data);
+            return data;
+        } catch (err) {
+            console.error(`Error fetching ${targetType} bookmarks:`, err);
+            throw err;
+        }
+    };
+
+    // Fetch all bookmarks data
+    const fetchBookmarks = async () => {
+        if (!user?._id) return;
+
+        try {
+            setLoading(true);
+            
+            // Fetch reports and claims in parallel
+            const [reportsResult, claimsResult] = await Promise.all([
+                fetchBookmarksByType('report', reportsPage),
+                fetchBookmarksByType('claim', claimsPage)
+            ]);
+            
+            setReportsData(reportsResult);
+            setClaimsData(claimsResult);
             setError(null);
         } catch (err) {
             console.error('Error fetching bookmarks:', err);
@@ -75,55 +107,83 @@ export default function AllBookmarks() {
                 throw new Error('Failed to remove bookmark');
             }
 
-            // Remove from local state
-            setBookmarks(prev => prev.filter(b => 
-                !(b.targetId._id === bookmark.targetId._id && b.targetType === bookmark.targetType)
-            ));
+            // Refresh the appropriate type's data
+            if (bookmark.targetType === 'report') {
+                const updatedReportsData = await fetchBookmarksByType('report', reportsPage);
+                setReportsData(updatedReportsData);
+            } else if (bookmark.targetType === 'claim') {
+                const updatedClaimsData = await fetchBookmarksByType('claim', claimsPage);
+                setClaimsData(updatedClaimsData);
+            }
         } catch (error) {
             console.error('Error removing bookmark:', error);
             alert('Failed to remove bookmark');
         }
     };
 
-    // Handle search change for local filtering only
+    // Handle search change for real-time filtering (URL search)
     const handleSearchChange = (e) => {
         setLocalSearchQuery(e.target.value);
     };
 
-    // No-op for form submission since we only do local filtering
+    // Handle search submit - navigate to search URL
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        // Do nothing - search is handled in real-time by filtering
+        if (localSearchQuery.trim()) {
+            navigate(`/bookmarks/all?q=${encodeURIComponent(localSearchQuery.trim())}`);
+        } else {
+            navigate('/bookmarks/all');
+        }
     };
 
     useEffect(() => {
         fetchBookmarks();
-    }, [user?._id, searchQuery]);
+    }, [user?._id, searchQuery, reportsPage, claimsPage]);
 
     useEffect(() => {
         setLocalSearchQuery(searchQuery);
+        // Reset pagination when search changes
+        setReportsPage(1);
+        setClaimsPage(1);
     }, [searchQuery]);
 
-    // Filter bookmarks locally for real-time search
-    const filteredBookmarks = bookmarks.filter(bookmark => {
-        if (!localSearchQuery || typeof localSearchQuery !== 'string' || !localSearchQuery.trim()) return true;
-        
-        const searchLower = localSearchQuery.toLowerCase();
-        const target = bookmark.targetId;
-        
-        return (
-            target.reportTitle?.toLowerCase().includes(searchLower) ||
-            target.claimTitle?.toLowerCase().includes(searchLower) ||
-            target.reportContent?.toLowerCase().includes(searchLower) ||
-            target.claimContent?.toLowerCase().includes(searchLower) ||
-            target.reportDescription?.toLowerCase().includes(searchLower) ||
-            target.aiReportSummary?.toLowerCase().includes(searchLower) ||
-            target.aiClaimSummary?.toLowerCase().includes(searchLower)
-        );
-    });
+    // Pagination helpers - now use server data directly
+    const getReportsBookmarks = () => {
+        return reportsData.bookmarks || [];
+    };
 
-    // Use the server search results if there's a URL search query, otherwise use local filtering
-    const displayBookmarks = searchQuery ? bookmarks : filteredBookmarks;
+    const getClaimsBookmarks = () => {
+        return claimsData.bookmarks || [];
+    };
+
+    const getTotalReportsPages = () => {
+        return reportsData.pagination?.totalPages || 1;
+    };
+
+    const getTotalClaimsPages = () => {
+        return claimsData.pagination?.totalPages || 1;
+    };
+
+    // Pagination handlers - trigger new API calls
+    const handleReportsPageChange = async (newPage) => {
+        setReportsPage(newPage);
+        try {
+            const updatedReportsData = await fetchBookmarksByType('report', newPage);
+            setReportsData(updatedReportsData);
+        } catch (err) {
+            console.error('Error fetching reports page:', err);
+        }
+    };
+
+    const handleClaimsPageChange = async (newPage) => {
+        setClaimsPage(newPage);
+        try {
+            const updatedClaimsData = await fetchBookmarksByType('claim', newPage);
+            setClaimsData(updatedClaimsData);
+        } catch (err) {
+            console.error('Error fetching claims page:', err);
+        }
+    };
 
     if (!user) {
         return null; // Will redirect in useEffect
@@ -176,20 +236,19 @@ export default function AllBookmarks() {
                     {/* Stats */}
                     <div className="flex items-center justify-center space-x-6 text-sm text-gray-300">
                         <span>
-                            {displayBookmarks.length} {displayBookmarks.length === 1 ? 'bookmark' : 'bookmarks'} 
-                            {(searchQuery || localSearchQuery) ? ' found' : ' total'}
+                            {(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks total
                         </span>
                         <span>
-                            {displayBookmarks.filter(b => b.targetType === 'report').length} reports
+                            {reportsData.pagination?.totalItems || 0} reports
                         </span>
                         <span>
-                            {displayBookmarks.filter(b => b.targetType === 'claim').length} claims
+                            {claimsData.pagination?.totalItems || 0} claims
                         </span>
                     </div>
                 </div>
 
                 {/* Content */}
-                {displayBookmarks.length === 0 ? (
+                {(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0) === 0 ? (
                     <div className="text-center py-12">
                         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <svg className="w-12 h-12 text-[color:var(--color-base)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,10 +256,10 @@ export default function AllBookmarks() {
                             </svg>
                         </div>
                         <h3 className="text-lg font-medium text-gray-300 mb-2">
-                            {(searchQuery || localSearchQuery) ? 'No bookmarks found' : 'No bookmarks yet'}
+                            {searchQuery ? 'No bookmarks found' : 'No bookmarks yet'}
                         </h3>
                         <p className="text-gray-500 mb-6">
-                            {(searchQuery || localSearchQuery)
+                            {searchQuery
                                 ? 'Try adjusting your search terms'
                                 : 'Start bookmarking reports and claims to see them here'
                             }
@@ -220,13 +279,11 @@ export default function AllBookmarks() {
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Reports ({displayBookmarks.filter(b => b.targetType === 'report').length})
+                                    Reports ({reportsData.pagination?.totalItems || 0} total, page {reportsPage} of {getTotalReportsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
-                                {displayBookmarks
-                                    .filter(bookmark => bookmark.targetType === 'report')
-                                    .map((bookmark) => (
+                                {getReportsBookmarks().map((bookmark) => (
                                         <div key={`report-${bookmark.targetId._id}`} className="relative group">
                                             <ReportCard report={bookmark.targetId} variant="compact" />
                                             <button
@@ -241,27 +298,30 @@ export default function AllBookmarks() {
                                         </div>
                                     ))
                                 }
-                                {displayBookmarks.filter(b => b.targetType === 'report').length === 0 && (
+                                {getReportsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {(searchQuery || localSearchQuery) ? "No reports found matching your search" : "No bookmarked reports found"}
+                                            {searchQuery ? "No reports found matching your search" : "No bookmarked reports found"}
                                         </p>
                                     </div>
                                 )}
                             </div>
+                            <PaginationControls
+                                currentPage={reportsPage}
+                                totalPages={getTotalReportsPages()}
+                                onPageChange={handleReportsPageChange}
+                            />
                         </div>
 
                         {/* Claims Section */}
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Claims ({displayBookmarks.filter(b => b.targetType === 'claim').length})
+                                    Claims ({claimsData.pagination?.totalItems || 0} total, page {claimsPage} of {getTotalClaimsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
-                                {displayBookmarks
-                                    .filter(bookmark => bookmark.targetType === 'claim')
-                                    .map((bookmark) => (
+                                {getClaimsBookmarks().map((bookmark) => (
                                         <div key={`claim-${bookmark.targetId._id}`} className="relative group">
                                             <ClaimCard claim={bookmark.targetId} variant="compact" />
                                             <button
@@ -276,14 +336,19 @@ export default function AllBookmarks() {
                                         </div>
                                     ))
                                 }
-                                {displayBookmarks.filter(b => b.targetType === 'claim').length === 0 && (
+                                {getClaimsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {(searchQuery || localSearchQuery) ? "No claims found matching your search" : "No bookmarked claims found"}
+                                            {searchQuery ? "No claims found matching your search" : "No bookmarked claims found"}
                                         </p>
                                     </div>
                                 )}
                             </div>
+                            <PaginationControls
+                                currentPage={claimsPage}
+                                totalPages={getTotalClaimsPages()}
+                                onPageChange={handleClaimsPageChange}
+                            />
                         </div>
                     </div>
                 )}
@@ -291,3 +356,97 @@ export default function AllBookmarks() {
         </div>
     );
 }
+
+// Pagination Component
+const PaginationControls = ({ currentPage, totalPages, onPageChange, className = "" }) => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+            
+            let startPage = Math.max(2, currentPage - 1);
+            let endPage = Math.min(totalPages - 1, currentPage + 1);
+            
+            // Add ellipsis if needed
+            if (startPage > 2) {
+                pages.push('...');
+            }
+            
+            // Add pages around current page
+            for (let i = startPage; i <= endPage; i++) {
+                if (i !== 1 && i !== totalPages) {
+                    pages.push(i);
+                }
+            }
+            
+            // Add ellipsis if needed
+            if (endPage < totalPages - 1) {
+                pages.push('...');
+            }
+            
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+        
+        return pages;
+    };
+
+    return (
+        <div className={`flex items-center justify-center gap-2 mt-6 ${className}`}>
+            {/* Previous Button */}
+            <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+                Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getPageNumbers().map((page, index) => (
+                <button
+                    key={index}
+                    onClick={() => typeof page === 'number' && onPageChange(page)}
+                    disabled={page === '...'}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        page === currentPage
+                            ? 'bg-[color:var(--color-dark)] text-white'
+                            : page === '...'
+                            ? 'text-gray-400 cursor-default'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                    {page}
+                </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === totalPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+                Next
+            </button>
+        </div>
+    );
+};
