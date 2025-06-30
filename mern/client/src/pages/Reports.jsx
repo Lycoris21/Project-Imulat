@@ -16,7 +16,7 @@ export default function Reports() {
   const [selectedFilter, setSelectedFilter] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalReports, setTotalReports] = useState(0);
-  const itemsPerPage = 6; // Number of items per page. Change this and backend pagination will handle it automatically
+  const itemsPerPage = 1; // Number of items per page. Change this and backend pagination will handle it automatically
 
 
   // Check if user is a researcher
@@ -125,39 +125,41 @@ export default function Reports() {
     };
 
     return (
-      <div className="flex justify-center items-center space-x-2 my-8">
+      <div className="flex justify-center items-center space-x-0.5">
         {/* Previous button */}
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-medium"
         >
           Previous
         </button>
 
         {/* Page numbers */}
-        {getVisiblePages().map((page, index) => (
-          <button
-            key={index}
-            onClick={() => typeof page === 'number' && handlePageChange(page)}
-            disabled={page === '...'}
-            className={`px-3 py-2 rounded-lg transition-colors ${
-              page === currentPage
-                ? 'bg-[color:var(--color-dark)] text-white'
-                : page === '...'
-                ? 'bg-transparent text-gray-400 cursor-default'
-                : 'bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
+        <div className="flex space-x-0.5 mx-1">
+          {getVisiblePages().map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' && handlePageChange(page)}
+              disabled={page === '...'}
+              className={`px-2 py-1 rounded-md transition-colors text-xs font-medium min-w-[28px] ${
+                page === currentPage
+                  ? 'bg-[color:var(--color-dark)] text-white shadow-sm'
+                  : page === '...'
+                  ? 'bg-transparent text-gray-400 cursor-default'
+                  : 'bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
 
         {/* Next button */}
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-medium"
         >
           Next
         </button>
@@ -219,46 +221,58 @@ export default function Reports() {
           )}
         </div>
 
-        {/* Search Bar */}
-        <SearchBar
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onSubmit={handleSearch}
-          placeholder="Search reports by title, content, author, or verdict...."
-          isLoading={searchLoading}
-        />
+        {/* Search and Controls */}
+        <div className="max-w-6xl mx-auto mb-6">
+          {/* Search Bar */}
+          <div className="mb-4">
+            <SearchBar
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSubmit={handleSearch}
+              placeholder="Search reports by title, content, author, or verdict...."
+              isLoading={searchLoading}
+            />
+          </div>
+          
+          {/* Sort and Pagination Controls Row */}
+          <div className="max-w-2xl mx-auto mb-4 relative">
+            <div className="flex justify-between items-center">
+              {/* Sort Dropdown - Left side */}
+              <div className="flex items-center gap-2">
+                <span className="text-white text-xs font-medium">Sort by:</span>
+                <select
+                  value={selectedFilter}
+                  onChange={(e) => setSelectedFilter(e.target.value)}
+                  className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 cursor-pointer text-xs min-w-[120px]"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="today">Today</option>
+                  <option value="thisWeek">This Week</option>
+                  <option value="thisMonth">This Month</option>
+                  <option value="mostLiked">Most Liked</option>
+                  <option value="mostCommented">Most Commented</option>
+                  <option value="hottest">Hottest</option>
+                </select>
+              </div>
 
-        {/*Filter */}
-    <div className="flex justify-center items-center gap-4 mb-4">
-      <label className="text-white text-sm font-medium">Sort by:</label>
-      <select
-        value={selectedFilter}
-        onChange={(e) => setSelectedFilter(e.target.value)}
-        className="px-4 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 cursor-pointer"
-      >
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-        <option value="today">Today</option>
-        <option value="thisWeek">This Week</option>
-        <option value="thisMonth">This Month</option>
-        <option value="mostLiked">Most Liked</option>
-        <option value="mostCommented">Most Commented</option>
-        <option value="hottest">Hottest</option>
-      </select>
-    </div>
+              {/* Pagination Controls - Right side */}
+              <PaginationControls />
+            </div>
+          </div>
+        </div>
 
         {/* Results Counter */}
-        <p className="text-gray-300 text-sm text-center">
-          {totalReports} report{totalReports !== 1 ? 's' : ''} found
-          {totalPages > 1 && (
-            <span className="ml-2">
-              (Page {currentPage} of {totalPages})
-            </span>
-          )}
-        </p>
-
-        {/* Top Pagination Controls */}
-        <PaginationControls />
+        <div className="text-center mb-6">
+          <p className="text-gray-300 text-sm">
+            {totalReports} report{totalReports !== 1 ? 's' : ''} found
+            {totalPages > 1 && (
+              <span className="ml-2 text-gray-400">
+                • Page {currentPage} of {totalPages}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
 
       {/* Reports Grid */}
@@ -277,7 +291,9 @@ export default function Reports() {
         )}
 
         {/* Bottom Pagination Controls */}
-        <PaginationControls />
+        <div className="mt-12">
+          <PaginationControls />
+        </div>
       </div>
 
       {/* Researcher: Create Report Modal */}
