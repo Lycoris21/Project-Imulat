@@ -152,15 +152,12 @@ export default function SearchBar({
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm0 4h8v1H6v-1zm0 3h6v1H6v-1z" clipRule="evenodd" />
-            <path d="M17.414 2.586a2 2 0 00-2.828 0L13 4.172V6h1.828l1.586-1.586a2 2 0 000-2.828z" />
-            <path fillRule="evenodd" d="M15.621 7.621l-3 3a1 1 0 01-.621.379H10v-2a1 1 0 01.379-.621l3-3L15.621 7.621z" clipRule="evenodd" />
           </svg>
         );
       case 'claim':
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm0 4h8v1H6v-1zm0 3h6v1H6v-1z" clipRule="evenodd" />
-            <path d="M17 9a1 1 0 00-1 1v3l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L18 13v-3a1 1 0 00-1-1z" />
+            <path fillRule="evenodd" d="M6 5a1 1 0 00-1 1v3a1 1 0 001 1h1v1a2 2 0 01-2 2 1 1 0 100 2 4 4 0 004-4V6a1 1 0 00-1-1H6zm7 0a1 1 0 00-1 1v3a1 1 0 001 1h1v1a2 2 0 01-2 2 1 1 0 100 2 4 4 0 004-4V6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
           </svg>
         );
       case 'user':
