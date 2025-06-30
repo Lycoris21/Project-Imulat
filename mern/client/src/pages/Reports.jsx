@@ -16,7 +16,7 @@ export default function Reports() {
   const [selectedFilter, setSelectedFilter] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalReports, setTotalReports] = useState(0);
-  const itemsPerPage = 6; // Number of items per page
+  const itemsPerPage = 6; // Number of items per page. Change this and backend pagination will handle it automatically
 
 
   // Check if user is a researcher

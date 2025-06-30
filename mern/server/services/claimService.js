@@ -8,39 +8,8 @@ class ClaimService {
   static async getAllClaims(page = 1, limit = 24, sort = 'newest') {
     const skip = (page - 1) * limit;
     
-    // Build sort criteria
-    let sortCriteria = { createdAt: -1 }; // default: newest
-    switch (sort) {
-      case 'oldest':
-        sortCriteria = { createdAt: 1 };
-        break;
-      case 'today':
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        break;
-      case 'thisWeek':
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        break;
-      case 'thisMonth':
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        break;
-      case 'mostLiked':
-        sortCriteria = { 'reactionCounts.like': -1 };
-        break;
-      case 'mostCommented':
-        sortCriteria = { commentCount: -1 };
-        break;
-      case 'highestTruth':
-        sortCriteria = { aiTruthIndex: -1 };
-        break;
-      default:
-        sortCriteria = { createdAt: -1 };
-    }
-
-    // Base query
-    let query = { deletedAt: null };
+    // Base match criteria
+    let matchCriteria = { deletedAt: null };
     
     // Add date filters for time-based sorts
     if (sort === 'today') {
@@ -48,49 +17,161 @@ class ClaimService {
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      query.createdAt = { $gte: today, $lt: tomorrow };
+      matchCriteria.createdAt = { $gte: today, $lt: tomorrow };
     } else if (sort === 'thisWeek') {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
-      query.createdAt = { $gte: weekAgo };
+      matchCriteria.createdAt = { $gte: weekAgo };
     } else if (sort === 'thisMonth') {
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
-      query.createdAt = { $gte: monthAgo };
+      matchCriteria.createdAt = { $gte: monthAgo };
     }
 
-    const [claims, total] = await Promise.all([
-      Claim.find(query)
-        .populate('userId', 'username email')
-        .populate("reportId", "reportTitle")
-        .sort(sortCriteria)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Claim.countDocuments(query)
-    ]);
+    // Build sort criteria
+    let sortCriteria = { createdAt: -1 }; // default: newest
+    switch (sort) {
+      case 'oldest':
+        sortCriteria = { createdAt: 1 };
+        break;
+      case 'mostLiked':
+        sortCriteria = { likeCount: -1 };
+        break;
+      case 'mostCommented':
+        sortCriteria = { commentCount: -1 };
+        break;
+      case 'highestTruth':
+        sortCriteria = { aiTruthIndex: -1 };
+        break;
+      case 'hottest':
+        sortCriteria = { hotScore: -1 };
+        break;
+      default:
+        sortCriteria = { createdAt: -1 };
+    }
 
-    const claimsWithMeta = await Promise.all(
-      claims.map(async (claim) => {
-        const [commentCount, reactionCounts] = await Promise.all([
-          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
-          ReactionService.countReactions(claim._id, 'claim'),
-        ]);
+    // Use aggregation for sorting by reaction counts or comment counts
+    if (sort === 'mostLiked' || sort === 'mostCommented' || sort === 'hottest') {
+      const pipeline = [
+        { $match: matchCriteria },
+        {
+          $lookup: {
+            from: 'comments',
+            let: { claimId: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $and: [{ $eq: ['$targetType', 'claim'] }, { $eq: ['$targetId', '$$claimId'] }] } } }
+            ],
+            as: 'comments'
+          }
+        },
+        {
+          $lookup: {
+            from: 'reactions',
+            let: { claimId: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $and: [{ $eq: ['$targetType', 'claim'] }, { $eq: ['$targetId', '$$claimId'] }, { $eq: ['$reactionType', 'like'] }] } } }
+            ],
+            as: 'likes'
+          }
+        },
+        {
+          $addFields: {
+            commentCount: { $size: '$comments' },
+            likeCount: { $size: '$likes' },
+            hotScore: { $add: [{ $size: '$comments' }, { $multiply: [{ $size: '$likes' }, 2] }] }
+          }
+        },
+        { $sort: sortCriteria },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userId',
+            pipeline: [{ $project: { username: 1, email: 1 } }]
+          }
+        },
+        {
+          $lookup: {
+            from: 'reports',
+            localField: 'reportId',
+            foreignField: '_id',
+            as: 'reportId',
+            pipeline: [{ $project: { reportTitle: 1 } }]
+          }
+        },
+        {
+          $addFields: {
+            userId: { $arrayElemAt: ['$userId', 0] },
+            reportId: { $arrayElemAt: ['$reportId', 0] }
+          }
+        }
+      ];
 
-        return {
-          ...claim,
-          commentCount,
-          reactionCounts,
-        };
-      })
-    );
+      const [claims, totalResult] = await Promise.all([
+        Claim.aggregate(pipeline),
+        Claim.aggregate([
+          { $match: matchCriteria },
+          { $count: 'total' }
+        ])
+      ]);
 
-    return {
-      claims: claimsWithMeta,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit)
-    };
+      const total = totalResult[0]?.total || 0;
+
+      // Add reaction counts for each claim
+      const claimsWithMeta = await Promise.all(
+        claims.map(async (claim) => {
+          const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
+          return {
+            ...claim,
+            reactionCounts,
+          };
+        })
+      );
+
+      return {
+        claims: claimsWithMeta,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } else {
+      // Use regular query for other sorts
+      const [claims, total] = await Promise.all([
+        Claim.find(matchCriteria)
+          .populate('userId', 'username email')
+          .populate("reportId", "reportTitle")
+          .sort(sortCriteria)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        Claim.countDocuments(matchCriteria)
+      ]);
+
+      const claimsWithMeta = await Promise.all(
+        claims.map(async (claim) => {
+          const [commentCount, reactionCounts] = await Promise.all([
+            Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+            ReactionService.countReactions(claim._id, 'claim'),
+          ]);
+
+          return {
+            ...claim,
+            commentCount,
+            reactionCounts,
+          };
+        })
+      );
+
+      return {
+        claims: claimsWithMeta,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    }
   }
 
   static async getClaimById(id) {
@@ -207,25 +288,6 @@ class ClaimService {
     const skip = (page - 1) * limit;
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
 
-    // Build sort criteria
-    let sortCriteria = { createdAt: -1 }; // default: newest
-    switch (sort) {
-      case 'oldest':
-        sortCriteria = { createdAt: 1 };
-        break;
-      case 'mostLiked':
-        sortCriteria = { 'reactionCounts.like': -1 };
-        break;
-      case 'mostCommented':
-        sortCriteria = { commentCount: -1 };
-        break;
-      case 'highestTruth':
-        sortCriteria = { aiTruthIndex: -1 };
-        break;
-      default:
-        sortCriteria = { createdAt: -1 };
-    }
-
     const searchQuery = {
       $and: [
         {
@@ -239,38 +301,150 @@ class ClaimService {
       ]
     };
 
-    const [claims, total] = await Promise.all([
-      Claim.find(searchQuery)
-        .populate('userId', 'username email')
-        .populate("reportId", "reportTitle")
-        .sort(sortCriteria)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Claim.countDocuments(searchQuery)
-    ]);
+    // Build sort criteria
+    let sortCriteria = { createdAt: -1 }; // default: newest
+    switch (sort) {
+      case 'oldest':
+        sortCriteria = { createdAt: 1 };
+        break;
+      case 'mostLiked':
+        sortCriteria = { likeCount: -1 };
+        break;
+      case 'mostCommented':
+        sortCriteria = { commentCount: -1 };
+        break;
+      case 'highestTruth':
+        sortCriteria = { aiTruthIndex: -1 };
+        break;
+      case 'hottest':
+        sortCriteria = { hotScore: -1 };
+        break;
+      default:
+        sortCriteria = { createdAt: -1 };
+    }
 
-    const claimsWithMeta = await Promise.all(
-      claims.map(async (claim) => {
-        const [commentCount, reactionCounts] = await Promise.all([
-          Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
-          ReactionService.countReactions(claim._id, 'claim'),
-        ]);
+    // Use aggregation for sorting by reaction counts or comment counts
+    if (sort === 'mostLiked' || sort === 'mostCommented' || sort === 'hottest') {
+      const pipeline = [
+        { $match: searchQuery },
+        {
+          $lookup: {
+            from: 'comments',
+            let: { claimId: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $and: [{ $eq: ['$targetType', 'claim'] }, { $eq: ['$targetId', '$$claimId'] }] } } }
+            ],
+            as: 'comments'
+          }
+        },
+        {
+          $lookup: {
+            from: 'reactions',
+            let: { claimId: '$_id' },
+            pipeline: [
+              { $match: { $expr: { $and: [{ $eq: ['$targetType', 'claim'] }, { $eq: ['$targetId', '$$claimId'] }, { $eq: ['$reactionType', 'like'] }] } } }
+            ],
+            as: 'likes'
+          }
+        },
+        {
+          $addFields: {
+            commentCount: { $size: '$comments' },
+            likeCount: { $size: '$likes' },
+            hotScore: { $add: [{ $size: '$comments' }, { $multiply: [{ $size: '$likes' }, 1.5] }] }
+          }
+        },
+        { $sort: sortCriteria },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userId',
+            pipeline: [{ $project: { username: 1, email: 1 } }]
+          }
+        },
+        {
+          $lookup: {
+            from: 'reports',
+            localField: 'reportId',
+            foreignField: '_id',
+            as: 'reportId',
+            pipeline: [{ $project: { reportTitle: 1 } }]
+          }
+        },
+        {
+          $addFields: {
+            userId: { $arrayElemAt: ['$userId', 0] },
+            reportId: { $arrayElemAt: ['$reportId', 0] }
+          }
+        }
+      ];
 
-        return {
-          ...claim,
-          commentCount,
-          reactionCounts,
-        };
-      })
-    );
+      const [claims, totalResult] = await Promise.all([
+        Claim.aggregate(pipeline),
+        Claim.aggregate([
+          { $match: searchQuery },
+          { $count: 'total' }
+        ])
+      ]);
 
-    return {
-      claims: claimsWithMeta,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit)
-    };
+      const total = totalResult[0]?.total || 0;
+
+      // Add reaction counts for each claim
+      const claimsWithMeta = await Promise.all(
+        claims.map(async (claim) => {
+          const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
+          return {
+            ...claim,
+            reactionCounts,
+          };
+        })
+      );
+
+      return {
+        claims: claimsWithMeta,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    } else {
+      // Use regular query for other sorts
+      const [claims, total] = await Promise.all([
+        Claim.find(searchQuery)
+          .populate('userId', 'username email')
+          .populate("reportId", "reportTitle")
+          .sort(sortCriteria)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        Claim.countDocuments(searchQuery)
+      ]);
+
+      const claimsWithMeta = await Promise.all(
+        claims.map(async (claim) => {
+          const [commentCount, reactionCounts] = await Promise.all([
+            Comment.countDocuments({ targetType: 'claim', targetId: claim._id }),
+            ReactionService.countReactions(claim._id, 'claim'),
+          ]);
+
+          return {
+            ...claim,
+            commentCount,
+            reactionCounts,
+          };
+        })
+      );
+
+      return {
+        claims: claimsWithMeta,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      };
+    }
   }
 
 }
