@@ -26,14 +26,14 @@ export default function CollectionCard({ collection, onEdit, onDelete, showActio
               />
             ) : (
               <div className="w-full h-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                <svg className="w-8 h-8 text-[#1E275E] group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-8 h-8 text-[color:var(--color-dark)] group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                 </svg>
               </div>
             )}
             {/* Fallback for failed image loads */}
             <div className="w-full h-full bg-gray-100 hidden items-center justify-center group-hover:bg-gray-200 transition-colors">
-              <svg className="w-8 h-8 text-[#1E275E] group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-8 h-8 text-[color:var(--color-dark)] group-hover:text-blue-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
               </svg>
             </div>

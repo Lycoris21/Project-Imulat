@@ -7,7 +7,7 @@ const ReportCardCompact = ({ report }) => (
     <Link
         key={report._id}
         to={`/reports/${report._id}`}
-        className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[#EDEEF1] rounded-lg p-3 m-3 transition-all duration-300 transform hover:-translate-y-1 group"
+        className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[color:var(--color-background-hover)] rounded-lg p-3 m-3 transition-all duration-300 transform hover:-translate-y-1 group"
     >
         <div className="flex gap-3">                  {/* Cover Image on the left */}
             {report.reportCoverUrl && (

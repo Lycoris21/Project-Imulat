@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged }) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [formData, setFormData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -65,7 +66,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
         confirmPassword: ""
       });
       
-      onClose();
+      handleClose();
       
       // Trigger success notification
       if (onPasswordChanged) {
@@ -96,6 +97,20 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
     }
   };
 
+  // Handle animation states
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150); // Wait for animation to complete
+  };
+
   // Reset form when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
@@ -105,6 +120,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
         confirmPassword: ""
       });
       setErrors({});
+      setIsAnimating(false);
     }
   }, [isOpen]);
 
@@ -112,7 +128,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === 'Escape' && isOpen && !isSubmitting) {
-        onClose();
+        handleClose();
       }
     };
 
@@ -125,12 +141,14 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
       document.removeEventListener('keydown', handleEscKey);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose, isSubmitting]);
+  }, [isOpen, handleClose, isSubmitting]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
+    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${
+      isAnimating ? 'opacity-100' : 'opacity-0'
+    }`}>
       {/* Loading Overlay */}
       {isSubmitting && (
         <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
@@ -141,13 +159,15 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full flex flex-col overflow-hidden relative">
+      <div className={`bg-white rounded-2xl shadow-2xl max-w-md w-full flex flex-col overflow-hidden relative transform transition-all duration-150 ${
+        isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+      }`}>
         {/* Modal Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Change Password</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
               className="text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 cursor-pointer "
             >
@@ -238,7 +258,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
               className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >

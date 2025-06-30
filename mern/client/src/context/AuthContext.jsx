@@ -10,11 +10,22 @@ export function useAuth() {
 
 // Provider component
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // NEW: loading state
+
+  // Check local/session storage on mount
+  useEffect(() => {
     const local = localStorage.getItem("user");
     const session = sessionStorage.getItem("user");
-    return local ? JSON.parse(local) : session ? JSON.parse(session) : null;
-  });
+
+    if (local) {
+      setUser(JSON.parse(local));
+    } else if (session) {
+      setUser(JSON.parse(session));
+    }
+
+    setLoading(false); // Done loading
+  }, []);
 
   // Login function
   const login = (userData, remember = false) => {
@@ -39,7 +50,11 @@ export function AuthProvider({ children }) {
     isLoggedIn: !!user,
     login,
     logout,
+    loading, // expose loading
   };
+
+  // Prevent children from rendering until loading is done
+  if (loading) return null; // or a spinner like <div>Loading...</div>
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

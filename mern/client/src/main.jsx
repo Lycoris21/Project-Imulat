@@ -27,6 +27,7 @@ import CollectionView from "./pages/CollectionView";
 import BookmarksSearch from "./pages/BookmarksSearch";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ErrorScreen from "./components/screens/ErrorScreen";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,8 @@ const router = createBrowserRouter([
       { path: "bookmarks/collection/:collectionId", element: <CollectionView /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "reset-password/:token", element: <ResetPassword /> },
+
+      { path: "*", element: <ErrorScreen title="Page Not Found" message="The page you're looking for doesn't exist." /> }
     ],
   },
 ]);

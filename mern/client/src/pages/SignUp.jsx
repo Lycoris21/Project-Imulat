@@ -1,12 +1,13 @@
-import React, { useState, useRef} from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 
 export default function SignUp() {
   const navigate = useNavigate();
   const datePickerRef = useRef(null);
+  const { user } = useAuth();
 
   const [form, setForm] = useState({
   username: "",
@@ -18,6 +19,12 @@ export default function SignUp() {
 
   const [error, setError] = useState("");
   const [birthdateError, setBirthdateError] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
   setForm({ ...form, [e.target.name]: e.target.value });

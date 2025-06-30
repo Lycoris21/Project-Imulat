@@ -5,7 +5,7 @@ import { truncateWords } from '../../utils/strings';
 import ReportIcon from '../../components/icons/ReportIcon.jsx';
 
 const ClaimCardCompact = ({ claim }) => (
-  <Link to={`/claims/${claim._id}`} className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[#EDEEF1] rounded-lg p-3 m-3 transition-all duration-300 transform hover:-translate-y-1 group">
+  <Link to={`/claims/${claim._id}`} className="block border-b border-gray-200 pb-4 last:border-b-0 shadow-sm hover:bg-[color:var(--color-background-hover)] rounded-lg p-3 m-3 transition-all duration-300 transform hover:-translate-y-1 group">
     <div className="flex justify-between items-start mb-2">
       <h3 className="font-bold text-gray-800 text-sm leading-tight flex-1 mr-2 group-hover:text-[color:var(--color-selected)] transition-colors">
         {claim.claimTitle}

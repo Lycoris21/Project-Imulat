@@ -4,7 +4,7 @@ import { getVerdictColor } from '../../utils/colors';
 import { formatRelativeTime } from '../../utils/time';
 
 const ReportCardSimple = ({ report }) => (
-  <div key={report._id} className="bg-white rounded-lg shadow-md p-4 border-none flex hover:bg-[#EDEEF1] transition-all duration-300 transform hover:-translate-y-1 group">
+  <div key={report._id} className="bg-white rounded-lg shadow-md p-4 border-none flex hover:bg-[color:var(--color-background-hover)] transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/reports/${report._id}`} className="flex-1 hover:text-blue-600 cursor-pointer">
       <div className="flex justify-start items-center">
         {report.reportCoverUrl && (

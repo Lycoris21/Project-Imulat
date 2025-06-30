@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { LoadingScreen, ErrorScreen, ClaimCard, SearchBar, SubmitClaimModal } from '../components';
 
 export default function Claims() {
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn = false } = useAuth() || {};
   const [searchQuery, setSearchQuery] = useState("");
   const [claims, setClaims] = useState([]);
   const [filteredClaims, setFilteredClaims] = useState([]);

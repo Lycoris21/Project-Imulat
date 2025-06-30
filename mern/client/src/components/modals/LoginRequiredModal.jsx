@@ -1,7 +1,23 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginRequiredModal({ isOpen, onClose, action = "perform this action" }) {
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    // Handle animation states
+    useEffect(() => {
+        if (isOpen) {
+            setIsAnimating(true);
+        }
+    }, [isOpen]);
+
+    // Handle animated close
+    const handleAnimatedClose = () => {
+        setIsAnimating(false);
+        setTimeout(() => {
+            onClose();
+        }, 150);
+    };
     // Disable scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -20,7 +36,7 @@ export default function LoginRequiredModal({ isOpen, onClose, action = "perform 
     useEffect(() => {
         const handleEscKey = (event) => {
             if (event.key === 'Escape') {
-                onClose();
+                handleAnimatedClose();
             }
         };
 
@@ -31,12 +47,12 @@ export default function LoginRequiredModal({ isOpen, onClose, action = "perform 
         return () => {
             document.removeEventListener('keydown', handleEscKey);
         };
-    }, [isOpen, onClose]);
+    }, [isOpen]);
 
     // Handle outside click
     const handleBackdropClick = (event) => {
         if (event.target === event.currentTarget) {
-            onClose();
+            handleAnimatedClose();
         }
     };
 
@@ -44,14 +60,18 @@ export default function LoginRequiredModal({ isOpen, onClose, action = "perform 
 
     return (
         <div 
-            className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50"
+            className={`fixed inset-0 bg-[#00000080] flex items-center justify-center z-50 transition-opacity duration-150 ${
+                isAnimating ? 'opacity-100' : 'opacity-0'
+            }`}
             onClick={handleBackdropClick}
         >
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative">
+            <div className={`bg-white rounded-lg p-6 max-w-md w-full mx-4 relative transition-all duration-150 ${
+                isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}>
                 {/* Close button */}
                 <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                    onClick={handleAnimatedClose}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-150"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -81,13 +101,13 @@ export default function LoginRequiredModal({ isOpen, onClose, action = "perform 
                 <div className="flex space-x-3">
                     <Link
                         to="/login"
-                        className="flex-1 bg-[#1E275E] text-white py-2 px-4 rounded-lg font-medium text-center hover:bg-[#4B548B] transition-colors"
+                        className="flex-1 bg-[color:var(--color-dark)] text-white py-2 px-4 rounded-lg font-medium text-center hover:bg-[color:var(--color-base)] transition-colors"
                     >
                         Log In
                     </Link>
                     <Link
                         to="/signup"
-                        className="flex-1 border border-[#1E275E] text-[#1E275E] py-2 px-4 rounded-lg font-medium text-center hover:bg-gray-200 transition-colors"
+                        className="flex-1 border border-[color:var(--color-dark)] text-[color:var(--color-dark)] py-2 px-4 rounded-lg font-medium text-center hover:bg-gray-200 transition-colors"
                     >
                         Sign Up
                     </Link>
@@ -95,8 +115,8 @@ export default function LoginRequiredModal({ isOpen, onClose, action = "perform 
 
                 {/* Close button */}
                 <button
-                    onClick={onClose}
-                    className="w-full mt-3 underline text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors cursor-pointer"
+                    onClick={handleAnimatedClose}
+                    className="w-full mt-3 underline text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors duration-150 cursor-pointer"
                 >
                     Maybe later
                 </button>

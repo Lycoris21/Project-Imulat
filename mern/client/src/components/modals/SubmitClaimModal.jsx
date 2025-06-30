@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claimId = null }) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Form state for create report modal
   const [claimFormData, setClaimFormData] = useState({
@@ -46,7 +47,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         claimSources: "",
       });
       
-      onClose();
+      handleClose();
 
       if (onSubmitFinish) {
           await onSubmitFinish('claimSubmitted');
@@ -68,6 +69,20 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     }));
   };
 
+  // Handle animation states
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150); // Wait for animation to complete
+  };
+
   // Reset form
   useEffect(() => {
     if (!isOpen) {
@@ -76,6 +91,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         claimContent: "",
         claimSources: ""
       });
+      setIsAnimating(false);
     }
   }, [isOpen]);
 
@@ -83,7 +99,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === 'Escape' && isOpen) {
-        onClose();
+        handleClose();
       }
     };
 
@@ -96,12 +112,14 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       document.removeEventListener('keydown', handleEscKey);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080]">
+    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${
+      isAnimating ? 'opacity-100' : 'opacity-0'
+    }`}>
       {/* Loading Overlay */}
       {isSubmitting && (
         <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
@@ -112,13 +130,15 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative">
+      <div className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all duration-150 ${
+        isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+      }`}>
         {/* Modal Header - Fixed */}
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">Submit New Claim</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -191,7 +211,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1 cursor-pointer"
             >
               Cancel

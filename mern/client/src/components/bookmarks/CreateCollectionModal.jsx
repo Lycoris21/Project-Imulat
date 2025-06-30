@@ -261,7 +261,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="px-4 py-2 bg-[#1E275E] text-white rounded-lg hover:bg-[#4B548B] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 bg-[color:var(--color-dark)] text-white rounded-lg hover:bg-[color:var(--color-base)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {loading ? (
                 <>

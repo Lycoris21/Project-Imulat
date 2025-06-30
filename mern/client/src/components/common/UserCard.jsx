@@ -36,7 +36,7 @@ export default function UserCard({ user, variant = 'default' }) {
     if (variant === 'compact') {
         return (
             <div
-                className="bg-white rounded-xl p-4 shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-gray-100 hover:bg-[#EDEEF1] group"
+                className="bg-white rounded-xl p-4 shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-gray-100 hover:bg-[color:var(--color-background-hover)] group"
                 onClick={handleClick}
             >
                 <div className="relative">
@@ -86,7 +86,7 @@ export default function UserCard({ user, variant = 'default' }) {
     // Default variant with more details
     return (
         <div
-            className="bg-white rounded-xl p-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-gray-100 hover:bg-[#EDEEF1] group"
+            className="bg-white rounded-xl p-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border border-gray-100 hover:bg-[color:var(--color-background-hover)] group"
             onClick={handleClick}
         >
             <div className="relative">

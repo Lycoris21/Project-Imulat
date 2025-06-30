@@ -93,7 +93,7 @@ export default function CommentForm({
               <button
                 type="submit"
                 disabled={!content.trim() || isSubmitting}
-                className="px-4 py-1 text-sm bg-[#1E275E] text-white rounded hover:bg-[#4B548B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-1 text-sm bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Posting...' : buttonText}
               </button>

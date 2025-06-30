@@ -18,20 +18,33 @@ export default function BookmarkModal({
   const [newCollectionBannerFile, setNewCollectionBannerFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isAnimating, setIsAnimating] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleClose = () => {
-    setSelectedCollectionId('');
-    setIsCreatingNew(false);
-    setNewCollectionName('');
-    setNewCollectionBanner('');
-    setNewCollectionBannerFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    setError('');
-    onClose();
+    setIsAnimating(false);
+    setTimeout(() => {
+      setSelectedCollectionId('');
+      setIsCreatingNew(false);
+      setNewCollectionName('');
+      setNewCollectionBanner('');
+      setNewCollectionBannerFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setError('');
+      onClose();
+    }, 150); // Wait for animation to complete
   };
+
+  // Handle animation states
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    } else {
+      setIsAnimating(false);
+    }
+  }, [isOpen]);
 
   // Fetch collections when modal opens
   useEffect(() => {
@@ -139,8 +152,12 @@ export default function BookmarkModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
+    <div className={`fixed inset-0 bg-[#00000080] flex items-center justify-center z-50 p-4 transition-opacity duration-150 ${
+      isAnimating ? 'opacity-100' : 'opacity-0'
+    }`}>
+      <div className={`bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col transform transition-all duration-150 ${
+        isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+      }`}>
         {/* Header */}
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -407,7 +424,7 @@ export default function BookmarkModal({
           <button
             onClick={handleSave}
             disabled={loading || (isCreatingNew && !newCollectionName.trim())}
-            className="px-4 py-2 bg-[#1E275E] text-white rounded-lg hover:bg-[#4B548B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[color:var(--color-dark)] text-white rounded-lg hover:bg-[color:var(--color-base)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Saving...' : 'Save Bookmark'}
           </button>

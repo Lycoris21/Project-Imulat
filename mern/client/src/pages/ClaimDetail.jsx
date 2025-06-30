@@ -62,7 +62,7 @@ export default function ClaimDetail() {
 
   useEffect(() => {
     fetchClaim();
-  }, [id]);
+  }, [id, user?._id]);
 
   const handleReaction = async (type) => {
     const newReaction = userReaction === type ? null : type;

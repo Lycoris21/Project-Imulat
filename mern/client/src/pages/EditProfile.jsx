@@ -33,8 +33,10 @@ export default function EditProfile() {
         profilePictureUrl: user?.profilePictureUrl || ""
       });
       setPreviewUrl(user?.profilePictureUrl || "");
+    } else {
+       navigate("/login");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const [status, setStatus] = useState("");
   const [coverFile, setcoverFile] = useState(null);
@@ -228,7 +230,7 @@ export default function EditProfile() {
           </button>
           <button
             onClick={() => setShowConfirmModal(true)}
-            className="px-4 py-2 bg-[#1E275E] text-white rounded hover:bg-[#4B548B] cursor-pointer"
+            className="px-4 py-2 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] cursor-pointer"
           >
             Save Changes
           </button>

@@ -6,14 +6,30 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setPassword("");
       setError("");
       setIsVerifying(false);
+      setIsAnimating(false);
     }
   }, [isOpen]);
+
+  // Handle animation states
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150); // Wait for animation to complete
+  };
 
   // Prevent body scroll and handle ESC key when modal is open
   useEffect(() => {
@@ -24,7 +40,7 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
       // Handle ESC key
       const handleEscKey = (event) => {
         if (event.key === 'Escape') {
-          onClose();
+          handleClose();
         }
       };
       
@@ -36,14 +52,14 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
         document.removeEventListener('keydown', handleEscKey);
       };
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
   // Handle background click to close modal
   const handleBackgroundClick = (e) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -100,10 +116,14 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center bg-[#00000080] z-50"
+      className={`fixed inset-0 flex items-center justify-center bg-[#00000080] z-50 transition-opacity duration-150 ${
+        isAnimating ? 'opacity-100' : 'opacity-0'
+      }`}
       onClick={handleBackgroundClick}
     >
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+      <div className={`bg-white p-6 rounded-lg shadow-lg max-w-sm w-full transform transition-all duration-150 ${
+        isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+      }`}>
         <h2 className="text-lg font-bold mb-4">Confirm your password to save changes</h2>
         
         <input
@@ -126,7 +146,7 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
         
         <div className="flex justify-end space-x-2">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isVerifying}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -135,7 +155,7 @@ export default function ConfirmPasswordModal({ isOpen, onClose, onConfirm }) {
           <button
             onClick={handleConfirm}
             disabled={isVerifying || !password.trim()}
-            className="px-4 py-2 bg-[#1E275E] text-white rounded hover:bg-[#4B548B] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             {isVerifying ? (
               <>
