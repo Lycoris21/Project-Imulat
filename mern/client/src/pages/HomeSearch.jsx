@@ -23,6 +23,20 @@ export default function HomeSearch() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('all');
+    
+    // Pagination state for each section
+    const [reportsPage, setReportsPage] = useState(1);
+    const [claimsPage, setClaimsPage] = useState(1);
+    const [usersPage, setUsersPage] = useState(1);
+    const [reportsTotalPages, setReportsTotalPages] = useState(0);
+    const [claimsTotalPages, setClaimsTotalPages] = useState(0);
+    const [usersTotalPages, setUsersTotalPages] = useState(0);
+    const [reportsTotal, setReportsTotal] = useState(0);
+    const [claimsTotal, setClaimsTotal] = useState(0);
+    const [usersTotal, setUsersTotal] = useState(0);
+    
+    const itemsPerPage = 10;
+    const usersPerPage = 12;
 
     // Search suggestions for the search bar
     const {
@@ -32,15 +46,21 @@ export default function HomeSearch() {
         disableSuggestions
     } = useHomeSearchSuggestions(localSearchQuery);
 
-    // Calculate total results
-    const totalResults = reports.length + claims.length + users.length;
+    // Calculate total results from API metadata
+    const totalResults = reportsTotal + claimsTotal + usersTotal;
 
     // Fetch search results
-    const fetchData = async () => {
+    const fetchData = async (reportsPageNum = reportsPage, claimsPageNum = claimsPage, usersPageNum = usersPage) => {
         if (!searchQuery.trim()) {
             setReports([]);
             setClaims([]);
             setUsers([]);
+            setReportsTotalPages(0);
+            setClaimsTotalPages(0);
+            setUsersTotalPages(0);
+            setReportsTotal(0);
+            setClaimsTotal(0);
+            setUsersTotal(0);
             setLoading(false);
             return;
         }
@@ -49,28 +69,51 @@ export default function HomeSearch() {
         setError(null);
 
         try {
-            // Fetch reports
-            const reportsResponse = await fetch(`http://localhost:5050/api/reports?search=${encodeURIComponent(searchQuery)}`);
+            // Fetch reports with pagination
+            const reportsResponse = await fetch(
+                `http://localhost:5050/api/reports?search=${encodeURIComponent(searchQuery)}&page=${reportsPageNum}&limit=${itemsPerPage}`
+            );
             
-            // Fetch claims
-            const claimsResponse = await fetch(`http://localhost:5050/api/claims?search=${encodeURIComponent(searchQuery)}`);
+            // Fetch claims with pagination
+            const claimsResponse = await fetch(
+                `http://localhost:5050/api/claims?search=${encodeURIComponent(searchQuery)}&page=${claimsPageNum}&limit=${itemsPerPage}`
+            );
             
-            // Fetch users
+            // Calculate pagination for users (since backend doesn't have pagination)
             const usersResponse = await fetch(`http://localhost:5050/api/users/search?q=${encodeURIComponent(searchQuery)}`);
 
             if (!reportsResponse.ok || !claimsResponse.ok || !usersResponse.ok) {
                 throw new Error('Failed to fetch data');
             }
             
-            const [reportsData, claimsData, usersData] = await Promise.all([
+            const [reportsData, claimsData, allUsersData] = await Promise.all([
                 reportsResponse.json(),
                 claimsResponse.json(),
                 usersResponse.json()
             ]);
 
-            setReports(reportsData);
-            setClaims(claimsData);
-            setUsers(usersData);
+            // Extract arrays from API responses
+            // Reports and claims APIs return { reports: [], total: number, ... } or { claims: [], total: number, ... }
+            // Users API returns array directly
+            const reportsArray = reportsData.reports || [];
+            const claimsArray = claimsData.claims || [];
+            const allUsersArray = Array.isArray(allUsersData) ? allUsersData : [];
+            
+            // Handle users pagination manually (since backend doesn't support it)
+            const usersStartIndex = (usersPageNum - 1) * usersPerPage;
+            const usersEndIndex = usersStartIndex + usersPerPage;
+            const paginatedUsers = allUsersArray.slice(usersStartIndex, usersEndIndex);
+            const usersTotalPagesCalc = Math.ceil(allUsersArray.length / usersPerPage);
+            
+            setReports(reportsArray);
+            setClaims(claimsArray);
+            setUsers(paginatedUsers);
+            setReportsTotalPages(reportsData.totalPages || 0);
+            setClaimsTotalPages(claimsData.totalPages || 0);
+            setUsersTotalPages(usersTotalPagesCalc);
+            setReportsTotal(reportsData.total || 0);
+            setClaimsTotal(claimsData.total || 0);
+            setUsersTotal(allUsersArray.length);
             setError(null);
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -95,6 +138,22 @@ export default function HomeSearch() {
         setLocalSearchQuery(e.target.value);
     };
 
+    // Pagination handlers
+    const handleReportsPageChange = (newPage) => {
+        setReportsPage(newPage);
+        fetchData(newPage, claimsPage, usersPage);
+    };
+
+    const handleClaimsPageChange = (newPage) => {
+        setClaimsPage(newPage);
+        fetchData(reportsPage, newPage, usersPage);
+    };
+
+    const handleUsersPageChange = (newPage) => {
+        setUsersPage(newPage);
+        fetchData(reportsPage, claimsPage, newPage);
+    };
+
     // Filter results based on active tab
     const getFilteredResults = () => {
         switch (activeTab) {
@@ -113,7 +172,11 @@ export default function HomeSearch() {
     const filteredResults = getFilteredResults();
 
     useEffect(() => {
-        fetchData();
+        // Reset pagination when search query changes
+        setReportsPage(1);
+        setClaimsPage(1);
+        setUsersPage(1);
+        fetchData(1, 1, 1);
     }, [searchQuery]);
 
     useEffect(() => {
@@ -153,13 +216,13 @@ export default function HomeSearch() {
                                     {totalResults} {totalResults === 1 ? 'result' : 'results'} found
                                 </span>
                                 <span>
-                                    {reports.length} reports
+                                    {reportsTotal} reports
                                 </span>
                                 <span>
-                                    {claims.length} claims
+                                    {claimsTotal} claims
                                 </span>
                                 <span>
-                                    {users.length} users
+                                    {usersTotal} users
                                 </span>
                             </div>
 
@@ -167,9 +230,9 @@ export default function HomeSearch() {
                             <div className="flex justify-center space-x-1 mb-8">
                                 {[
                                     { key: 'all', label: 'All', count: totalResults },
-                                    { key: 'reports', label: 'Reports', count: reports.length },
-                                    { key: 'claims', label: 'Claims', count: claims.length },
-                                    { key: 'users', label: 'Users', count: users.length }
+                                    { key: 'reports', label: 'Reports', count: reportsTotal },
+                                    { key: 'claims', label: 'Claims', count: claimsTotal },
+                                    { key: 'users', label: 'Users', count: usersTotal }
                                 ].map(({ key, label, count }) => (
                                     <button
                                         key={key}
@@ -216,13 +279,18 @@ export default function HomeSearch() {
                         {filteredResults.reports.length > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                                    Reports ({filteredResults.reports.length})
+                                    Reports ({reportsTotal} total, page {reportsPage} of {reportsTotalPages})
                                 </h2>
                                 <div className="space-y-4">
                                     {filteredResults.reports.map((report) => (
                                         <ReportCard key={report._id} report={report} variant="compact" />
                                     ))}
                                 </div>
+                                <PaginationControls
+                                    currentPage={reportsPage}
+                                    totalPages={reportsTotalPages}
+                                    onPageChange={handleReportsPageChange}
+                                />
                             </div>
                         )}
 
@@ -230,13 +298,18 @@ export default function HomeSearch() {
                         {filteredResults.claims.length > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                                    Claims ({filteredResults.claims.length})
+                                    Claims ({claimsTotal} total, page {claimsPage} of {claimsTotalPages})
                                 </h2>
                                 <div className="space-y-4">
                                     {filteredResults.claims.map((claim) => (
                                         <ClaimCard key={claim._id} claim={claim} variant="compact" />
                                     ))}
                                 </div>
+                                <PaginationControls
+                                    currentPage={claimsPage}
+                                    totalPages={claimsTotalPages}
+                                    onPageChange={handleClaimsPageChange}
+                                />
                             </div>
                         )}
 
@@ -244,13 +317,18 @@ export default function HomeSearch() {
                         {filteredResults.users.length > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                                    Users ({filteredResults.users.length})
+                                    Users ({usersTotal} total, page {usersPage} of {usersTotalPages})
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {filteredResults.users.map((user) => (
                                         <UserCard key={user._id} user={user} variant="compact" />
                                     ))}
                                 </div>
+                                <PaginationControls
+                                    currentPage={usersPage}
+                                    totalPages={usersTotalPages}
+                                    onPageChange={handleUsersPageChange}
+                                />
                             </div>
                         )}
 
@@ -277,3 +355,97 @@ export default function HomeSearch() {
         </div>
     );
 }
+
+// Pagination Component
+const PaginationControls = ({ currentPage, totalPages, onPageChange, className = "" }) => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+            
+            let startPage = Math.max(2, currentPage - 1);
+            let endPage = Math.min(totalPages - 1, currentPage + 1);
+            
+            // Add ellipsis if needed
+            if (startPage > 2) {
+                pages.push('...');
+            }
+            
+            // Add pages around current page
+            for (let i = startPage; i <= endPage; i++) {
+                if (i !== 1 && i !== totalPages) {
+                    pages.push(i);
+                }
+            }
+            
+            // Add ellipsis if needed
+            if (endPage < totalPages - 1) {
+                pages.push('...');
+            }
+            
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+        
+        return pages;
+    };
+
+    return (
+        <div className={`flex items-center justify-center gap-2 mt-6 ${className}`}>
+            {/* Previous Button */}
+            <button
+                onClick={() => onPageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+                Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getPageNumbers().map((page, index) => (
+                <button
+                    key={index}
+                    onClick={() => typeof page === 'number' && onPageChange(page)}
+                    disabled={page === '...'}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        page === currentPage
+                            ? 'bg-[color:var(--color-dark)] text-white'
+                            : page === '...'
+                            ? 'text-gray-400 cursor-default'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                    {page}
+                </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+                onClick={() => onPageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === totalPages
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+            >
+                Next
+            </button>
+        </div>
+    );
+};

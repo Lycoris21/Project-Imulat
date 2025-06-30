@@ -41,8 +41,13 @@ export function useHomeSearchSuggestions(initialQuery = "", debounceMs = 300) {
         // Format suggestions
         const allSuggestions = [];
 
+        // Extract arrays from API responses
+        const reports = reportsData.reports || [];
+        const claims = claimsData.claims || [];
+        const users = Array.isArray(usersData) ? usersData : [];
+
         // Add top 3 reports
-        const reportSuggestions = reportsData.slice(0, 3).map(report => ({
+        const reportSuggestions = reports.slice(0, 3).map(report => ({
           _id: report._id,
           type: 'report',
           title: report.reportTitle,
@@ -50,7 +55,7 @@ export function useHomeSearchSuggestions(initialQuery = "", debounceMs = 300) {
         }));
 
         // Add top 3 claims
-        const claimSuggestions = claimsData.slice(0, 3).map(claim => ({
+        const claimSuggestions = claims.slice(0, 3).map(claim => ({
           _id: claim._id,
           type: 'claim',
           title: claim.claimTitle,
@@ -58,7 +63,7 @@ export function useHomeSearchSuggestions(initialQuery = "", debounceMs = 300) {
         }));
 
         // Add top 2 users
-        const userSuggestions = usersData.slice(0, 2).map(user => ({
+        const userSuggestions = users.slice(0, 2).map(user => ({
           _id: user._id,
           type: 'user',
           title: user.username,

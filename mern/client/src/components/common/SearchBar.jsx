@@ -40,17 +40,21 @@ export default function SearchBar({
   // Show dropdown only when input is focused AND has suggestions
   useEffect(() => {
     if (showDropdown && suggestions.length > 0 && value.trim() && 
-        isInputFocused && !isDisabled) {
+        (isInputFocused || hasBeenClicked) && !isDisabled) {
       setIsDropdownOpen(true);
     } else {
       setIsDropdownOpen(false);
     }
     setSelectedIndex(-1);
-  }, [showDropdown, suggestions, value, isInputFocused, isDisabled]);
+  }, [showDropdown, suggestions, value, isInputFocused, hasBeenClicked, isDisabled]);
 
   const handleInputChange = (e) => {
     onChange(e);
     setSelectedIndex(-1);
+    // Ensure input is marked as focused when user types
+    if (!isInputFocused) {
+      setIsInputFocused(true);
+    }
   };
 
   const handleKeyDown = (e) => {
