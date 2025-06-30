@@ -145,19 +145,22 @@ export default function SearchBar({
       case 'collection':
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
           </svg>
         );
       case 'report':
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm0 4h8v1H6v-1zm0 3h6v1H6v-1z" clipRule="evenodd" />
+            <path d="M17.414 2.586a2 2 0 00-2.828 0L13 4.172V6h1.828l1.586-1.586a2 2 0 000-2.828z" />
+            <path fillRule="evenodd" d="M15.621 7.621l-3 3a1 1 0 01-.621.379H10v-2a1 1 0 01.379-.621l3-3L15.621 7.621z" clipRule="evenodd" />
           </svg>
         );
       case 'claim':
         return (
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm0 4h8v1H6v-1zm0 3h6v1H6v-1z" clipRule="evenodd" />
+            <path d="M17 9a1 1 0 00-1 1v3l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L18 13v-3a1 1 0 00-1-1z" />
           </svg>
         );
       case 'user':
@@ -224,7 +227,7 @@ export default function SearchBar({
 
       {/* Dropdown Suggestions */}
       {isDropdownOpen && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto custom-scrollbar">
           {suggestions.map((suggestion, index) => (
             <div
               key={`${suggestion.type}-${suggestion._id}`}
@@ -245,12 +248,12 @@ export default function SearchBar({
               }`}>
                 {getSuggestionIcon(suggestion.type)}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">
+              <div className="flex-1 min-w-0 text-left">
+                <div className="font-medium truncate text-left">
                   {suggestion.title || suggestion.name}
                 </div>
                 {suggestion.description && (
-                  <div className="text-sm text-gray-500 truncate">
+                  <div className="text-sm text-gray-500 truncate text-left">
                     {suggestion.description}
                   </div>
                 )}

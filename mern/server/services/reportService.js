@@ -7,7 +7,7 @@ let aiEnabled = false;
 class ReportService {
   // Get all reports
   static async getAllReports() {
-    const reports = await Report.find({})
+    const reports = await Report.find({deletedAt: null})
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
@@ -35,7 +35,7 @@ class ReportService {
 
   // Get report by ID
   static async getReportById(id) {
-    const report = await Report.findById(id)
+    const report = await Report.findOne({ _id: id, deletedAt: null })
       .populate('userId', 'username email bio')
       .populate('claimIds');
 

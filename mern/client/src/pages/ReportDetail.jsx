@@ -28,6 +28,7 @@ export default function ReportDetail() {
         const reportRes = await fetch(`http://localhost:5050/api/reports/${id}`);
         if (!reportRes.ok) throw new Error("Failed to fetch report");
         const reportData = await reportRes.json();
+
         setReport(reportData);
 
         // Check bookmark status if user is logged in

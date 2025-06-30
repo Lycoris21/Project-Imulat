@@ -62,7 +62,7 @@ export function useHomeSearchSuggestions(initialQuery = "", debounceMs = 300) {
           _id: user._id,
           type: 'user',
           title: user.username,
-          description: user.role ? `${user.role.charAt(0).toUpperCase()}${user.role.slice(1)}` : 'User'
+          description: user.bio || 'No bio available'
         }));
 
         // Combine all suggestions

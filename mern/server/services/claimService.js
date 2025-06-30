@@ -6,7 +6,7 @@ let aiEnabled = false;
 
 class ClaimService {
   static async getAllClaims() {
-    const claims = await Claim.find({})
+    const claims = await Claim.find({deletedAt: null})
       .populate('userId', 'username email')
       .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
