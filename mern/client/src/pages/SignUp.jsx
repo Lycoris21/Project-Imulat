@@ -84,7 +84,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-base-gradient flex flex-col justify-center items-center text-center px-4">
       <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[40%] p-8 m-auto">
-        <h2 className="text-3xl font-bold text-center text-deep mb-6">
+        <h2 className="text-3xl font-bold text-center text-[color:var(--color-deep)] mb-6">
           Create Your Account
         </h2>
 
@@ -96,7 +96,7 @@ export default function SignUp() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-deep mb-1 text-left">
+            <label className="block text-sm font-medium text-[color:var(--color-deep)] mb-1 text-left">
               Username
             </label>
    <div className="flex items-center border-b border-gray-400 py-2">
@@ -113,7 +113,7 @@ export default function SignUp() {
    </div>
 
           <div>
-            <label className="block text-sm font-medium text-deep mb-1 text-left">
+            <label className="block text-sm font-medium text-[color:var(--color-deep)] mb-1 text-left">
               Email
             </label>
 
@@ -131,7 +131,7 @@ export default function SignUp() {
   </div>
 
           <div>
-            <label className="block text-sm font-medium text-deep mb-1 text-left">
+            <label className="block text-sm font-medium text-[color:var(--color-deep)] mb-1 text-left">
               Password
             </label>
 
@@ -149,7 +149,7 @@ export default function SignUp() {
   </div>
 
           <div>
-            <label className="block text-sm font-medium text-deep mb-1 text-left">
+            <label className="block text-sm font-medium text-[color:var(--color-deep)] mb-1 text-left">
               Confirm Password
             </label>
 
@@ -173,7 +173,7 @@ export default function SignUp() {
  
  
    <div>
-  <label className="flex items-center gap-2 text-sm font-medium text-deep mb-1 text-left">
+  <label className="flex items-center gap-2 text-sm font-medium text-[color:var(--color-deep)] mb-1 text-left">
     <span>Birthdate</span>
     <svg
       onClick={handleIconClick}
@@ -238,7 +238,7 @@ export default function SignUp() {
 
           <button
             type="submit"
-              className="w-full bg-dark text-white font-semibold py-2 rounded-xl hover:bg-darker transition"
+              className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition"
           >
             Sign Up
           </button>
@@ -246,7 +246,7 @@ export default function SignUp() {
 
         <p className="text-sm text-center text-gray-500 mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-base hover:underline font-medium">
+          <a href="/login" className="text-[color:var(--color-base)] hover:underline font-medium">
             Log In
           </a>
         </p>

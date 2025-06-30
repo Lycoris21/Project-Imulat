@@ -38,7 +38,7 @@ export default function ResetPassword() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex flex-col justify-center items-center text-center px-4">
       <div className="bg-white shadow-xl rounded-xl w-full max-w-lg p-8">
-        <h2 className="text-3xl font-bold text-deep mb-6">Reset Password</h2>
+        <h2 className="text-3xl font-bold text-[color:var(--color-deep)] mb-6">Reset Password</h2>
 
         {successMsg && (
           <div className="bg-green-100 text-green-700 text-sm p-3 rounded-lg mb-4">
@@ -100,7 +100,7 @@ export default function ResetPassword() {
 
           <button
             type="submit"
-            className="w-full bg-dark text-white font-semibold py-2 rounded-xl hover:bg-darker transition"
+            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition"
           >
             Reset Password
           </button>

@@ -6,9 +6,9 @@ import ReportIcon from '../../components/icons/ReportIcon.jsx';
 
 const ClaimCardSimple = ({ claim }) => (
   <div key={claim._id} className="bg-white rounded-lg shadow-md p-4 border-none flex hover:bg-[#EDEEF1] transition-all duration-300 transform hover:-translate-y-1 group">
-    <Link to={`/claims/${claim._id}`} className="flex-1 group-hover:text-selected cursor-pointer">
+    <Link to={`/claims/${claim._id}`} className="flex-1 group-hover:text-[color:var(--color-selected)] cursor-pointer">
       <div className="flex justify-start items-center">
-        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
+        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2">
           {claim.claimTitle}
         </h3>
         

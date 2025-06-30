@@ -26,7 +26,7 @@ const ReportCardCompact = ({ report }) => (
             {/* Content on the right */}
             <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-800 text-sm leading-tight group-hover:text-selected transition-colors">
+                    <h3 className="font-bold text-gray-800 text-sm leading-tight group-hover:text-[color:var(--color-selected)] transition-colors">
                         {report.reportTitle}
                     </h3>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getVerdictColor(report.truthVerdictParsed)}`}>

@@ -70,7 +70,7 @@ export default function UserCard({ user, variant = 'default' }) {
                             )}
                         </div>
                         <div className="flex-1 min-w-0 relative">
-                            <h3 className="font-semibold text-dark truncate group-hover:text-selected transition-colors">
+                            <h3 className="font-semibold text-[color:var(--color-dark)] truncate group-hover:text-[color:var(--color-selected)] transition-colors">
                                 {user.username}
                             </h3>
                             <p className="text-gray-600 text-xs line-clamp-2 pr-12">
@@ -127,7 +127,7 @@ export default function UserCard({ user, variant = 'default' }) {
                     <div className="flex-1 min-w-0 relative">
                         {/* Header with username */}
                         <div className="mb-2">
-                            <h3 className="text-lg font-bold text-dark truncate group-hover:text-selected transition-colors">
+                            <h3 className="text-lg font-bold text-[color:var(--color-dark)] truncate group-hover:text-[color:var(--color-selected)] transition-colors">
                                 {user.username}
                             </h3>
                         </div>

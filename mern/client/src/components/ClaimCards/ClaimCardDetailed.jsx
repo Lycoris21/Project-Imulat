@@ -8,7 +8,7 @@ const ClaimCardDetailed = ({ claim }) => (
     <Link to={`/claims/${claim._id}`} className="block">
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.75em]">
+          <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.75em]">
             {claim.claimTitle}
           </h3>
           <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getTruthIndexColor(claim.aiTruthIndex)}`}>

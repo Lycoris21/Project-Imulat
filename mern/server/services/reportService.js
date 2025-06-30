@@ -194,24 +194,24 @@ class ReportService {
   // Search reports
   static async searchReports(query) {
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
-    
-   const reports = await Report.find({
+
+    const reports = await Report.find({
       $and: [
         {
           $or: [
-            { reportTitle: { $regex: searchRegex, $options: 'i' } },
-            { reportContent: { $regex: searchRegex, $options: 'i' } },
-            { reportDescription: { $regex: searchRegex, $options: 'i' } },
-            { aiReportSummary: { $regex: searchRegex, $options: 'i' } }
+            { reportTitle: { $regex: searchRegex } },
+            { reportContent: { $regex: searchRegex } },
+            { reportDescription: { $regex: searchRegex } },
+            { aiReportSummary: { $regex: searchRegex } }
           ]
         },
         { deletedAt: null }
       ]
     })
-    .populate('userId', 'username email')
-    .populate('claimIds', 'claimTitle aiTruthIndex')
-    .sort({ createdAt: -1 })
-    .limit(50); // Limit results
+      .populate('userId', 'username email')
+      .populate('claimIds', 'claimTitle aiTruthIndex')
+      .sort({ createdAt: -1 })
+      .limit(50); // Limit results
 
     const reportsWithMeta = await Promise.all(
       reports.map(async (report) => {
@@ -233,6 +233,7 @@ class ReportService {
 
     return reportsWithMeta;
   }
+
 
 }
 

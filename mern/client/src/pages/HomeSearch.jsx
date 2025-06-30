@@ -194,7 +194,7 @@ export default function HomeSearch() {
                         <div className="text-red-400 text-lg mb-4">{error}</div>
                         <button
                             onClick={fetchData}
-                            className="px-6 py-3 bg-white text-dark rounded-lg hover:bg-gray-100 transition-colors"
+                            className="px-6 py-3 bg-white text-[color:var(--color-dark)] rounded-lg hover:bg-gray-100 transition-colors"
                         >
                             Try Again
                         </button>

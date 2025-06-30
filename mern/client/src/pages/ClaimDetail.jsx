@@ -181,7 +181,7 @@ export default function ClaimDetail() {
               <p className="text-gray-600 mb-2"> By{" "}
                 <Link
                   to={`/profile/${claim.userId?._id}`}
-                  className="font-medium hover:text-selected hover:underline"
+                  className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
                 >
                   {claim.userId?.username}
                 </Link>

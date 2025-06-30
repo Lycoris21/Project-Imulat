@@ -208,7 +208,7 @@ export default function ReportDetail() {
                 By{" "}
                 <Link
                   to={`/profile/${report.userId?._id}`}
-                  className="font-medium hover:text-selected hover:underline"
+                  className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
                 >
                   {report.userId?.username}
                 </Link>
@@ -230,7 +230,7 @@ export default function ReportDetail() {
                   <Link
                     key={claim._id}
                     to={`/claims/${claim._id}`}
-                    className="block text-base hover:text-dark text-sm underline"
+                    className="block text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] text-sm underline"
                   >
                     {claim.claimTitle || 'Untitled Claim'}
                   </Link>

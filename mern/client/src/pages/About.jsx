@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CountUp from 'react-countup';
 
 export default function About() {
   const [stats, setStats] = useState({
@@ -55,7 +56,7 @@ export default function About() {
             <h2 className="text-3xl font-bold text-gray-800 mb-6">How It Works</h2>
             <div className="space-y-4">
               <div className="flex items-start space-x-4">
-                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-[color:var(--color-base)] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   1
                 </div>
                 <div>
@@ -65,7 +66,7 @@ export default function About() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-[color:var(--color-base)] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   2
                 </div>
                 <div>
@@ -75,7 +76,7 @@ export default function About() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-[color:var(--color-base)] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   3
                 </div>
                 <div>
@@ -85,7 +86,7 @@ export default function About() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="bg-base text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                <div className="bg-[color:var(--color-base)] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm flex-shrink-0">
                   4
                 </div>
                 <div>
@@ -138,19 +139,27 @@ export default function About() {
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Our Impact</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-base mb-2">{stats.claimsVerified}</div>
+              <div className="text-4xl font-bold text-[color:var(--color-base)] mb-2">
+                <CountUp end={stats.claimsVerified} duration={1.5} />
+              </div>
               <div className="text-gray-600 font-medium">Claims Verified</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">{stats.reportsPublished}</div>
+              <div className="text-4xl font-bold text-[color:var(--color-base)] mb-2">
+                <CountUp end={stats.reportsPublished} duration={1.5} />
+              </div>
               <div className="text-gray-600 font-medium">Reports Published</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">{stats.activeUsers}</div>
+              <div className="text-4xl font-bold text-[color:var(--color-base)] mb-2">
+                <CountUp end={stats.activeUsers} duration={1.5} />
+              </div>
               <div className="text-gray-600 font-medium">Active Users</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-base mb-2">{stats.accuracyRate}</div>
+              <div className="text-4xl font-bold text-[color:var(--color-base)] mb-2">
+                <CountUp end={parseFloat(stats.accuracyRate)} decimals={0} suffix="%" duration={1.5} />
+              </div>
               <div className="text-gray-600 font-medium">Accuracy Rate</div>
             </div>
           </div>
@@ -165,13 +174,13 @@ export default function About() {
           </p>          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/claims"
-              className="px-8 py-4 bg-white border-2 border-base text-base font-semibold rounded-2xl shadow hover:bg-base hover:text-white transition"
+              className="px-8 py-4 bg-white border-2 border-[color:var(--color-base)] text-[color:var(--color-base)] font-semibold rounded-2xl shadow hover:bg-[color:var(--color-base)] hover:text-white transition"
             >
               Submit a Claim
             </Link>
             <Link
               to="/reports"
-              className="px-8 py-4 bg-base border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-base transition"
+              className="px-8 py-4 bg-[color:var(--color-base)] border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-[color:var(--color-base)] transition"
             >
               Browse Reports
             </Link>

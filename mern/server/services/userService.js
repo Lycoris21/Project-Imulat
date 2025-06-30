@@ -101,7 +101,7 @@ class UserService {
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
     
     const users = await User.find({
-      $and: [
+       $and: [
         {
           $or: [
             { username: { $regex: searchRegex } },
@@ -110,7 +110,7 @@ class UserService {
             { lastName: { $regex: searchRegex } }
           ]
         },
-        { deletedAt: null }
+         { deletedAt: null }
       ]
     }, '-passwordHash') // Exclude password hash
     .limit(20) // Limit results to 20 users

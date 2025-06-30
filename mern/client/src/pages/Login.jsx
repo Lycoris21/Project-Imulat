@@ -46,7 +46,7 @@ export default function Login() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex flex-col justify-center items-center text-center px-4">
       <div className="bg-white shadow-xl rounded-xl w-full max-w-lg p-8">
-        <h2 className="text-3xl font-bold text-center text-deep mb-6">Login</h2>
+        <h2 className="text-3xl font-bold text-center text-[color:var(--color-deep)] mb-6">Login</h2>
 
         {error && (
           <div className="bg-red-100 text-red-700 text-sm p-3 rounded-lg mb-4">
@@ -112,14 +112,14 @@ export default function Login() {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                className="mr-2 accent-dark focus:ring-0"
+                className="mr-2 accent-[color:var(--color-dark)] focus:ring-0"
                 checked={rememberMe}
                 name="remember"
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
               Remember me
             </label>
-            <Link to="/forgot-password" className="text-dark hover:underline font-medium">
+            <Link to="/forgot-password" className="text-[color:var(--color-dark)] hover:underline font-medium">
               Forgot password?
             </Link>
           </div>
@@ -128,7 +128,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-dark text-white font-semibold py-2 rounded-xl hover:bg-darker transition"
+            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition"
           >
             Log In
           </button>
@@ -137,7 +137,7 @@ export default function Login() {
 
         <p className="text-sm text-center text-gray-500 mt-6">
           Not a member?{" "}
-          <a href="/signup" className="text-base hover:underline font-medium">
+          <a href="/signup" className="text-[color:var(--color-base)] hover:underline font-medium">
             Register now!
           </a>
         </p>

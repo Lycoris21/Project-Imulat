@@ -121,7 +121,7 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Latest Reports</h2>
-            <Link to="/reports" className="text-base hover:text-dark font-medium">
+            <Link to="/reports" className="text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] font-medium">
               View All →
             </Link>
           </div>            
@@ -136,7 +136,7 @@ export default function Home() {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Latest Claims</h2>
-            <Link to="/claims" className="text-base hover:text-dark font-medium">
+            <Link to="/claims" className="text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] font-medium">
               View All →
             </Link>
           </div>            

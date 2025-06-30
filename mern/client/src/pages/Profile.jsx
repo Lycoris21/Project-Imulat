@@ -139,7 +139,7 @@ export default function Profile() {
                         {user && profileData && user._id === profileData._id ? (
                             <Link
                                 to="/edit-profile"
-                                className="border-[0.5px] border-dark bg-white text-dark py-1 px-4 rounded hover:bg-dark hover:text-white hover:border-white">
+                                className="border-[0.5px] border-[color:var(--color-dark)] bg-white text-[color:var(--color-dark)] py-1 px-4 rounded hover:bg-[color:var(--color-dark)] hover:text-white hover:border-white">
                                 Edit Profile
                             </Link>
                         ) : (
@@ -163,8 +163,8 @@ export default function Profile() {
                         onClick={() => setActiveTab("claims")}
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "claims"
-                            ? "border-selected text-selected border-b-2"
-                            : "text-gray-500 hover:text-selected cursor-pointer"
+                            ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2"
+                            : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
                         }`}
                     >
                         Claims ({profileData.claims.length})
@@ -173,8 +173,8 @@ export default function Profile() {
                         onClick={() => setActiveTab("reports")}
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "reports"
-                            ? "border-selected text-selected border-b-2 "
-                            : "text-gray-500 hover:text-selected cursor-pointer"
+                            ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2 "
+                            : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
                         }`}
                     >
                         Reports ({profileData.reports.length})

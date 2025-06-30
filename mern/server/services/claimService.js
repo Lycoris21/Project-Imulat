@@ -141,25 +141,25 @@ class ClaimService {
 
   // Search claims
   static async searchClaims(query) {
-    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
-    
-    const claims = await Claim.find({
+  const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+
+  const claims = await Claim.find({
       $and: [
         {
-           $or: [
-            { claimTitle: { $regex: searchRegex } },
-            { claimContent: { $regex: searchRegex } },
-            { aiClaimSummary: { $regex: searchRegex } }
-          ],
+          $or: [
+            { claimTitle: searchRegex },
+            { claimContent: searchRegex },
+            { aiClaimSummary: searchRegex }
+          ]
         },
         { deletedAt: null }
       ]
     })
-    .populate('userId', 'username email')
-    .populate("reportId", "reportTitle")
-    .sort({ createdAt: -1 })
-    .limit(50) // Limit results
-    .lean();
+      .populate('userId', 'username email')
+      .populate("reportId", "reportTitle")
+      .sort({ createdAt: -1 })
+      .limit(50) // Limit results
+      .lean();
 
     const claimsWithMeta = await Promise.all(
       claims.map(async (claim) => {
@@ -178,6 +178,7 @@ class ClaimService {
 
     return claimsWithMeta;
   }
+
 }
 
 export default ClaimService;

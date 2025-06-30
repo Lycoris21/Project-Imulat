@@ -159,7 +159,7 @@ useEffect(() => {
             <div className="absolute top-0 right-0">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-dark text-white font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3 bg-[color:var(--color-dark)] text-white font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -185,7 +185,7 @@ useEffect(() => {
       <select
         value={selectedFilter}
         onChange={(e) => setSelectedFilter(e.target.value)}
-        className="px-4 py-2 rounded-lg bg-white text-dark border border-gray-300 cursor-pointer"
+        className="px-4 py-2 rounded-lg bg-white text-[color:var(--color-dark)] border border-gray-300 cursor-pointer"
       >
         <option value="newest">Newest</option>
         <option value="oldest">Oldest</option>

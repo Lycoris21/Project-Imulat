@@ -50,7 +50,7 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
                     <div className="rounded-lg hover:bg-gray-100 ">
                         <Link
                             to={`/profile/${user?._id}`}
-                            className="text-center block px-4 py-2 text-base"
+                            className="text-center block px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                         >
                             Profile
                         </Link>
@@ -60,7 +60,7 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
                     <div className="hover:bg-gray-100">
                         <Link
                             to="/bookmarks"
-                            className="text-center block px-4 py-2 text-base"
+                            className="text-center block px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                         >
                             Bookmarks
                         </Link>
@@ -69,7 +69,7 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
 
                     <div className="hover:bg-gray-100">
                         <button
-                            className="text-center w-full px-4 py-2 text-base cursor-pointer"
+                            className="text-center w-full px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                             onClick={handleChangePasswordClick}
                         >
                             Change Password
@@ -79,7 +79,7 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
 
                     <div className="hover:bg-gray-100 rounded-b-lg">
                         <button
-                            className="text-center w-full px-4 py-2 text-base cursor-pointer"
+                            className="text-center w-full px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                             onClick={onLogout}
                         >
                             Logout

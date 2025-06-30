@@ -78,7 +78,7 @@ export default function NotificationItem({ notification, onClose, refreshNotific
 
   return (
     <div
-      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? "bg-blue-50" : ""}`}
+      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? "bg-blue-50" : ""} rounded-lg`}
     >
       <div className="flex items-center space-x-3">
         <div className="relative flex-shrink-0">

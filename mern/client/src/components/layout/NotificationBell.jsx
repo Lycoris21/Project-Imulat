@@ -82,7 +82,7 @@ export default function NotificationBell({ user, notifications, setNotifications
                 onClick={markAllAsRead}
                 disabled={unreadCount === 0}
                 className={`text-sm font-medium ${unreadCount > 0
-                  ? 'text-base hover:text-dark cursor-pointer'
+                  ? 'text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] cursor-pointer'
                   : 'text-gray-400 cursor-not-allowed'
                   }`}
               >

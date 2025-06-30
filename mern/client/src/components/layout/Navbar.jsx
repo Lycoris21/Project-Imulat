@@ -76,7 +76,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </div>
-        <h1 className="text-xl font-bold text-base -m-5">Project IMULAT</h1>
+        <h1 className="text-xl font-bold text-[color:var(--color-base)] -m-5">Project IMULAT</h1>
       </Link>
 
       {/* Center - Navigation Items */}
@@ -110,7 +110,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           <div className="flex items-center space-x-3">
             <Link
               to="/login"
-              className="px-4 py-2 border-1 border-base text-base hover:text-white hover:border-white hover:bg-base font-medium rounded-lg transition-colors"
+              className="px-4 py-2 border-1 border-[color:var(--color-base)] text-[color:var(--color-base)] hover:text-white hover:border-white hover:bg-[color:var(--color-base)] font-medium rounded-lg transition-colors"
             >
               Login / Sign up
             </Link>

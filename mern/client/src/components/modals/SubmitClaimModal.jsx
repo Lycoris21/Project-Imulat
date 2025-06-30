@@ -204,7 +204,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
               className={`px-6 py-2 rounded-lg transition-colors flex-1 ${
                 isSubmitting 
                   ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                  : 'bg-base text-white hover:bg-dark cursor-pointer'
+                  : 'bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer'
               }`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Claim'}

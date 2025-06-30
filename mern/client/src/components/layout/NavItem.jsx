@@ -5,8 +5,8 @@ export default function NavItem({ name, to }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `text-base hover:text-dark font-medium transition-colors ${
-          isActive ? "text-dark opacity-60 border-b-2 border-dark pb-1" : ""
+        `text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] font-medium transition-colors ${
+          isActive ? "text-[color:var(--color-dark)] opacity-60 border-b-2 border-[color:var(--color-dark)] pb-1" : ""
         }`
       }
     >

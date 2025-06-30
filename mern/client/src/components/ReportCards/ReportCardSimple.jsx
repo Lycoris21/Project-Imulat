@@ -20,7 +20,7 @@ const ReportCardSimple = ({ report }) => (
           </div>  
         )}
 
-        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-selected transition-colors flex-1 mr-3 line-clamp-2">
+        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2">
           {report.reportTitle}
         </h3>
 

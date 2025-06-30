@@ -205,7 +205,7 @@ export default function SearchBar({
           />
           <button
             type="submit"
-            className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-dark font-semibold rounded-r-2xl hover:bg-gray-50 transition cursor-pointer"
+            className="px-8 py-4 bg-white border border-l-0 border-gray-300 text-[color:var(--color-dark)] font-semibold rounded-r-2xl hover:bg-gray-50 transition cursor-pointer"
           >
             {isLoading ? (
               <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
