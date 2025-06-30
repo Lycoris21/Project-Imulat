@@ -47,7 +47,6 @@ export default function Profile() {
             if (!res.ok) throw new Error("Failed to fetch user profile");
             const data = await res.json();
 
-            if (data.deletedAt != null) throw new Error("User is deleted");
             if (isMounted) {
                 setProfileData(data);
                 setReactionCounts({ likes: data.likes || 0, dislikes: data.dislikes || 0 });
@@ -164,7 +163,7 @@ export default function Profile() {
                         onClick={() => setActiveTab("claims")}
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "claims"
-                            ? "border-b-2 border-selected text-selected"
+                            ? "border-selected text-selected border-b-2"
                             : "text-gray-500 hover:text-selected cursor-pointer"
                         }`}
                     >
@@ -174,7 +173,7 @@ export default function Profile() {
                         onClick={() => setActiveTab("reports")}
                         className={`pb-2 text-sm font-medium transition-colors ${
                         activeTab === "reports"
-                            ? "border-b-2 border-selected text-selected"
+                            ? "border-selected text-selected border-b-2 "
                             : "text-gray-500 hover:text-selected cursor-pointer"
                         }`}
                     >

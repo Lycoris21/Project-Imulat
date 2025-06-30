@@ -5,13 +5,13 @@ import claimService from './claimService.js';
 class UserService {
   // Get all users
   static async getAllUsers() {
-    return await User.find({}, '-passwordHash');
+    return await User.find({deletedAt: null}, '-passwordHash');
   }
 
   // Get user by ID
   static async getUserById(id) {
     // Step 1: Get the user without passwordHash
-    const user = await User.findById(id, '-passwordHash').lean();
+    const user = await User.findOne({ _id: id, deletedAt: null }, '-passwordHash').lean();
     if (!user) throw new Error('User not found');
 
     // Step 2: Get all claims authored by this user using service
@@ -40,7 +40,8 @@ class UserService {
   // Find user by email or username
   static async findUserByEmailOrUsername(email, username) {
     return await User.findOne({ 
-      $or: [{ email }, { username }] 
+      $or: [{ email }, { username }],
+      deletedAt: null
     });
   }
 
@@ -74,12 +75,16 @@ class UserService {
 
   // Delete user
   static async deleteUser(id) {
-    return await User.findByIdAndDelete(id);
+    return await User.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
   }
 
   // Get user with password (for authentication)
   static async getUserWithPassword(email) {
-    return await User.findOne({ email });
+    return await User.findOne({ email, deletedAt: null });
   }
 
   // Update password
@@ -96,11 +101,16 @@ class UserService {
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
     
     const users = await User.find({
-      $or: [
-        { username: { $regex: searchRegex } },
-        { email: { $regex: searchRegex } },
-        { firstName: { $regex: searchRegex } },
-        { lastName: { $regex: searchRegex } }
+      $and: [
+        {
+          $or: [
+            { username: { $regex: searchRegex } },
+            { email: { $regex: searchRegex } },
+            { firstName: { $regex: searchRegex } },
+            { lastName: { $regex: searchRegex } }
+          ]
+        },
+        { deletedAt: null }
       ]
     }, '-passwordHash') // Exclude password hash
     .limit(20) // Limit results to 20 users

@@ -31,7 +31,7 @@ class ClaimService {
   }
 
   static async getClaimById(id) {
-    const claim = await Claim.findById(id)
+    const claim = await Claim.findOne({ _id: id, deletedAt: null })
       .populate("userId", "username email")
       .populate("reportId", "reportTitle")
       .lean();
@@ -52,7 +52,7 @@ class ClaimService {
 
   // Get reports by user
   static async getClaimsByUser(userId) {
-    const claims = await Claim.find({ userId })
+    const claims = await Claim.find({ userId, deletedAt: null })
       .populate('userId', 'username email')
       .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
@@ -106,11 +106,15 @@ class ClaimService {
   }
 
   static async deleteClaim(id) {
-    return await Claim.findByIdAndDelete(id);
+    return await Claim.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
   }
 
   static async getLatestClaims(limit = 10) {
-    const claims = await Claim.find({})
+    const claims = await Claim.find({deletedAt: null})
       .populate('userId', 'username email')
       .populate("reportId", "reportTitle")
       .sort({ createdAt: -1 })
@@ -140,10 +144,15 @@ class ClaimService {
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
     
     const claims = await Claim.find({
-      $or: [
-        { claimTitle: { $regex: searchRegex } },
-        { claimContent: { $regex: searchRegex } },
-        { aiClaimSummary: { $regex: searchRegex } }
+      $and: [
+        {
+           $or: [
+            { claimTitle: { $regex: searchRegex } },
+            { claimContent: { $regex: searchRegex } },
+            { aiClaimSummary: { $regex: searchRegex } }
+          ],
+        },
+        { deletedAt: null }
       ]
     })
     .populate('userId', 'username email')

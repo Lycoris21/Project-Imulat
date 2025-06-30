@@ -101,12 +101,16 @@ class ReportService {
 
   // Delete report
   static async deleteReport(id) {
-    return await Report.findByIdAndDelete(id);
+    return await Report.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
   }
 
   // Get reports by truth verdict
   static async getReportsByVerdict(verdict) {
-    const reports = await Report.find({ truthVerdict: verdict })
+    const reports = await Report.find({ truthVerdict: verdict, deletedAt: null })
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
@@ -134,7 +138,7 @@ class ReportService {
 
   // Get reports by user
   static async getReportsByUser(userId) {
-    const reports = await Report.find({ userId })
+    const reports = await Report.find({ userId, deletedAt: null })
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 });
@@ -161,7 +165,7 @@ class ReportService {
 
   // Get latest reports
   static async getLatestReports() {
-    const reports = await Report.find({})
+    const reports = await Report.find({ deletedAt: null })
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({ createdAt: -1 })
@@ -191,12 +195,17 @@ class ReportService {
   static async searchReports(query) {
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
     
-    const reports = await Report.find({
-      $or: [
-        { reportTitle: { $regex: searchRegex } },
-        { reportContent: { $regex: searchRegex } },
-        { reportDescription: { $regex: searchRegex } },
-        { aiReportSummary: { $regex: searchRegex } }
+   const reports = await Report.find({
+      $and: [
+        {
+          $or: [
+            { reportTitle: { $regex: searchRegex, $options: 'i' } },
+            { reportContent: { $regex: searchRegex, $options: 'i' } },
+            { reportDescription: { $regex: searchRegex, $options: 'i' } },
+            { aiReportSummary: { $regex: searchRegex, $options: 'i' } }
+          ]
+        },
+        { deletedAt: null }
       ]
     })
     .populate('userId', 'username email')
