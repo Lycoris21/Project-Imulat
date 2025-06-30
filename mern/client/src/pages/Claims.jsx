@@ -8,6 +8,7 @@ import { LoadingScreen, ErrorScreen, ClaimCard, SearchBar, SubmitClaimModal } fr
 export default function Claims() {
   const { isLoggedIn = false } = useAuth() || {};
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // The actual search query used for fetching
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -19,33 +20,27 @@ export default function Claims() {
   const itemsPerPage = 6; // Number of items per page. Change this and backend pagination will handle it automatically
 
 
-  // Effect for handling search and filter changes (reset to page 1)
+  // Effect for handling filter changes (reset to page 1)
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedFilter]);
+  }, [activeSearchQuery, selectedFilter]);
 
-  // Effect for fetching data when page, search, or filter changes
+  // Effect for fetching data when page, active search, or filter changes
   useEffect(() => {
-    setSearchLoading(true);
-    
-    // Add debounce only for search queries
-    const delay = searchQuery && searchQuery.length > 0 ? 300 : 0;
-    const timeoutId = setTimeout(() => {
-      fetchClaims();
-    }, delay);
-    
-    return () => clearTimeout(timeoutId);
-  }, [currentPage, selectedFilter, searchQuery]);
+    fetchClaims();
+  }, [currentPage, selectedFilter, activeSearchQuery]);
 
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Search is handled by useEffect above
+    setActiveSearchQuery(searchQuery);
+    setCurrentPage(1);
   };
 
   const fetchClaims = async () => {
     try {
-      setLoading(true);
+      setLoading(currentPage === 1); // Only show loading spinner on first page
+      setSearchLoading(true);
       
       // Build query parameters
       const params = new URLSearchParams({
@@ -54,8 +49,8 @@ export default function Claims() {
         sort: selectedFilter
       });
       
-      if (searchQuery.trim()) {
-        params.append('search', searchQuery.trim());
+      if (activeSearchQuery.trim()) {
+        params.append('search', activeSearchQuery.trim());
       }
       
       const response = await fetch(`http://localhost:5050/api/claims?${params}`);
