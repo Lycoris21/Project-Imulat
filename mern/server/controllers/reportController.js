@@ -113,6 +113,21 @@ class ReportController {
   // Delete report
   static async deleteReport(req, res) {
     try {
+      // First get the report to check ownership
+      const report = await ReportService.getReportById(req.params.id);
+      if (!report) return res.status(404).json({ error: "Report not found" });
+
+      // Check authorization - user must be owner or admin
+      const userId = req.body?.userId || req.headers['user-id']; // Support both body and header
+      if (!userId) {
+        return res.status(401).json({ error: "User ID required" });
+      }
+
+      // Only owner or admin can delete
+      if (report.userId._id.toString() !== userId && req.body?.userRole !== 'admin') {
+        return res.status(403).json({ error: "You don't have permission to delete this report" });
+      }
+
       const deletedReport = await ReportService.deleteReport(req.params.id);
       
       if (!deletedReport) {

@@ -17,6 +17,8 @@ export default function ClaimDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     reportTitle: "",
     reportContent: "",
@@ -159,6 +161,44 @@ export default function ClaimDetail() {
     }
   };
 
+  const handleDeleteClaim = async () => {
+    if (!user || (user._id !== claim.userId?._id && user.role !== 'admin')) {
+      alert('You do not have permission to delete this claim');
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`http://localhost:5050/api/claims/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          userRole: user.role
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete claim');
+      }
+
+      // Navigate back to claims page after successful deletion
+      navigate('/claims');
+    } catch (error) {
+      console.error('Error deleting claim:', error);
+      alert('Failed to delete claim: ' + error.message);
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  // Check if user can delete the claim
+  const canDeleteClaim = user && (user._id === claim?.userId?._id || user.role === 'admin');
+
   if (loading) {
     return (
       <LoadingScreen message="Loading claim..." />
@@ -224,6 +264,8 @@ export default function ClaimDetail() {
           onReact={handleReaction}
           onBookmark={handleBookmark}
           handleOpenModal={() => setShowCreateModal(true)}
+          canDelete={canDeleteClaim}
+          onDelete={() => setShowDeleteConfirm(true)}
         />
 
 
@@ -245,6 +287,44 @@ export default function ClaimDetail() {
           itemType="claim"
           itemTitle={claim?.claimTitle}
         />
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50"
+              onClick={() => setShowDeleteConfirm(false)}
+            ></div>
+            
+            {/* Modal */}
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto relative z-10">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Deletion</h3>
+              <p className="text-gray-700 mb-4">
+                Are you sure you want to delete this claim? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-gray-200 rounded-lg text-gray-800 hover:bg-gray-300 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteClaim}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {deleting && (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {deleting ? 'Deleting...' : 'Delete Claim'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

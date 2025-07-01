@@ -17,7 +17,7 @@ export default function Reports() {
   const [selectedFilter, setSelectedFilter] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalReports, setTotalReports] = useState(0);
-  const itemsPerPage = 9; // Number of items per page. Change this and backend pagination will handle it automatically
+  const itemsPerPage = 6; // Number of items per page. Change this and backend pagination will handle it automatically
 
 
   // Check if user is a researcher
@@ -252,7 +252,7 @@ export default function Reports() {
               </div>
 
               {/* Pagination Controls - Right side */}
-              <PaginationControls />
+              {reports.length > 0 && totalPages > 1 && <PaginationControls />}
             </div>
           </div>
         </div>
@@ -286,9 +286,11 @@ export default function Reports() {
         )}
 
         {/* Bottom Pagination Controls */}
-        <div className="mt-12">
-          <PaginationControls />
-        </div>
+        {reports.length > 0 && totalPages > 1 && (
+          <div className="mt-12">
+            <PaginationControls />
+          </div>
+        )}
       </div>
 
       {/* Researcher: Create Report Modal */}

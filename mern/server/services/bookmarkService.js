@@ -1,5 +1,7 @@
 import { Bookmark, Collection, Claim, Report, Comment } from '../models/index.js';
 import ReactionService from './reactionService.js';
+import mongoose from 'mongoose';
+import { parseVerdict } from '../utils/helpers.js'
 
 class BookmarkService {
   // Get all bookmarks for a user
@@ -220,133 +222,160 @@ class BookmarkService {
     }
   }
 
-  // Get paginated bookmarks for a user with optional type filtering
   static async getUserBookmarksPaginated(userId, options = {}) {
     try {
       const {
         page = 1,
         limit = 10,
-        targetType = null, // 'report', 'claim', or null for all
+        targetType = null,
         collectionId = undefined,
         search = null
       } = options;
 
-      const query = { userId };
-      
-      // Filter by collection if specified
-      if (collectionId !== undefined) {
-        query.collectionId = collectionId;
-      }
+      const matchStage = { userId: new mongoose.Types.ObjectId(userId) };
+      if (targetType) matchStage.targetType = targetType;
+      if (collectionId) matchStage.collectionId = new mongoose.Types.ObjectId(collectionId);
 
-      // Filter by target type if specified
-      if (targetType) {
-        query.targetType = targetType;
-      }
+      const lookupStage = {
+        $lookup: {
+          from: '', // Will be set dynamically based on targetType
+          localField: 'targetId',
+          foreignField: '_id',
+          as: 'targetData'
+        }
+      };
 
-      console.log('BookmarkService.getUserBookmarksPaginated query:', query);
-      
-      // Calculate pagination
-      const skip = (page - 1) * limit;
-      
-      // Get total count for pagination info
-      const totalBookmarks = await Bookmark.countDocuments(query);
-      
-      // Fetch bookmarks with pagination
-      const bookmarks = await Bookmark.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+      const addFieldsStage = {
+        $addFields: {
+          targetData: { $arrayElemAt: ['$targetData', 0] }
+        }
+      };
 
-      console.log('BookmarkService.getUserBookmarksPaginated found bookmarks:', bookmarks.length);
-      
-      // Manually populate targetId based on targetType
-      const populatedBookmarks = await Promise.all(
-        bookmarks.map(async (bookmark) => {
-          let populatedTarget = null;
-          
-          if (bookmark.targetType === 'report') {
-            const report = await Report.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
-            if (report) {
-              // Add reaction counts and comment count like in reportService
-              const commentCount = await Comment.countDocuments({
-                targetType: 'report',
-                targetId: report._id,
-              });
-              const reactionCounts = await ReactionService.countReactions(report._id, 'report');
-              
-              populatedTarget = {
-                ...report.toObject({ virtuals: true }),
-                commentCount,
-                reactionCounts
-              };
-            }
-          } else if (bookmark.targetType === 'claim') {
-            const claim = await Claim.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
-            if (claim) {
-              // Add reaction counts and comment count like in claimService
-              const commentCount = await Comment.countDocuments({
-                targetType: 'claim',
-                targetId: claim._id,
-              });
-              const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
-              
-              populatedTarget = {
-                ...claim.toObject({ virtuals: true }),
-                commentCount,
-                reactionCounts
-              };
+      const pipeline = [{ $match: matchStage }];
+
+      if (targetType === 'report') {
+        lookupStage.$lookup.from = 'reports';
+      } else if (targetType === 'claim') {
+        lookupStage.$lookup.from = 'claims';
+      } else {
+        // Allow both types
+        const reportLookup = {
+          $lookup: {
+            from: 'reports',
+            localField: 'targetId',
+            foreignField: '_id',
+            as: 'reportData'
+          }
+        };
+        const claimLookup = {
+          $lookup: {
+            from: 'claims',
+            localField: 'targetId',
+            foreignField: '_id',
+            as: 'claimData'
+          }
+        };
+        pipeline.push(reportLookup, claimLookup, {
+          $addFields: {
+            targetData: {
+              $cond: {
+                if: { $eq: ['$targetType', 'report'] },
+                then: { $arrayElemAt: ['$reportData', 0] },
+                else: { $arrayElemAt: ['$claimData', 0] }
+              }
             }
           }
-          
-          if (populatedTarget) {
-            return {
-              ...bookmark.toObject(),
-              targetId: populatedTarget
-            };
-          }
-          return null; // Will be filtered out
-        })
-      );
-      
-      // Filter out bookmarks where target was not found (deleted reports/claims)
-      const filteredBookmarks = populatedBookmarks.filter(bookmark => bookmark !== null);
-      
-      // Apply search filter if provided
-      let searchFilteredBookmarks = filteredBookmarks;
-      if (search && search.trim()) {
-        const searchLower = search.toLowerCase();
-        searchFilteredBookmarks = filteredBookmarks.filter(bookmark => {
-          const target = bookmark.targetId;
-          return (
-            target.reportTitle?.toLowerCase().includes(searchLower) ||
-            target.claimTitle?.toLowerCase().includes(searchLower) ||
-            target.reportContent?.toLowerCase().includes(searchLower) ||
-            target.claimContent?.toLowerCase().includes(searchLower) ||
-            target.reportDescription?.toLowerCase().includes(searchLower) ||
-            target.aiReportSummary?.toLowerCase().includes(searchLower) ||
-            target.aiClaimSummary?.toLowerCase().includes(searchLower)
-          );
         });
       }
 
-      console.log('BookmarkService.getUserBookmarksPaginated after filtering:', searchFilteredBookmarks.length);
-      
+      if (targetType) {
+        pipeline.push(lookupStage, addFieldsStage);
+      }
+
+      // Search filter
+      if (search && search.trim()) {
+        const searchRegex = new RegExp(search, 'i');
+        pipeline.push({
+          $match: {
+            $or: [
+              { 'targetData.reportTitle': searchRegex },
+              { 'targetData.claimTitle': searchRegex },
+              { 'targetData.reportContent': searchRegex },
+              { 'targetData.claimContent': searchRegex },
+              { 'targetData.reportDescription': searchRegex },
+              { 'targetData.aiReportSummary': searchRegex },
+              { 'targetData.aiClaimSummary': searchRegex }
+            ]
+          }
+        });
+      }
+
+      pipeline.push(
+        { $sort: { createdAt: -1 } },
+        {
+          $facet: {
+            bookmarks: [
+              { $skip: (page - 1) * limit },
+              { $limit: limit }
+            ],
+            totalCount: [{ $count: 'count' }]
+          }
+        }
+      );
+
+      const [result] = await Bookmark.aggregate(pipeline);
+
+      const bookmarks = result.bookmarks || [];
+      const totalItems = result.totalCount[0]?.count || 0;
+      const totalPages = Math.ceil(totalItems / limit);
+
+      // Enrich with comment and reaction counts
+      const enriched = await Promise.all(bookmarks.map(async (b) => {
+        const target = b.targetData;
+        if (!target) return null;
+
+        const commentCount = await Comment.countDocuments({
+          targetType: b.targetType,
+          targetId: target._id
+        });
+
+        const reactionCounts = await ReactionService.countReactions(target._id, b.targetType);
+
+        // Apply parseVerdict for reports that have truthVerdict
+        const enrichedTarget = {
+          ...target,
+          commentCount,
+          reactionCounts
+        };
+
+        // Parse truthVerdict if it exists (for reports)
+        if (target.truthVerdict) {
+          enrichedTarget.truthVerdictParsed = parseVerdict(target.truthVerdict);
+        }
+
+        return {
+          ...b,
+          targetId: enrichedTarget
+        };
+      }));
+
       return {
-        bookmarks: searchFilteredBookmarks,
+        bookmarks: enriched.filter(Boolean),
         pagination: {
           currentPage: page,
-          totalPages: Math.ceil(totalBookmarks / limit),
-          totalItems: totalBookmarks,
+          totalPages,
+          totalItems,
           itemsPerPage: limit,
-          hasNextPage: page < Math.ceil(totalBookmarks / limit),
+          hasNextPage: page < totalPages,
           hasPrevPage: page > 1
         }
       };
-    } catch (error) {
-      console.error('Error in BookmarkService.getUserBookmarksPaginated:', error);
-      throw error;
+    } catch (err) {
+      console.error('Aggregation error:', err);
+      throw err;
     }
   }
+
 
   // Get all collections for a user
   static async getUserCollections(userId) {

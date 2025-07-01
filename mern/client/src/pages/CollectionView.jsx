@@ -17,7 +17,8 @@ export default function CollectionView() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeSearchQuery, setActiveSearchQuery] = useState(""); // The actual search query used for fetching
     
     // Pagination state
     const [reportsPage, setReportsPage] = useState(1);
@@ -44,8 +45,8 @@ export default function CollectionView() {
                 collectionId
             });
 
-            if (searchQuery.trim()) {
-                params.append('search', searchQuery.trim());
+            if (activeSearchQuery.trim()) {
+                params.append('search', activeSearchQuery.trim());
             }
 
             const url = `http://localhost:5050/api/bookmarks/user/${user._id}?${params}`;
@@ -190,7 +191,7 @@ export default function CollectionView() {
         }
     };
 
-    // Handle search change and trigger search
+    // Handle search change and submit like Reports/Claims pages
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
@@ -198,11 +199,21 @@ export default function CollectionView() {
     // Handle search submit - trigger new fetch
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        // Reset pagination and fetch new data
+        setActiveSearchQuery(searchQuery);
         setReportsPage(1);
         setClaimsPage(1);
-        fetchData();
     };
+
+    // Effect for handling search changes (reset to page 1)
+    useEffect(() => {
+        setReportsPage(1);
+        setClaimsPage(1);
+    }, [activeSearchQuery]);
+
+    // Effect for fetching data when page or active search changes
+    useEffect(() => {
+        fetchData();
+    }, [user?._id, collectionId, activeSearchQuery, reportsPage, claimsPage]);
 
     // Pagination helpers - now use server data directly
     const getReportsBookmarks = () => {
@@ -241,10 +252,6 @@ export default function CollectionView() {
             console.error('Error fetching claims page:', err);
         }
     };
-
-    useEffect(() => {
-        fetchData();
-    }, [user?._id, collectionId, reportsPage, claimsPage]);
 
     if (!user) {
         return null; // Will redirect in useEffect
@@ -351,13 +358,22 @@ export default function CollectionView() {
                     {/* Stats */}
                     <div className="flex items-center justify-center space-x-6 text-sm text-gray-300">
                         <span>
-                            {(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks in collection
+                            {activeSearchQuery 
+                                ? `${(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks found`
+                                : `${(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks in collection`
+                            }
                         </span>
                         <span>
-                            {reportsData.pagination?.totalItems || 0} reports
+                            {activeSearchQuery 
+                                ? `${reportsData.pagination?.totalItems || 0} reports`
+                                : `${reportsData.pagination?.totalItems || 0} reports`
+                            }
                         </span>
                         <span>
-                            {claimsData.pagination?.totalItems || 0} claims
+                            {activeSearchQuery 
+                                ? `${claimsData.pagination?.totalItems || 0} claims`
+                                : `${claimsData.pagination?.totalItems || 0} claims`
+                            }
                         </span>
                     </div>
                 </div>
@@ -371,10 +387,10 @@ export default function CollectionView() {
                             </svg>
                         </div>
                         <h3 className="text-lg font-medium text-gray-300 mb-2">
-                            {searchQuery ? 'No bookmarks found' : 'Collection is empty'}
+                            {activeSearchQuery ? 'No bookmarks found' : 'Collection is empty'}
                         </h3>
                         <p className="text-gray-500 mb-6">
-                            {searchQuery 
+                            {activeSearchQuery 
                                 ? 'Try adjusting your search terms'
                                 : 'Start adding bookmarks to this collection'
                             }
@@ -386,7 +402,10 @@ export default function CollectionView() {
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Reports ({reportsData.pagination?.totalItems || 0} total, page {reportsPage} of {getTotalReportsPages()})
+                                    Reports ({activeSearchQuery 
+                                        ? `${reportsData.pagination?.totalItems || 0} found`
+                                        : `${reportsData.pagination?.totalItems || 0} total`
+                                    }, page {reportsPage} of {getTotalReportsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
@@ -408,23 +427,28 @@ export default function CollectionView() {
                                 {getReportsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {searchQuery ? "No reports found matching your search" : "No reports in this collection"}
+                                            {activeSearchQuery ? "No reports found matching your search" : "No reports in this collection"}
                                         </p>
                                     </div>
                                 )}
                             </div>
-                            <PaginationControls
-                                currentPage={reportsPage}
-                                totalPages={getTotalReportsPages()}
-                                onPageChange={handleReportsPageChange}
-                            />
+                            {getReportsBookmarks().length > 0 && getTotalReportsPages() > 1 && (
+                                <PaginationControls
+                                    currentPage={reportsPage}
+                                    totalPages={getTotalReportsPages()}
+                                    onPageChange={handleReportsPageChange}
+                                />
+                            )}
                         </div>
 
                         {/* Claims Section */}
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Claims ({claimsData.pagination?.totalItems || 0} total, page {claimsPage} of {getTotalClaimsPages()})
+                                    Claims ({activeSearchQuery 
+                                        ? `${claimsData.pagination?.totalItems || 0} found`
+                                        : `${claimsData.pagination?.totalItems || 0} total`
+                                    }, page {claimsPage} of {getTotalClaimsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
@@ -446,16 +470,18 @@ export default function CollectionView() {
                                 {getClaimsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {searchQuery ? "No claims found matching your search" : "No claims in this collection"}
+                                            {activeSearchQuery ? "No claims found matching your search" : "No claims in this collection"}
                                         </p>
                                     </div>
                                 )}
                             </div>
-                            <PaginationControls
-                                currentPage={claimsPage}
-                                totalPages={getTotalClaimsPages()}
-                                onPageChange={handleClaimsPageChange}
-                            />
+                            {getClaimsBookmarks().length > 0 && getTotalClaimsPages() > 1 && (
+                                <PaginationControls
+                                    currentPage={claimsPage}
+                                    totalPages={getTotalClaimsPages()}
+                                    onPageChange={handleClaimsPageChange}
+                                />
+                            )}
                         </div>
                     </div>
                 )}

@@ -249,7 +249,7 @@ export default function Claims() {
               </div>
 
               {/* Pagination Controls - Right side */}
-              <PaginationControls />
+              {claims.length > 0 && totalPages > 1 && <PaginationControls />}
             </div>
           </div>
 
@@ -283,9 +283,11 @@ export default function Claims() {
         )}
 
         {/* Bottom Pagination Controls */}
-        <div className="mt-12">
-          <PaginationControls />
-        </div>
+        {claims.length > 0 && totalPages > 1 && (
+          <div className="mt-12">
+            <PaginationControls />
+          </div>
+        )}
       </div>
 
        <SubmitClaimModal isOpen={showSubmitModal} onClose={() => setShowSubmitModal(false)} onSubmitFinish={handleSubmitFinish}/>

@@ -9,6 +9,9 @@ router.post("/", CommentController.createComment);
 // Get comments by target (using query params)
 router.get("/", CommentController.getCommentsByTarget);
 
+// Update comment
+router.put("/:commentId", CommentController.updateComment);
+
 // Like/dislike comments
 router.put("/:commentId/like", CommentController.likeComment);
 router.put("/:commentId/dislike", CommentController.dislikeComment);

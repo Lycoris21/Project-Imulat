@@ -54,6 +54,18 @@ class CommentController {
     }
   }
 
+  static async updateComment(req, res) {
+    try {
+      const { commentId } = req.params;
+      const { commentContent, userId } = req.body;
+      
+      const updatedComment = await CommentService.updateComment(commentId, userId, commentContent);
+      res.status(200).json(updatedComment);
+    } catch (err) {
+      res.status(403).json({ message: err.message || "Failed to update comment" });
+    }
+  }
+
   static async deleteComment(req, res) {
     try {
       const { commentId } = req.params;

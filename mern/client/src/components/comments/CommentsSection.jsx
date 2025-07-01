@@ -183,6 +183,57 @@ export default function CommentsSection({ targetId, targetType }) {
     }
   };
 
+  // Edit comment
+  const handleEditComment = async (commentId, newContent) => {
+    try {
+      const response = await fetch(`http://localhost:5050/api/comments/${commentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          commentContent: newContent,
+          userId: user._id 
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to edit comment');
+      }
+
+      // Refresh comments to get the updated list
+      await fetchComments();
+    } catch (err) {
+      console.error('Error editing comment:', err);
+      throw err;
+    }
+  };
+
+  // Delete comment
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const response = await fetch(`http://localhost:5050/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user._id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete comment');
+      }
+
+      // Refresh comments to get the updated list
+      await fetchComments();
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      throw err;
+    }
+  };
+
   // Fetch comments on component mount
   useEffect(() => {
     fetchComments();
@@ -258,6 +309,8 @@ export default function CommentsSection({ targetId, targetType }) {
                 onAddComment={handleAddComment}
                 onLikeComment={handleLikeComment}
                 onDislikeComment={handleDislikeComment}
+                onEditComment={handleEditComment}
+                onDeleteComment={handleDeleteComment}
                 level={0}
               />
             ))}

@@ -226,16 +226,46 @@ class CommentService {
     };
   }
 
+  static async updateComment(commentId, userId, newContent) {
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+    
+    // Only allow the comment author to edit their own comment
+    if (comment.userId.toString() !== userId.toString()) {
+      throw new Error("Unauthorized: You can only edit your own comments");
+    }
+
+    comment.commentContent = newContent;
+    comment.updatedAt = new Date();
+    
+    return await comment.save();
+  }
+
   static async deleteComment(commentId, userId) {
     const comment = await Comment.findById(commentId);
-    if (!comment)
+    if (!comment) {
       throw new Error("Comment not found");
-    if (comment.userId.toString() !== userId.toString())
-      throw new Error("Unauthorized");
+    }
+    
+    // Get user to check if they are admin
+    const { User } = await import('../models/index.js');
+    const user = await User.findById(userId);
+    
+    // Allow comment author or admin to delete
+    const isAuthor = comment.userId.toString() === userId.toString();
+    const isAdmin = user && user.role === 'admin';
+    
+    if (!isAuthor && !isAdmin) {
+      throw new Error("Unauthorized: You can only delete your own comments");
+    }
 
+    // Delete all replies to this comment
     await Comment.deleteMany({
       parentCommentId: comment._id
-    }); // Delete replies
+    });
+    
     return await comment.deleteOne();
   }
 }

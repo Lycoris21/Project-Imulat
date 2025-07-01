@@ -9,13 +9,13 @@ export default function AllBookmarks() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const searchQuery = searchParams.get('q') || '';
     
     const [reportsData, setReportsData] = useState({ bookmarks: [], pagination: {} });
     const [claimsData, setClaimsData] = useState({ bookmarks: [], pagination: {} });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [activeSearchQuery, setActiveSearchQuery] = useState(""); // The actual search query used for fetching
     
     // Pagination state
     const [reportsPage, setReportsPage] = useState(1);
@@ -41,8 +41,8 @@ export default function AllBookmarks() {
                 targetType
             });
 
-            if (searchQuery) {
-                params.append('search', searchQuery);
+            if (activeSearchQuery.trim()) {
+                params.append('search', activeSearchQuery.trim());
             }
 
             const url = `http://localhost:5050/api/bookmarks/user/${user._id}?${params}`;
@@ -121,31 +121,28 @@ export default function AllBookmarks() {
         }
     };
 
-    // Handle search change for real-time filtering (URL search)
+    // Handle search change and submit like Reports/Claims pages
     const handleSearchChange = (e) => {
-        setLocalSearchQuery(e.target.value);
+        setSearchQuery(e.target.value);
     };
 
-    // Handle search submit - navigate to search URL
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        if (localSearchQuery.trim()) {
-            navigate(`/bookmarks/all?q=${encodeURIComponent(localSearchQuery.trim())}`);
-        } else {
-            navigate('/bookmarks/all');
-        }
-    };
-
-    useEffect(() => {
-        fetchBookmarks();
-    }, [user?._id, searchQuery, reportsPage, claimsPage]);
-
-    useEffect(() => {
-        setLocalSearchQuery(searchQuery);
-        // Reset pagination when search changes
+        setActiveSearchQuery(searchQuery);
         setReportsPage(1);
         setClaimsPage(1);
-    }, [searchQuery]);
+    };
+
+    // Effect for handling search changes (reset to page 1)
+    useEffect(() => {
+        setReportsPage(1);
+        setClaimsPage(1);
+    }, [activeSearchQuery]);
+
+    // Effect for fetching data when page or active search changes
+    useEffect(() => {
+        fetchBookmarks();
+    }, [user?._id, activeSearchQuery, reportsPage, claimsPage]);
 
     // Pagination helpers - now use server data directly
     const getReportsBookmarks = () => {
@@ -221,12 +218,12 @@ export default function AllBookmarks() {
                     </div>
                     
                     <h1 className="text-3xl font-bold text-white mb-4">
-                        {searchQuery ? `Search Results for "${searchQuery}"` : 'All Bookmarks'}
+                        {activeSearchQuery ? `Search Results for "${activeSearchQuery}"` : 'All Bookmarks'}
                     </h1>
                     
                     {/* Search Bar */}
                     <SearchBar
-                        value={localSearchQuery}
+                        value={searchQuery}
                         onChange={handleSearchChange}
                         onSubmit={handleSearchSubmit}
                         placeholder="Search your bookmarks..."
@@ -236,13 +233,22 @@ export default function AllBookmarks() {
                     {/* Stats */}
                     <div className="flex items-center justify-center space-x-6 text-sm text-gray-300">
                         <span>
-                            {(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks total
+                            {activeSearchQuery 
+                                ? `${(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks found`
+                                : `${(reportsData.pagination?.totalItems || 0) + (claimsData.pagination?.totalItems || 0)} bookmarks total`
+                            }
                         </span>
                         <span>
-                            {reportsData.pagination?.totalItems || 0} reports
+                            {activeSearchQuery 
+                                ? `${reportsData.pagination?.totalItems || 0} reports`
+                                : `${reportsData.pagination?.totalItems || 0} reports`
+                            }
                         </span>
                         <span>
-                            {claimsData.pagination?.totalItems || 0} claims
+                            {activeSearchQuery 
+                                ? `${claimsData.pagination?.totalItems || 0} claims`
+                                : `${claimsData.pagination?.totalItems || 0} claims`
+                            }
                         </span>
                     </div>
                 </div>
@@ -256,10 +262,10 @@ export default function AllBookmarks() {
                             </svg>
                         </div>
                         <h3 className="text-lg font-medium text-gray-300 mb-2">
-                            {searchQuery ? 'No bookmarks found' : 'No bookmarks yet'}
+                            {activeSearchQuery ? 'No bookmarks found' : 'No bookmarks yet'}
                         </h3>
                         <p className="text-gray-500 mb-6">
-                            {searchQuery
+                            {activeSearchQuery
                                 ? 'Try adjusting your search terms'
                                 : 'Start bookmarking reports and claims to see them here'
                             }
@@ -279,7 +285,10 @@ export default function AllBookmarks() {
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Reports ({reportsData.pagination?.totalItems || 0} total, page {reportsPage} of {getTotalReportsPages()})
+                                    Reports ({activeSearchQuery 
+                                        ? `${reportsData.pagination?.totalItems || 0} found`
+                                        : `${reportsData.pagination?.totalItems || 0} total`
+                                    }, page {reportsPage} of {getTotalReportsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
@@ -301,23 +310,28 @@ export default function AllBookmarks() {
                                 {getReportsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {searchQuery ? "No reports found matching your search" : "No bookmarked reports found"}
+                                            {activeSearchQuery ? "No reports found matching your search" : "No bookmarked reports found"}
                                         </p>
                                     </div>
                                 )}
                             </div>
-                            <PaginationControls
-                                currentPage={reportsPage}
-                                totalPages={getTotalReportsPages()}
-                                onPageChange={handleReportsPageChange}
-                            />
+                            {getReportsBookmarks().length > 0 && getTotalReportsPages() > 1 && (
+                                <PaginationControls
+                                    currentPage={reportsPage}
+                                    totalPages={getTotalReportsPages()}
+                                    onPageChange={handleReportsPageChange}
+                                />
+                            )}
                         </div>
 
                         {/* Claims Section */}
                         <div className="bg-white rounded-2xl shadow-xl p-6">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-bold text-gray-800">
-                                    Claims ({claimsData.pagination?.totalItems || 0} total, page {claimsPage} of {getTotalClaimsPages()})
+                                    Claims ({activeSearchQuery 
+                                        ? `${claimsData.pagination?.totalItems || 0} found`
+                                        : `${claimsData.pagination?.totalItems || 0} total`
+                                    }, page {claimsPage} of {getTotalClaimsPages()})
                                 </h2>
                             </div>
                             <div className="space-y-4">
@@ -339,16 +353,18 @@ export default function AllBookmarks() {
                                 {getClaimsBookmarks().length === 0 && (
                                     <div className="text-center py-8">
                                         <p className="text-gray-500">
-                                            {searchQuery ? "No claims found matching your search" : "No bookmarked claims found"}
+                                            {activeSearchQuery ? "No claims found matching your search" : "No bookmarked claims found"}
                                         </p>
                                     </div>
                                 )}
                             </div>
-                            <PaginationControls
-                                currentPage={claimsPage}
-                                totalPages={getTotalClaimsPages()}
-                                onPageChange={handleClaimsPageChange}
-                            />
+                            {getClaimsBookmarks().length > 0 && getTotalClaimsPages() > 1 && (
+                                <PaginationControls
+                                    currentPage={claimsPage}
+                                    totalPages={getTotalClaimsPages()}
+                                    onPageChange={handleClaimsPageChange}
+                                />
+                            )}
                         </div>
                     </div>
                 )}
@@ -359,6 +375,7 @@ export default function AllBookmarks() {
 
 // Pagination Component
 const PaginationControls = ({ currentPage, totalPages, onPageChange, className = "" }) => {
+    // Only show pagination if there are multiple pages AND we're not showing empty results
     if (totalPages <= 1) return null;
 
     const getPageNumbers = () => {
