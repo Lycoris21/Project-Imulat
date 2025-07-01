@@ -17,7 +17,7 @@ export default function Claims() {
   const [selectedFilter, setSelectedFilter] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalClaims, setTotalClaims] = useState(0);
-  const itemsPerPage = 6; // Number of items per page. Change this and backend pagination will handle it automatically
+  const itemsPerPage = 4; // Number of items per page. Change this and backend pagination will handle it automatically
 
 
   // Effect for handling filter changes (reset to page 1)
@@ -201,7 +201,7 @@ export default function Claims() {
             {isLoggedIn && (
               <button
                 onClick={() => setShowSubmitModal(true)}
-                className="px-6 py-3 bg-[color:var(--color-dark)] text-white font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
