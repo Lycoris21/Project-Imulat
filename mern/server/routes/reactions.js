@@ -15,4 +15,7 @@ router.get('/counts/:targetType/:targetId', reactionController.getReactionCounts
 // Get current user’s reaction for a target
 router.get('/user/:targetType/:targetId/:userId', reactionController.getUserReaction);
 
+// Get all items liked by a user
+router.get('/user-likes/:userId/:targetType', reactionController.getUserLikes);
+
 export default router;

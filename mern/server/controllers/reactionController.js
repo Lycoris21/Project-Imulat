@@ -33,11 +33,13 @@ const reactionController = {
 
   async setReaction(req, res) {
     const { userId, targetId, targetType, reactionType } = req.body;
+    console.log('setReaction called with:', { userId, targetId, targetType, reactionType });
     try {
       const result = await ReactionService.setReaction(userId, targetId, targetType, reactionType);
       res.json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to set reaction' });
+      console.error('Error in setReaction:', error);
+      res.status(500).json({ error: 'Failed to set reaction', details: error.message });
     }
   },
 
@@ -48,6 +50,22 @@ const reactionController = {
       res.json(result);
     } catch (error) {
       res.status(500).json({ error: 'Failed to remove reaction' });
+    }
+  },
+
+  async getUserLikes(req, res) {
+    const { userId, targetType } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    
+    try {
+      const result = await ReactionService.getUserLikes(userId, targetType, {
+        page: parseInt(page),
+        limit: parseInt(limit)
+      });
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting user likes:', error);
+      res.status(500).json({ error: 'Failed to fetch user likes' });
     }
   }
 };

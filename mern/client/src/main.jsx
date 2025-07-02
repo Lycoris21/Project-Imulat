@@ -25,6 +25,7 @@ import Bookmarks from "./pages/Bookmarks";
 import AllBookmarks from "./pages/AllBookmarks";
 import CollectionView from "./pages/CollectionView";
 import BookmarksSearch from "./pages/BookmarksSearch";
+import Likes from "./pages/Likes";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ErrorScreen from "./components/screens/ErrorScreen";
@@ -50,6 +51,7 @@ const router = createBrowserRouter([
       { path: "bookmarks/all", element: <AllBookmarks /> },
       { path: "bookmarks/search", element: <BookmarksSearch /> },
       { path: "bookmarks/collection/:collectionId", element: <CollectionView /> },
+      { path: "likes", element: <Likes /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "reset-password/:token", element: <ResetPassword /> },
 

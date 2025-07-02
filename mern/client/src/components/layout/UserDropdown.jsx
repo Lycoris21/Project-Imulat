@@ -68,6 +68,16 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
                     </div>
 
                     <div className="hover:bg-gray-100">
+                        <Link
+                            to="/likes"
+                            className="text-center block px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
+                        >
+                            Likes
+                        </Link>
+                        <div className="border-t border-gray-200 mx-10" />
+                    </div>
+
+                    <div className="hover:bg-gray-100">
                         <button
                             className="text-center w-full px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                             onClick={handleChangePasswordClick}
