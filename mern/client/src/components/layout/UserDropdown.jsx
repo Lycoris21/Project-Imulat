@@ -72,7 +72,7 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
                             to="/likes"
                             className="text-center block px-4 py-2 text-[color:var(--color-base)] cursor-pointer"
                         >
-                            Likes
+                            Your Likes
                         </Link>
                         <div className="border-t border-gray-200 mx-10" />
                     </div>
