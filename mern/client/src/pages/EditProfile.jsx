@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Components
-import { LoadingScreen, ErrorScreen, ConfirmPasswordModal } from '../components';
+import { LoadingScreen, ErrorScreen, ConfirmPasswordModal, DeleteUserModal } from '../components';
 
 export default function EditProfile() {
   const { user, logout, setUser } = useAuth();
@@ -21,6 +21,7 @@ export default function EditProfile() {
   const [profilePictureFile, setProfilePictureFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -34,7 +35,7 @@ export default function EditProfile() {
       });
       setPreviewUrl(user?.profilePictureUrl || "");
     } else {
-       navigate("/login");
+      navigate("/login");
     }
   }, [user, navigate]);
 
@@ -89,7 +90,7 @@ export default function EditProfile() {
 
       const updatedUser = await response.json();
       setUser(updatedUser); // <- Update context
-      localStorage.setItem("user", JSON.stringify(updatedUser)); 
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       // Redirect to profile with success state
       navigate(`/profile/${user._id}`, { state: { profileUpdated: true } });
@@ -99,9 +100,22 @@ export default function EditProfile() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`http://localhost:5050/api/users/${user._id}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      logout();
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Could not delete account.");
+    }
+  }
+
   if (!user) {
-   return (
-      <LoadingScreen message="Loading user info..."/>
+    return (
+      <LoadingScreen message="Loading user info..." />
     );
   }
 
@@ -129,22 +143,22 @@ export default function EditProfile() {
             )}
 
             <div className="mt-4">
-                <label className="block font-semibold text-left mb-2">Profile Picture</label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setProfilePictureFile(e.target.files[0])}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
-                    <span className="text-gray-900">Choose File</span>
-                    <span className="mx-2">|</span>
-                    <span className={`${profilePictureFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
-                      {profilePictureFile ? profilePictureFile.name : 'No file chosen'}
-                    </span>
-                  </div>
+              <label className="block font-semibold text-left mb-2">Profile Picture</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setProfilePictureFile(e.target.files[0])}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                  <span className="text-gray-900">Choose File</span>
+                  <span className="mx-2">|</span>
+                  <span className={`${profilePictureFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
+                    {profilePictureFile ? profilePictureFile.name : 'No file chosen'}
+                  </span>
                 </div>
+              </div>
             </div>
           </div>
 
@@ -203,20 +217,20 @@ export default function EditProfile() {
               <p className="text-sm text-gray-500 mb-2">No cover photo set.</p>
             )}
             <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setcoverFile(e.target.files[0])}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
-                    <span className="text-gray-900">Choose File</span>
-                    <span className="mx-2">|</span>
-                    <span className={`${coverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
-                      {coverFile ? coverFile.name : 'No file chosen'}
-                    </span>
-                  </div>
-                </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setcoverFile(e.target.files[0])}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                <span className="text-gray-900">Choose File</span>
+                <span className="mx-2">|</span>
+                <span className={`${coverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
+                  {coverFile ? coverFile.name : 'No file chosen'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -236,6 +250,15 @@ export default function EditProfile() {
           </button>
         </div>
 
+        <div className="text-center mt-4">
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="text-sm text-red-600 hover:text-red-800 underline"
+          >
+            Delete Account
+          </button>
+        </div>
+
         {status && <p className="text-sm mt-2 text-center text-gray-600">{status}</p>}
       </div>
 
@@ -247,6 +270,16 @@ export default function EditProfile() {
           handleSave(password); // optionally pass this to backend for validation
         }}
       />
+
+      <DeleteUserModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={async () => {
+          setShowDeleteModal(false);
+          handleDelete();
+        }}
+      />
+
 
     </div>
   );

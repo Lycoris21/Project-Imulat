@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import ConfirmLogout from "../modals/ConfirmLogout";
+import ConfirmLogoutModal from "../modals/ConfirmLogoutModal";
 import { useAuth } from "../../context/AuthContext";
 
 import NavItem from './NavItem';
@@ -117,7 +117,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
           </div>
         )}
       </div>
-      <ConfirmLogout
+      <ConfirmLogoutModal
         isOpen={showLogoutConfirm}
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={() => {

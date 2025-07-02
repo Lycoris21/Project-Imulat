@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function ConfirmLogout({ isOpen, onCancel, onConfirm }) {
+export default function ConfirmLogoutModal({ isOpen, onCancel, onConfirm }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Handle animation states

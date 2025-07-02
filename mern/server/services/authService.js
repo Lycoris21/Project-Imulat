@@ -6,7 +6,7 @@ import User from "../models/User.js";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function findUserByEmail(email) {
-  return await User.findOne({ email });
+  return await User.findOne({ email, deletedAt: null});
 }
 
 export async function verifyPassword(plainText, hash) {

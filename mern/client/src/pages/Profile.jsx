@@ -17,8 +17,8 @@ export default function Profile() {
     const [reactionCounts, setReactionCounts] = useState({ likes: 0, dislikes: 0 });
 
     const canResearch = user?.role === "admin" || user?.role === "researcher";
-    const CLAIM_LIMIT = 1;
-    const REPORT_LIMIT = 1;
+    const CLAIM_LIMIT = 10;
+    const REPORT_LIMIT = 10;
 
     // Check for profile update success
     useEffect(() => {
