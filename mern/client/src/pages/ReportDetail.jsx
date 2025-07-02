@@ -70,6 +70,28 @@ export default function ReportDetail() {
   }, [id, user?._id]);
 
 
+  // Handle ESC key press and disable background scroll when delete modal is open
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && showDeleteConfirm && !deleting) {
+        setShowDeleteConfirm(false);
+      }
+    };
+
+    if (showDeleteConfirm) {
+      // Add ESC key listener
+      document.addEventListener('keydown', handleEscapeKey);
+      
+      // Disable background scroll
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKey);
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [showDeleteConfirm, deleting]);
+
   const handleReaction = async (type) => {
     const newReaction = userReaction === type ? null : type;
 
@@ -347,8 +369,8 @@ export default function ReportDetail() {
         <div className="fixed inset-0 flex items-center justify-center z-50">
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={() => setShowDeleteConfirm(false)}
+            className="fixed inset-0 bg-[#00000080] bg-opacity-50"
+            onClick={() => !deleting && setShowDeleteConfirm(false)}
           ></div>
           
           {/* Modal */}
