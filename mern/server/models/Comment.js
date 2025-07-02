@@ -28,26 +28,7 @@ const commentSchema = new mongoose.Schema({
     trim: true,
     maxlength: 1000
   },
-  likes: {
-    type: Number,
-  default:
-    0
-  },
-  dislikes: {
-    type: Number,
-  default:
-    0
-  },
-  likedBy: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
-  dislikedBy: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
+  // Reactions are stored in the Reaction model
   deletedAt: {
     type: Date,
   default:

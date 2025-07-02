@@ -15,7 +15,7 @@ const reactionController = {
     const { userId, targetId, targetType } = req.params;
     try {
       const reaction = await ReactionService.getUserReaction(userId, targetId, targetType);
-      res.json(reaction);
+      res.json(reaction || { reactionType: null });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch user reaction' });
     }
@@ -33,12 +33,12 @@ const reactionController = {
 
   async setReaction(req, res) {
     const { userId, targetId, targetType, reactionType } = req.body;
-    console.log('setReaction called with:', { userId, targetId, targetType, reactionType });
     try {
+      console.log('setReaction called with:', { userId, targetId, targetType, reactionType });
       const result = await ReactionService.setReaction(userId, targetId, targetType, reactionType);
       res.json(result);
     } catch (error) {
-      console.error('Error in setReaction:', error);
+      console.error('setReaction error:', error);
       res.status(500).json({ error: 'Failed to set reaction', details: error.message });
     }
   },

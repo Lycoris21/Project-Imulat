@@ -42,8 +42,8 @@ export default function UserReactionBar({ targetUserId, initialLikes = 0, initia
 
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:5050/api/reactions", {
-                method: "PUT",
+            const response = await fetch("http://localhost:5050/api/reactions/toggle", {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },

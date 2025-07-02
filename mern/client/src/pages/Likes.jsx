@@ -98,8 +98,12 @@ export default function Likes() {
             
             const data = await response.json();
             
+            console.log(`${sectionType} data:`, data);
+            
             // Extract targetId from each item (backend returns reaction objects with populated targetId)
-            const items = (data.items || []).map(item => item.targetId);
+            const items = (data.items || []).map(item => item.targetId).filter(item => item && item._id);
+            
+            console.log(`${sectionType} items after extraction:`, items);
             
             switch (sectionType) {
                 case 'reports':
@@ -302,9 +306,9 @@ export default function Likes() {
                                 ) : (reportsPagination.totalCount || 0) > 0 ? (
                                     <>
                                         <div className="space-y-4">
-                                            {reports.filter(item => item && item.targetId).map((item) => (
-                                                <div key={`report-${item.targetId._id}`}>
-                                                    <ReportCard report={item.targetId} variant="compact" />
+                                            {reports.map((report) => (
+                                                <div key={`report-${report._id}`}>
+                                                    <ReportCard report={report} variant="compact" />
                                                 </div>
                                             ))}
                                         </div>
@@ -339,9 +343,9 @@ export default function Likes() {
                                 ) : (claimsPagination.totalCount || 0) > 0 ? (
                                     <>
                                         <div className="space-y-4">
-                                            {claims.filter(item => item && item.targetId).map((item) => (
-                                                <div key={`claim-${item.targetId._id}`}>
-                                                    <ClaimCard claim={item.targetId} variant="compact" />
+                                            {claims.map((claim) => (
+                                                <div key={`claim-${claim._id}`}>
+                                                    <ClaimCard claim={claim} variant="compact" />
                                                 </div>
                                             ))}
                                         </div>
@@ -376,9 +380,9 @@ export default function Likes() {
                                 ) : (commentsPagination.totalCount || 0) > 0 ? (
                                     <>
                                         <div className="space-y-4">
-                                            {comments.filter(item => item && item.targetId).map((item) => (
-                                                <div key={`comment-${item.targetId._id}`}>
-                                                    <CommentCard comment={item.targetId} variant="compact" />
+                                            {comments.map((comment) => (
+                                                <div key={`comment-${comment._id}`}>
+                                                    <CommentCard comment={comment} variant="compact" />
                                                 </div>
                                             ))}
                                         </div>
@@ -413,9 +417,9 @@ export default function Likes() {
                                 ) : (usersPagination.totalCount || 0) > 0 ? (
                                     <>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {users.filter(item => item && item.targetId).map((item) => (
-                                                <div key={`user-${item.targetId._id}`}>
-                                                    <UserCard user={item.targetId} variant="compact" />
+                                            {users.map((user) => (
+                                                <div key={`user-${user._id}`}>
+                                                    <UserCard user={user} variant="compact" />
                                                 </div>
                                             ))}
                                         </div>

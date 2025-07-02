@@ -3,6 +3,9 @@ import reactionController from '../controllers/reactionController.js';
 
 const router = express.Router();
 
+// Toggle a reaction (like/dislike)
+router.post('/toggle', reactionController.toggleReaction);
+
 // Set or update a reaction (like/dislike)
 router.put('/', reactionController.setReaction);
 

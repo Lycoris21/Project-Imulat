@@ -1,4 +1,5 @@
-import { Comment, Notification, Report, Claim } from '../models/index.js';
+import mongoose from 'mongoose';
+import { Comment, Notification, Report, Claim, Reaction } from '../models/index.js';
 import NotificationService from './notificationService.js';
 
 class CommentService {
@@ -71,68 +72,67 @@ class CommentService {
   }
 
   static async getCommentsByTarget(targetType, targetId, userId = null) {
-    // Get all comments for the target
-    const allComments = await Comment.find({
-      targetType,
-      targetId
-    })
-      .sort({
-        createdAt: -1
-      })
-      .populate('userId', 'username profilePictureUrl')
-      .lean();
+    const comments = await Comment.find({ targetType, targetId, deletedAt: null })
+      .populate('userId')
+      .sort('-createdAt');
 
-    // Add user reaction status to each comment if userId is provided
-    if (userId) {
-      allComments.forEach(comment => {
-        // Convert ObjectIds to strings for comparison
-        const likedByStrings = (comment.likedBy || []).map(id => id.toString());
-        const dislikedByStrings = (comment.dislikedBy || []).map(id => id.toString());
-
-        if (likedByStrings.includes(userId.toString())) {
-          comment.userReaction = 'like';
-        } else if (dislikedByStrings.includes(userId.toString())) {
-          comment.userReaction = 'dislike';
-        } else {
-          comment.userReaction = null;
+    // Get reaction counts for all comments
+    const commentIds = comments.map(c => c._id);
+    const reactions = await Reaction.aggregate([
+      {
+        $match: {
+          targetId: { $in: commentIds.map(id => new mongoose.Types.ObjectId(id)) },
+          targetType: 'comment'
         }
+      },
+      {
+        $group: {
+          _id: {
+            targetId: '$targetId',
+            reactionType: '$reactionType'
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // If userId is provided, get user's reactions
+    let userReactions = [];
+    if (userId) {
+      userReactions = await Reaction.find({
+        userId: new mongoose.Types.ObjectId(userId),
+        targetId: { $in: commentIds },
+        targetType: 'comment'
       });
     }
 
-    // Build nested structure
-    const commentMap = new Map();
-    const rootComments = [];
+    // Map the reactions to each comment
+    const commentsWithReactions = comments.map(comment => {
+      const commentObj = comment.toObject();
+      
+      // Initialize reaction counts
+      commentObj.reactionCounts = {
+        like: 0,
+        dislike: 0
+      };
 
-    // First pass: create a map of all comments
-    allComments.forEach(comment => {
-      comment.replies = [];
-      commentMap.set(comment._id.toString(), comment);
-    });
-
-    // Second pass: build the tree structure
-    allComments.forEach(comment => {
-      if (comment.parentCommentId) {
-        const parent = commentMap.get(comment.parentCommentId.toString());
-        if (parent) {
-          parent.replies.push(comment);
-        }
-      } else {
-        rootComments.push(comment);
-      }
-    });
-
-    // Sort replies by creation date (oldest first for readability)
-    const sortReplies = (comments) => {
-      comments.forEach(comment => {
-        if (comment.replies.length > 0) {
-          comment.replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-          sortReplies(comment.replies);
+      // Add reaction counts
+      reactions.forEach(reaction => {
+        if (reaction._id.targetId.equals(comment._id)) {
+          commentObj.reactionCounts[reaction._id.reactionType] = reaction.count;
         }
       });
-    };
 
-    sortReplies(rootComments);
-    return rootComments;
+      // Add user's reaction if available
+      if (userId) {
+        const userReaction = userReactions.find(r => r.targetId.equals(comment._id));
+        commentObj.userReaction = userReaction ? userReaction.reactionType : null;
+      }
+
+      return commentObj;
+    });
+
+    return commentsWithReactions;
   }
 
   static async toggleLike(commentId, userId) {

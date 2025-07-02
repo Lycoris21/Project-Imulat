@@ -7,8 +7,16 @@ class ReactionService {
   }
 
   static async countReactions(targetId, targetType) {
+    // Convert string ID to ObjectId if needed
+    const targetObjectId = typeof targetId === 'string' ? new mongoose.Types.ObjectId(targetId) : targetId;
+
     const counts = await Reaction.aggregate([
-      { $match: { targetId: new mongoose.Types.ObjectId(targetId), targetType } },
+      { 
+        $match: { 
+          targetId: targetObjectId, 
+          targetType 
+        } 
+      },
       {
         $group: {
           _id: '$reactionType',
@@ -21,6 +29,13 @@ class ReactionService {
     counts.forEach(item => {
       result[item._id] = item.count;
     });
+    
+    // Also include the reactionCounts key for consistency
+    result.reactionCounts = {
+      like: result.like,
+      dislike: result.dislike
+    };
+    
     return result;
   }
 
@@ -30,33 +45,49 @@ class ReactionService {
 
   static async toggleReaction(userId, targetId, targetType, reactionType) {
     const existing = await Reaction.findOne({ userId, targetId, targetType });
+    let result;
 
     if (existing) {
       if (existing.reactionType === reactionType) {
         await Reaction.deleteOne({ _id: existing._id });
-        return { message: 'Reaction removed', removed: true };
+        result = { message: 'Reaction removed', removed: true };
       } else {
         existing.reactionType = reactionType;
         await existing.save();
-        return { message: 'Reaction updated', updated: true };
+        result = { message: 'Reaction updated', updated: true };
       }
     } else {
       const newReaction = new Reaction({ userId, targetId, targetType, reactionType });
       await newReaction.save();
-      return { message: 'Reaction added', created: true };
+      result = { message: 'Reaction added', created: true };
     }
+
+    // For any target type, return the updated reaction counts
+    if (result.created || result.updated || result.removed) {
+      const counts = await this.countReactions(targetId, targetType);
+      result.reactionCounts = counts.reactionCounts;
+    }
+
+    return result;
   }
 
-  static async setReaction(userId, targetId, targetType, reactionType, io = null) {
+  static async setReaction(userId, targetId, targetType, reactionType, io) {
+    // Validate before proceeding
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(targetId)) {
+      throw new Error('Invalid userId or targetId');
+    }
+
+    // Find if there's an existing reaction
     const previous = await Reaction.findOne({ userId, targetId, targetType });
-
-    let isNew = false;
-
+    
+    // Update or create the reaction
     const updated = await Reaction.findOneAndUpdate(
       { userId, targetId, targetType },
       { reactionType },
-      { new: true, upsert: true }
+      { upsert: true, new: true }
     );
+
+    let isNew = false;
 
     if (!previous || !previous.reactionType || previous.reactionType !== reactionType) {
       isNew = true;
@@ -82,6 +113,43 @@ class ReactionService {
       recipientId = targetDoc?.userId?._id;
       postType = targetDoc?.targetType;
       postId = targetDoc?.targetId;
+      
+      // Update comment's likes and dislikes counts
+      if (targetDoc) {
+        // Get all reactions for this comment
+        const likesCount = await Reaction.countDocuments({ 
+          targetId, 
+          targetType: 'comment', 
+          reactionType: 'like' 
+        });
+        
+        const dislikesCount = await Reaction.countDocuments({ 
+          targetId, 
+          targetType: 'comment', 
+          reactionType: 'dislike' 
+        });
+        
+        // Get all users who liked/disliked this comment
+        const likedByUsers = await Reaction.find({ 
+          targetId, 
+          targetType: 'comment', 
+          reactionType: 'like' 
+        }).distinct('userId');
+        
+        const dislikedByUsers = await Reaction.find({ 
+          targetId, 
+          targetType: 'comment', 
+          reactionType: 'dislike' 
+        }).distinct('userId');
+        
+        // Update the comment document
+        await Comment.findByIdAndUpdate(targetId, {
+          likes: likesCount,
+          dislikes: dislikesCount,
+          likedBy: likedByUsers,
+          dislikedBy: dislikedByUsers
+        });
+      }
     } else if (targetType === "user") {
       recipientId = targetId;
     }

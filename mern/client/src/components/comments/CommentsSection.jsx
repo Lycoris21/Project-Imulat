@@ -111,23 +111,32 @@ export default function CommentsSection({ targetId, targetType }) {
         const currentReaction = comment.userReaction;
         const wasLiked = currentReaction === 'like';
         const wasDisliked = currentReaction === 'dislike';
+        const currentLikes = comment.reactionCounts?.like || 0;
+        const currentDislikes = comment.reactionCounts?.dislike || 0;
         
         return {
           ...comment,
-          likes: wasLiked ? comment.likes - 1 : comment.likes + 1,
-          dislikes: wasDisliked ? comment.dislikes - 1 : comment.dislikes,
+          reactionCounts: {
+            like: wasLiked ? currentLikes - 1 : currentLikes + 1,
+            dislike: wasDisliked ? currentDislikes : currentDislikes
+          },
           userReaction: wasLiked ? null : 'like'
         };
       })
     );
 
     try {
-      const response = await fetch(`http://localhost:5050/api/comments/${commentId}/like`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:5050/api/reactions/toggle`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: user._id }),
+        body: JSON.stringify({
+          userId: user._id,
+          targetId: commentId,
+          targetType: 'comment',
+          reactionType: 'like'
+        }),
       });
 
       if (!response.ok) {
@@ -152,23 +161,32 @@ export default function CommentsSection({ targetId, targetType }) {
         const currentReaction = comment.userReaction;
         const wasLiked = currentReaction === 'like';
         const wasDisliked = currentReaction === 'dislike';
+        const currentLikes = comment.reactionCounts?.like || 0;
+        const currentDislikes = comment.reactionCounts?.dislike || 0;
         
         return {
           ...comment,
-          likes: wasLiked ? comment.likes - 1 : comment.likes,
-          dislikes: wasDisliked ? comment.dislikes - 1 : comment.dislikes + 1,
+          reactionCounts: {
+            like: wasLiked ? currentLikes : currentLikes,
+            dislike: wasDisliked ? currentDislikes - 1 : currentDislikes + 1
+          },
           userReaction: wasDisliked ? null : 'dislike'
         };
       })
     );
 
     try {
-      const response = await fetch(`http://localhost:5050/api/comments/${commentId}/dislike`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:5050/api/reactions/toggle`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: user._id }),
+        body: JSON.stringify({
+          userId: user._id,
+          targetId: commentId,
+          targetType: 'comment',
+          reactionType: 'dislike'
+        }),
       });
 
       if (!response.ok) {

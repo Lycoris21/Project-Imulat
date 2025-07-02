@@ -40,8 +40,8 @@ export default function ClaimDetail() {
       if (user?._id) {
         const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/claim/${id}/${user._id}`);
         if (reactionRes.ok) {
-          const { reactionType } = await reactionRes.json();
-          setUserReaction(reactionType || null);
+          const reaction = await reactionRes.json();
+          setUserReaction(reaction?.reactionType || null);
         }
 
         // Check bookmark status
