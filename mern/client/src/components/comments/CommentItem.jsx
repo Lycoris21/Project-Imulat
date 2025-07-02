@@ -236,8 +236,8 @@ export default function CommentItem({
           {/* Action Buttons */}
           <CommentActions
             commentId={comment._id}
-            likes={comment.likes || 0}
-            dislikes={comment.dislikes || 0}
+            likes={comment.reactionCounts.like || 0}
+            dislikes={comment.reactionCounts.dislike || 0}
             repliesCount={comment.replies?.length || 0}
             onLike={onLikeComment}
             onDislike={onDislikeComment}
