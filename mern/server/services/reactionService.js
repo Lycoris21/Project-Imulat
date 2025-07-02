@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Reaction, Claim, Report, Comment, User, Notification } from '../models/index.js';
+import { parseVerdict } from '../utils/helpers.js';
 
 class ReactionService {
   static async getReactionsByTarget(targetId, targetType) {
@@ -490,6 +491,14 @@ class ReactionService {
 
     // Get the reactions with populated target data
     const reactions = await Reaction.aggregate(pipeline);
+
+    if (targetType === 'report') {
+      reactions.forEach((reaction) => {
+        if (reaction.targetId?.truthVerdict) {
+          reaction.targetId.truthVerdictParsed = parseVerdict(reaction.targetId.truthVerdict);
+        }
+      });
+    }
 
     // Get total count for pagination
     const totalCount = await Reaction.countDocuments({
