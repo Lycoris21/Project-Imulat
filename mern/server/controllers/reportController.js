@@ -4,13 +4,16 @@ class ReportController {
   // Get all reports
   static async getAllReports(req, res) {
     try {
-      const { search, page = 1, limit = 24, sort = 'newest' } = req.query;
+      const { search, page = 1, limit = 24, sort = 'newest', user } = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
       
-      const result = search 
-        ? await ReportService.searchReports(search, pageNum, limitNum, sort)
+      const shouldSearch = search?.trim() || user;
+
+      const result = shouldSearch
+        ? await ReportService.searchReports(search ?? '', pageNum, limitNum, sort, user)
         : await ReportService.getAllReports(pageNum, limitNum, sort);
+
       
       res.status(200).json(result);
     } catch (error) {

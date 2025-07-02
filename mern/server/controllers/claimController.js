@@ -3,12 +3,14 @@ import ClaimService from "../services/claimService.js";
 class ClaimController {
   static async getAllClaims(req, res) {
     try {
-      const { search, page = 1, limit = 24, sort = 'newest' } = req.query;
+      const { search, page = 1, limit = 24, sort = 'newest', user} = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
       
-      const result = search 
-        ? await ClaimService.searchClaims(search, pageNum, limitNum, sort)
+      const shouldSearch = search?.trim() || user;
+
+      const result = shouldSearch 
+        ? await ClaimService.searchClaims(search, pageNum, limitNum, sort, user)
         : await ClaimService.getAllClaims(pageNum, limitNum, sort);
       
       res.status(200).json(result);

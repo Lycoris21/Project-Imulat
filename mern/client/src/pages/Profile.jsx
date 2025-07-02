@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
@@ -17,6 +17,8 @@ export default function Profile() {
     const [reactionCounts, setReactionCounts] = useState({ likes: 0, dislikes: 0 });
 
     const canResearch = user?.role === "admin" || user?.role === "researcher";
+    const CLAIM_LIMIT = 1;
+    const REPORT_LIMIT = 1;
 
     // Check for profile update success
     useEffect(() => {
@@ -43,18 +45,18 @@ export default function Profile() {
             if (!targetUserId) return;
 
             try {
-            const res = await fetch(`http://localhost:5050/api/users/${targetUserId}`);
-            if (!res.ok) throw new Error("Failed to fetch user profile");
-            const data = await res.json();
+                const res = await fetch(`http://localhost:5050/api/users/${targetUserId}`);
+                if (!res.ok) throw new Error("Failed to fetch user profile");
+                const data = await res.json();
 
-            if (isMounted) {
-                setProfileData(data);
-                setReactionCounts({ likes: data.likes || 0, dislikes: data.dislikes || 0 });
-                setLoading(false);
-            }
+                if (isMounted) {
+                    setProfileData(data);
+                    setReactionCounts({ likes: data.likes || 0, dislikes: data.dislikes || 0 });
+                    setLoading(false);
+                }
             } catch (error) {
-            console.error("Error fetching profile:", error);
-            if (isMounted) setLoading(false);
+                console.error("Error fetching profile:", error);
+                if (isMounted) setLoading(false);
             }
         };
 
@@ -63,7 +65,7 @@ export default function Profile() {
         return () => {
             isMounted = false;
         };
-        }, [user, id]);
+    }, [user, id]);
 
     // Handle reaction updates from UserReactionBar
     const handleReactionUpdate = (newLikes, newDislikes) => {
@@ -73,13 +75,13 @@ export default function Profile() {
 
     if (loading) {
         return (
-            <LoadingScreen message = "Loading profile..."/>
+            <LoadingScreen message="Loading profile..." />
         );
     }
 
-    if (!profileData){
+    if (!profileData) {
         return (
-            <ErrorScreen title="User Not Found" message="The user you're looking for doesn't exist."/>
+            <ErrorScreen title="User Not Found" message="The user you're looking for doesn't exist." />
         );
     }
 
@@ -92,7 +94,7 @@ export default function Profile() {
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     <span className="font-medium">Profile updated successfully!</span>
-                    <button 
+                    <button
                         onClick={() => setShowSuccessMessage(false)}
                         className="ml-2 text-green-200 hover:text-white"
                     >
@@ -115,15 +117,15 @@ export default function Profile() {
                     <div className="flex items-center">
                         <div className="w-16 h-16 mr-4 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                             {profileData.profilePictureUrl ? (
-                            <img
-                                src={profileData.profilePictureUrl}
-                                alt={profileData.username}
-                                className="w-full h-full object-cover"
-                            />
+                                <img
+                                    src={profileData.profilePictureUrl}
+                                    alt={profileData.username}
+                                    className="w-full h-full object-cover"
+                                />
                             ) : (
-                            <span className="text-gray-600 font-medium text-sm">
-                                {profileData.username?.charAt(0).toUpperCase() || "U"}
-                            </span>
+                                <span className="text-gray-600 font-medium text-sm">
+                                    {profileData.username?.charAt(0).toUpperCase() || "U"}
+                                </span>
                             )}
                         </div>
                         <div>
@@ -144,7 +146,7 @@ export default function Profile() {
                             </Link>
                         ) : (
                             /* Show Like/Dislike for other users' profiles */
-                            <UserReactionBar 
+                            <UserReactionBar
                                 targetUserId={profileData._id}
                                 initialLikes={reactionCounts.likes}
                                 initialDislikes={reactionCounts.dislikes}
@@ -156,62 +158,83 @@ export default function Profile() {
 
                 {/* Claims / Reports Tabs */}
                 {(canResearch && Array.isArray(profileData.reports) && profileData.reports.length > 0) ? (
-                <div className="mt-8">
-                    {/* Tabs */}
-                    <div className="flex border-b mb-4 space-x-4 ">
-                    <button
-                        onClick={() => setActiveTab("claims")}
-                        className={`pb-2 text-sm font-medium transition-colors ${
-                        activeTab === "claims"
-                            ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2"
-                            : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
-                        }`}
-                    >
-                        Claims ({profileData.claims.length})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("reports")}
-                        className={`pb-2 text-sm font-medium transition-colors ${
-                        activeTab === "reports"
-                            ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2 "
-                            : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
-                        }`}
-                    >
-                        Reports ({profileData.reports.length})
-                    </button>
-                    </div>
+                    <div className="mt-8">
+                        {/* Tabs */}
+                        <div className="flex border-b mb-4 space-x-4 ">
+                            <button
+                                onClick={() => setActiveTab("claims")}
+                                className={`pb-2 text-sm font-medium transition-colors ${activeTab === "claims"
+                                    ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2"
+                                    : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
+                                    }`}
+                            >
+                                Claims ({profileData.claims.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("reports")}
+                                className={`pb-2 text-sm font-medium transition-colors ${activeTab === "reports"
+                                    ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2 "
+                                    : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
+                                    }`}
+                            >
+                                Reports ({profileData.reports.length})
+                            </button>
+                        </div>
 
-                    {/* Tab Content */}
-                   {/* Tab Content */}
-                    {activeTab === "claims" && (
-                    <div className="space-y-4">
-                        {profileData.claims.map((claim) => (
-                        <ClaimCard key={claim._id} claim={claim} variant="simple" />
-                        ))}
-                    </div>
-                    )}
+                        {/* Tab Content */}
+                        {activeTab === "claims" && (
+                            <div className="space-y-4">
+                                {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
+                                    <ClaimCard key={claim._id} claim={claim} variant="simple" />
+                                ))}
+                                {profileData.claims.length > CLAIM_LIMIT && (
+                                    <Link
+                                        to={`/claims?user=${profileData._id}`}
+                                        className="block w-fit mt-4 mx-auto text-sm font-semibold text-[color:var(--color-selected)] hover:underline"
+                                    >
+                                        See more claims →
+                                    </Link>
+                                )}
+                            </div>
+                        )}
 
-                    {activeTab === "reports" && (
-                    <div className="space-y-4">
-                        {profileData.reports.map((report) => (
-                        <ReportCard key={report._id} report={report} variant="simple" />
-                        ))}
+                        {activeTab === "reports" && (
+                            <div className="space-y-4">
+                                {profileData.reports.slice(0, REPORT_LIMIT).map((report) => (
+                                    <ReportCard key={report._id} report={report} variant="simple" />
+                                ))}
+                                {profileData.reports.length > REPORT_LIMIT && (
+                                    <Link
+                                        to={`/reports?user=${profileData._id}`}
+                                        className="block w-fit mt-4 mx-auto text-sm font-semibold text-[color:var(--color-selected)] hover:underline"
+                                    >
+                                        See more reports →
+                                    </Link>
+                                )}
+                            </div>
+                        )}
+
                     </div>
-                    )}
-                </div>
                 ) : (
-                // Show just Claims if user is not researcher or has no reports
-                <div className="mt-8">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
-                    <div className="space-y-4">
-                    {profileData.claims.map((claim) => (
-                        <ClaimCard key={claim._id} claim={claim} variant="simple" />
-                    ))}
+                    // Show just Claims if user is not researcher or has no reports
+                    <div className="mt-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
+                        <div className="space-y-4">
+                            {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
+                                <ClaimCard key={claim._id} claim={claim} variant="simple" />
+                            ))}
+                            {profileData.claims.length > CLAIM_LIMIT && (
+                                <Link
+                                    to={`/claims?user=${profileData._id}`}
+                                    className="block w-fit mt-4 mx-auto text-sm font-semibold text-[color:var(--color-selected)] hover:underline"
+                                >
+                                    See more claims →
+                                </Link>
+                            )}
+                        </div>
                     </div>
-                </div>
+
                 )}
-
-
             </div>
         </div>
     );

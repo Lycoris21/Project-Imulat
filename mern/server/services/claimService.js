@@ -1,6 +1,7 @@
-import { Claim, Comment} from "../models/index.js";
+import { Claim, Comment, User} from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
+import mongoose from "mongoose";
 
 let aiEnabled = true;
 
@@ -236,12 +237,12 @@ class ClaimService {
       });
 
       const savedClaim = await newClaim.save();
-      console.log("Saved Claim:", savedClaim); // confirm successful DB save
+      console.log("Saved Claim:", savedClaim); 
 
       return savedClaim;
     } catch (err) {
-      console.error("Error in createClaim:", err); // ❌ log any caught error
-      throw err; // rethrow to let controller handle the error response
+      console.error("Error in createClaim:", err);
+      throw err;
     }
   }
 
@@ -284,21 +285,47 @@ class ClaimService {
   }
 
   // Search claims
-  static async searchClaims(query, page = 1, limit = 24, sort = 'newest') {
+  static async searchClaims(query, page = 1, limit = 24, sort = 'newest', user = null) {
     const skip = (page - 1) * limit;
     const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
 
+    let userIds = [];
+
+    if (!user) {
+      const matchedUsers = await User.find({
+        $or: [
+          { username: { $regex: searchRegex } },
+          { email: { $regex: searchRegex } }
+        ]
+      }).select('_id');
+      userIds = matchedUsers.map(u => u._id);
+    }
+
     const searchQuery = {
       $and: [
-        {
-          $or: [
-            { claimTitle: searchRegex },
-            { claimContent: searchRegex },
-            { aiClaimSummary: searchRegex }
-          ]
-        },
-        { deletedAt: null }
-      ]
+        user
+          ? {
+              $and: [
+                { userId: new mongoose.Types.ObjectId(user) },
+                {
+                  $or: [
+                    { claimTitle: searchRegex },
+                    { claimContent: searchRegex },
+                    { aiClaimSummary: searchRegex },
+                  ],
+                },
+              ],
+            }
+          : {
+              $or: [
+                { claimTitle: searchRegex },
+                { claimContent: searchRegex },
+                { aiClaimSummary: searchRegex },
+                  ...(userIds.length > 0 ? [{ userId: { $in: userIds } }] : [])
+              ],
+            },
+        { deletedAt: null },
+      ],
     };
 
     // Build sort criteria

@@ -1,6 +1,7 @@
 import { Report, User, Claim, Comment } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
+import mongoose from "mongoose";
 
 let aiEnabled = true;
 
@@ -335,22 +336,49 @@ class ReportService {
   }
 
   // Search reports
-  static async searchReports(query, page = 1, limit = 24, sort = 'newest') {
+  static async searchReports(query, page = 1, limit = 24, sort = 'newest', user = null) {
     const skip = (page - 1) * limit;
-    const searchRegex = new RegExp(query, 'i'); // Case-insensitive search
+    const searchRegex = new RegExp(query, 'i');
+
+    let userIds = [];
+
+    if (!user) {
+      const matchedUsers = await User.find({
+        $or: [
+          { username: { $regex: searchRegex } },
+          { email: { $regex: searchRegex } }
+        ]
+      }).select('_id');
+      userIds = matchedUsers.map(u => u._id);
+    }
 
     const searchQuery = {
       $and: [
-        {
-          $or: [
-            { reportTitle: { $regex: searchRegex } },
-            { reportContent: { $regex: searchRegex } },
-            { reportDescription: { $regex: searchRegex } },
-            { aiReportSummary: { $regex: searchRegex } }
-          ]
-        },
-        { deletedAt: null }
-      ]
+        user
+          ? {
+              $and: [
+                { userId: new mongoose.Types.ObjectId(user) },
+                {
+                  $or: [
+                    { reportTitle: { $regex: searchRegex } },
+                    { reportContent: { $regex: searchRegex } },
+                    { reportDescription: { $regex: searchRegex } },
+                    { aiReportSummary: { $regex: searchRegex } },
+                  ],
+                },
+              ],
+            }
+          : {
+              $or: [
+                { reportTitle: { $regex: searchRegex } },
+                { reportContent: { $regex: searchRegex } },
+                { reportDescription: { $regex: searchRegex } },
+                { aiReportSummary: { $regex: searchRegex } },
+                ...(userIds.length > 0 ? [{ userId: { $in: userIds } }] : []),
+              ],
+            },
+        { deletedAt: null },
+      ],
     };
 
     // Build sort criteria
@@ -499,8 +527,6 @@ class ReportService {
       };
     }
   }
-
-
 }
 
 export default ReportService;
