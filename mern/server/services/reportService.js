@@ -1,4 +1,4 @@
-import { Report, User, Claim, Comment } from "../models/index.js";
+import { Report, User, Claim, Comment, Activity } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
 import mongoose from "mongoose";
@@ -218,6 +218,20 @@ class ReportService {
       });
 
       const savedReport = await newReport.save();
+
+      // Log the activity
+      try {
+        await Activity.create({
+          user: userId,
+          type: 'REPORT_CREATE',
+          targetType: 'REPORT',
+          target: savedReport._id,
+          targetModel: 'Report'
+        });
+      } catch (activityError) {
+        console.error('Error logging report activity:', activityError);
+        // Don't fail the report if activity logging fails
+      }
 
       const populated = await Report.findById(savedReport._id)
         .populate('userId', 'username email')

@@ -1,4 +1,4 @@
-import { User, Claim, Report, Reaction} from "../models/index.js";
+import { User, Claim, Report, Reaction, Activity } from "../models/index.js";
 import reportService from './reportService.js';
 import claimService from './claimService.js';
 
@@ -66,11 +66,29 @@ class UserService {
 
   // Update user
   static async updateUser(id, updateData) {
-    return await User.findByIdAndUpdate(
+    const updated = await User.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
     ).select('-passwordHash');
+
+    // Log the activity for profile updates
+    if (updated && (updateData.username || updateData.bio || updateData.profilePictureUrl)) {
+      try {
+        await Activity.create({
+          user: id,
+          type: 'PROFILE_UPDATE',
+          targetType: 'USER',
+          target: id,
+          targetModel: 'User'
+        });
+      } catch (activityError) {
+        console.error('Error logging profile update activity:', activityError);
+        // Don't fail the update if activity logging fails
+      }
+    }
+
+    return updated;
   }
 
   // Delete user

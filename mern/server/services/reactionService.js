@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Reaction, Claim, Report, Comment, User, Notification } from '../models/index.js';
+import { Reaction, Claim, Report, Comment, User, Notification, Activity } from '../models/index.js';
 import { parseVerdict } from '../utils/helpers.js';
 
 class ReactionService {
@@ -61,6 +61,22 @@ class ReactionService {
       const newReaction = new Reaction({ userId, targetId, targetType, reactionType });
       await newReaction.save();
       result = { message: 'Reaction added', created: true };
+
+      // Log activity for new reaction
+      try {
+        await Activity.create({
+          user: userId,
+          type: reactionType === 'like' ? 'LIKE' : 'DISLIKE',
+          targetType: targetType.toUpperCase(),
+          target: targetId,
+          targetModel: targetType === 'report' ? 'Report' : 
+                      targetType === 'claim' ? 'Claim' : 
+                      targetType === 'comment' ? 'Comment' : 'User'
+        });
+      } catch (activityError) {
+        console.error('Error logging activity:', activityError);
+        // Don't fail the reaction if activity logging fails
+      }
     }
 
     // For any target type, return the updated reaction counts

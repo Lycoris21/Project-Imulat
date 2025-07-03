@@ -1,4 +1,4 @@
-import { Claim, Comment, User} from "../models/index.js";
+import { Claim, Comment, User, Activity } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
 import mongoose from "mongoose";
@@ -238,6 +238,20 @@ class ClaimService {
 
       const savedClaim = await newClaim.save();
       console.log("Saved Claim:", savedClaim); 
+
+      // Log the activity
+      try {
+        await Activity.create({
+          user: claimData.userId,
+          type: 'CLAIM_CREATE',
+          targetType: 'CLAIM',
+          target: savedClaim._id,
+          targetModel: 'Claim'
+        });
+      } catch (activityError) {
+        console.error('Error logging claim activity:', activityError);
+        // Don't fail the claim if activity logging fails
+      }
 
       return savedClaim;
     } catch (err) {
