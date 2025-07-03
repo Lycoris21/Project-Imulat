@@ -89,10 +89,27 @@ const Activities = () => {
 
   const handleDateRangeChange = (event) => {
     const { name, value } = event.target;
-    setDateRange(prev => ({
-      ...prev,
-      [name]: value ? new Date(value) : null
-    }));
+    setDateRange(prev => {
+      const newRange = { ...prev };
+      
+      if (value) {
+        const date = new Date(value);
+        
+        if (name === 'startDate') {
+          // Set to beginning of day (12:00 AM)
+          date.setHours(0, 0, 0, 0);
+          newRange[name] = date;
+        } else if (name === 'endDate') {
+          // Set to end of day (11:59:59 PM)
+          date.setHours(23, 59, 59, 999);
+          newRange[name] = date;
+        }
+      } else {
+        newRange[name] = null;
+      }
+      
+      return newRange;
+    });
   };
 
   return (
