@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import ConfirmLogoutModal from "../modals/ConfirmLogoutModal";
 import { useAuth } from "../../context/AuthContext";
 
+import DarkModeToggle from './DarkModeToggle';
 import NavItem from './NavItem';
 import NotificationBell from './NotificationBell';
 import UserDropdown from './UserDropdown';

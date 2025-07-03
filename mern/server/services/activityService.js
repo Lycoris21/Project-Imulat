@@ -22,9 +22,13 @@ class ActivityService {
     async getUserActivities(userId, page = 1, limit = 10) {
         try {
             const skip = (page - 1) * limit;
-            
-            let activities = await Activity.find({ user: userId })
-                .sort({ createdAt: -1 })
+
+            let activities = await Activity.find({
+                user: userId
+            })
+                .sort({
+                    createdAt: -1
+                })
                 .skip(skip)
                 .limit(limit)
                 .populate('user', 'username avatar')
@@ -36,7 +40,7 @@ class ActivityService {
                 if (activity.target && activity.targetModel) {
                     try {
                         let targetWithUser = null;
-                        
+
                         if (activity.targetModel === 'Report') {
                             const { Report } = await import('../models/index.js');
                             targetWithUser = await Report.findById(activity.target._id).populate('userId', 'username avatar').lean();
@@ -55,6 +59,42 @@ class ActivityService {
                             if (targetWithUser) {
                                 activity.target.owner = targetWithUser.userId;
                             }
+                        } else if (activity.targetModel === 'Bookmark') {
+                            const { Bookmark, Report, Claim } = await import('../models/index.js');
+
+                            // Step 1: Get the bookmark
+                            const bookmark = await Bookmark.findById(activity.target._id)
+                                .populate('userId', 'username avatar')
+                                .lean();
+
+                            if (!bookmark) {
+                                console.warn('[ActivityService] Bookmark not found:', activity.target._id);
+                                continue;
+                            }
+
+                            // Step 2: Get the bookmarked target (Report or Claim)
+                            let bookmarkedTarget = null;
+                            if (bookmark.targetType === 'report') {
+                                bookmarkedTarget = await Report.findById(bookmark.targetId)
+                                    .populate('userId', 'username avatar')
+                                    .lean();
+                            } else if (bookmark.targetType === 'claim') {
+                                bookmarkedTarget = await Claim.findById(bookmark.targetId)
+                                    .populate('userId', 'username avatar')
+                                    .lean();
+                            }
+
+                            // Step 3: Assign user data into activity.target
+                            if (bookmarkedTarget) {
+                                activity.target.owner = bookmark.userId;
+                                activity.target.targetId = bookmarkedTarget;
+
+                                // Optional debug logs
+                                console.log('[ActivityService] Populated bookmark:', bookmarkedTarget);
+                                console.log('[ActivityService] Owner:', bookmark.userId);
+                            } else {
+                                console.warn('[ActivityService] Target (report/claim) not found for bookmark:', bookmark._id);
+                            }
                         }
                     } catch (populateError) {
                         console.error('Error populating target user:', populateError);
@@ -63,7 +103,9 @@ class ActivityService {
                 }
             }
 
-            const total = await Activity.countDocuments({ user: userId });
+            const total = await Activity.countDocuments({
+                user: userId
+            });
 
             return {
                 activities,
@@ -82,7 +124,7 @@ class ActivityService {
     async getActivitiesByDateRange(userId, startDate, endDate, page = 1, limit = 10) {
         try {
             const skip = (page - 1) * limit;
-            
+
             const query = {
                 user: userId,
                 createdAt: {
@@ -92,7 +134,9 @@ class ActivityService {
             };
 
             const activities = await Activity.find(query)
-                .sort({ createdAt: -1 })
+                .sort({
+                    createdAt: -1
+                })
                 .skip(skip)
                 .limit(limit)
                 .populate('user', 'username avatar')

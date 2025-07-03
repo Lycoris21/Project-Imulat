@@ -26,10 +26,10 @@ const getActivityIcon = (type) => {
 
 const getActivityText = (activity) => {
   const { type, targetType, target, actionDetails } = activity;
-  
+
   // Get owner information from populated target
   const targetOwner = target?.user?.username || target?.userId?.username || target?.username;
-  
+
   switch (type) {
     case 'LIKE':
       if (targetType === 'REPORT') return targetOwner ? `liked ${targetOwner}'s report` : 'liked a report';
@@ -41,7 +41,7 @@ const getActivityText = (activity) => {
       if (targetType === 'REPORT') return targetOwner ? `disliked ${targetOwner}'s report` : 'disliked a report';
       if (targetType === 'CLAIM') return targetOwner ? `disliked ${targetOwner}'s claim` : 'disliked a claim';
       if (targetType === 'COMMENT') return targetOwner ? `disliked ${targetOwner}'s comment` : 'disliked a comment';
-      if (targetType === 'USER') return targetOwner ? `disliked ${targetOwner}` : 'disliked a user';
+      if (targetType === 'USER') return targetOwner ? `disliked the profile` : 'disliked a user';
       return `disliked a ${targetType.toLowerCase()}`;
     case 'COMMENT':
       if (targetType === 'REPORT') return targetOwner ? `commented on ${targetOwner}'s report` : 'commented on a report';
@@ -75,12 +75,12 @@ const getActivityText = (activity) => {
 
 const getActivityLink = (activity) => {
   const { type, targetType, target } = activity;
-  
+
   // Profile updates are not clickable
   if (type === 'PROFILE_UPDATE') {
     return null;
   }
-  
+
   // Helper function to extract ID from target
   const getTargetId = (target) => {
     if (typeof target === 'string') return target;
@@ -88,7 +88,7 @@ const getActivityLink = (activity) => {
     if (target?.id) return target.id;
     return null;
   };
-  
+
   switch (targetType) {
     case 'REPORT':
       const reportId = getTargetId(target);
@@ -142,36 +142,37 @@ const getActivityLink = (activity) => {
 
 const getTargetTitle = (activity) => {
   const { target, targetType, type } = activity;
-  
+
   if (!target) return null;
-  
+
   // Handle different target structures from populated data
   if (typeof target === 'string') return null; // Just an ID
-  
+
   // For bookmarks, get the title of the bookmarked item
   if (type === 'BOOKMARK_CREATE' && target.targetId) {
-    return target.targetId.title || target.targetId.claimTitle;
+    return target.targetId.reportTitle || target.targetId.claimTitle;
   }
-  
+
   // Standard title fields
   if (target.title) return target.title;
+  if (target.reportTitle) return target.reportTitle;
   if (target.claimTitle) return target.claimTitle;
-  
+
   // For comments, show content preview
   if (target.commentContent && target.commentContent.length > 0) {
     return target.commentContent.substring(0, 50) + (target.commentContent.length > 50 ? '...' : '');
   }
-  
+
   // For users
   if (target.username) return `@${target.username}`;
   if (target.name) return target.name;
-  
+
   return null;
 };
 
 const getTargetTypeLabel = (activity) => {
   const { targetType, type } = activity;
-  
+
   switch (targetType) {
     case 'REPORT': return 'report';
     case 'CLAIM': return 'claim';
@@ -186,17 +187,17 @@ const ActivityItem = ({ activity }) => {
   // Debug logging
   console.log('ActivityItem received:', activity);
   console.log('Target data:', activity.target);
-  
+
   const icon = getActivityIcon(activity.type);
   const text = getActivityText(activity);
   const link = getActivityLink(activity);
   const time = format(new Date(activity.createdAt), 'h:mm a');
   const targetTitle = getTargetTitle(activity);
   const targetTypeLabel = getTargetTypeLabel(activity);
-  
+
   // Debug the link generation
   console.log('Generated link:', link);
-  
+
   // If no link (like profile updates), render as non-clickable div
   if (!link) {
     return (
@@ -228,7 +229,7 @@ const ActivityItem = ({ activity }) => {
 
   // Render as clickable card
   return (
-    <Link 
+    <Link
       to={link}
       className="flex items-start space-x-4 p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg cursor-pointer"
     >
@@ -245,14 +246,23 @@ const ActivityItem = ({ activity }) => {
           </span>
           {targetTitle && (
             <span className="ml-1">
-              <span className="text-gray-500"> "</span>
+              <span className="text-gray-500">
+                {activity.targetType === 'USER'
+                  ? 'of "'
+                  : activity.type !== "REPLY" &&
+                  (activity.targetType === "COMMENT")
+                  ? 'on "'
+                  : 'titled "'}
+              </span>
               <span className="text-gray-700 font-medium">{targetTitle}</span>
               <span className="text-gray-500">"</span>
             </span>
           )}
+
+
           {!targetTitle && targetTypeLabel && activity.type !== 'PROFILE_UPDATE' && (
             <span className="ml-1 text-gray-500">
-              this {targetTypeLabel}
+              on this {targetTypeLabel}
             </span>
           )}
         </div>

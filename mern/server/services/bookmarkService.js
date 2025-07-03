@@ -2,6 +2,7 @@ import { Bookmark, Collection, Claim, Report, Comment } from '../models/index.js
 import ReactionService from './reactionService.js';
 import mongoose from 'mongoose';
 import { parseVerdict } from '../utils/helpers.js'
+import activityService from './activityService.js';
 
 class BookmarkService {
   // Get all bookmarks for a user
@@ -130,7 +131,23 @@ class BookmarkService {
       targetType,
       collectionId
     });
-    return await bookmark.save();
+
+    const savedBookmark = await bookmark.save();
+
+    // Log activity after successful save
+    try {
+      await activityService.logActivity(
+        userId,
+        'BOOKMARK_CREATE',
+        'BOOKMARK',
+        savedBookmark._id,
+        'Bookmark');
+    } catch (activityError) {
+      console.error('Error logging bookmark activity:', activityError);
+      // Don't block the bookmark even if logging fails
+    }
+
+    return savedBookmark;
   }
 
   // Remove bookmark
@@ -476,141 +493,6 @@ static async getUserCollections(userId) {
       }));
 
   return collectionsWithCounts;
-}
-
-// Create a new collection
-static async createCollection(userId, collectionName, collectionBanner = null) {
-  const collection = new Collection({
-    userId,
-    collectionName,
-    collectionBanner
-  });
-  return await collection.save();
-}
-
-// Add bookmark
-static async addBookmark(userId, targetId, targetType, collectionId = null) {
-  const bookmark = new Bookmark({
-    userId,
-    targetId,
-    targetType,
-    collectionId
-  });
-  return await bookmark.save();
-}
-
-// Remove bookmark
-static async removeBookmark(userId, targetId, targetType) {
-  return await Bookmark.findOneAndDelete({
-    userId,
-    targetId,
-    targetType
-  });
-}
-
-// Check if item is bookmarked
-static async isBookmarked(userId, targetId, targetType) {
-  const bookmark = await Bookmark.findOne({
-    userId,
-    targetId,
-    targetType
-  });
-  return !!bookmark;
-}
-
-// Search bookmarks
-static async searchBookmarks(userId, searchQuery, collectionId = undefined, limit = null) {
-  try {
-    const query = {
-      userId
-    };
-
-    // Only filter by collection if collectionId is explicitly provided
-    if (collectionId !== undefined) {
-      query.collectionId = collectionId;
-    }
-    // If collectionId is undefined, search ALL bookmarks (both with and without collections)
-
-    const bookmarks = await Bookmark.find(query).sort({
-      createdAt: -1
-    });
-
-    // Manually populate and filter based on search query
-    const searchResults = await Promise.all(
-        bookmarks.map(async(bookmark) => {
-          let populatedTarget = null;
-
-          if (bookmark.targetType === 'report') {
-            const report = await Report.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
-            if (report) {
-              // Add reaction counts and comment count like in reportService
-              const commentCount = await Comment.countDocuments({
-                targetType: 'report',
-                targetId: report._id,
-              });
-              const reactionCounts = await ReactionService.countReactions(report._id, 'report');
-
-              populatedTarget = {
-                ...report.toObject({
-                  virtuals: true
-                }),
-                commentCount,
-                reactionCounts
-              };
-            }
-          } else if (bookmark.targetType === 'claim') {
-            const claim = await Claim.findById(bookmark.targetId).populate('userId', 'username profilePictureUrl');
-            if (claim) {
-              // Add reaction counts and comment count like in claimService
-              const commentCount = await Comment.countDocuments({
-                targetType: 'claim',
-                targetId: claim._id,
-              });
-              const reactionCounts = await ReactionService.countReactions(claim._id, 'claim');
-
-              populatedTarget = {
-                ...claim.toObject({
-                  virtuals: true
-                }),
-                commentCount,
-                reactionCounts
-              };
-            }
-          }
-
-          if (populatedTarget) {
-            // Check if the populated target matches the search query
-            const searchLower = searchQuery.toLowerCase();
-            const matchesSearch =
-              (populatedTarget.reportTitle && populatedTarget.reportTitle.toLowerCase().includes(searchLower)) ||
-            (populatedTarget.claimTitle && populatedTarget.claimTitle.toLowerCase().includes(searchLower)) ||
-            (populatedTarget.reportContent && populatedTarget.reportContent.toLowerCase().includes(searchLower)) ||
-            (populatedTarget.claimContent && populatedTarget.claimContent.toLowerCase().includes(searchLower)) ||
-            (populatedTarget.reportDescription && populatedTarget.reportDescription.toLowerCase().includes(searchLower));
-
-            if (matchesSearch) {
-              return {
-                ...bookmark.toObject(),
-                targetId: populatedTarget,
-                target: populatedTarget // For suggestions compatibility
-              };
-            }
-          }
-          return null;
-        }));
-
-    // Filter out non-matching bookmarks and apply limit if specified
-    const filteredResults = searchResults.filter(bookmark => bookmark !== null);
-
-    if (limit && typeof limit === 'number' && limit > 0) {
-      return filteredResults.slice(0, limit);
-    }
-
-    return filteredResults;
-  } catch (error) {
-    console.error('Error in BookmarkService.searchBookmarks:', error);
-    throw error;
-  }
 }
 
 // Update collection
