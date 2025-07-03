@@ -107,10 +107,19 @@ export default function Profile() {
 
             <div className="w-[1000px] bg-white rounded shadow-xl pt-0 p-8">
 
-                <div className="relative h-60 bg-cover bg-center rounded-sm mb-6" style={{
-                    backgroundImage: `url(${profileData.coverPhotoUrl})`,
-                }}>
+                <div className="relative h-60 bg-cover bg-center rounded-sm mb-6">
+                    {profileData.coverPhotoUrl ? (
+                        <div
+                            className="absolute inset-0 bg-cover bg-center"
+                            style={{ backgroundImage: `url(${profileData.coverPhotoUrl})` }}
+                        />
+                    ) : (
+                        <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-5xl font-bold text-gray-600 uppercase">
+                            {profileData.username?.charAt(0)}
+                        </div>
+                    )}
                 </div>
+
 
                 {/* Profile Info */}
                 <div className="flex items-center justify-between mb-6">
