@@ -28,9 +28,8 @@ class CommentService {
         parentCommentId ? 'REPLY' : 'COMMENT',
         targetType.toUpperCase(),
         targetId,
-        targetType === 'report' ? 'Report' : 
-        targetType === 'claim' ? 'Claim' : 'Comment'
-      );
+        targetType === 'report' ? 'Report' :
+        targetType === 'claim' ? 'Claim' : 'Comment');
     } catch (activityError) {
       console.error('Error logging comment activity:', activityError);
       // Don't fail the comment if activity logging fails
@@ -88,67 +87,90 @@ class CommentService {
   }
 
   static async getCommentsByTarget(targetType, targetId, userId = null) {
-    const comments = await Comment.find({ targetType, targetId, deletedAt: null })
+    const comments = await Comment.find({
+      targetType,
+      targetId,
+      deletedAt: null
+    })
       .populate('userId')
-      .sort('-createdAt');
+      .sort({
+        createdAt: 1
+      }); // earlier comments first
 
-    // Get reaction counts for all comments
     const commentIds = comments.map(c => c._id);
-    const reactions = await Reaction.aggregate([
-      {
-        $match: {
-          targetId: { $in: commentIds.map(id => new mongoose.Types.ObjectId(id)) },
-          targetType: 'comment'
-        }
-      },
-      {
-        $group: {
-          _id: {
-            targetId: '$targetId',
-            reactionType: '$reactionType'
-          },
-          count: { $sum: 1 }
-        }
-      }
-    ]);
 
-    // If userId is provided, get user's reactions
+    // Get reaction counts
+    const reactions = await Reaction.aggregate([{
+            $match: {
+              targetId: {
+                $in: commentIds.map(id => new mongoose.Types.ObjectId(id))
+              },
+              targetType: 'comment'
+            }
+          }, {
+            $group: {
+              _id: {
+                targetId: '$targetId',
+                reactionType: '$reactionType'
+              },
+              count: {
+                $sum: 1
+              }
+            }
+          }
+        ]);
+
+    // Get user reactions
     let userReactions = [];
     if (userId) {
       userReactions = await Reaction.find({
         userId: new mongoose.Types.ObjectId(userId),
-        targetId: { $in: commentIds },
+        targetId: {
+          $in: commentIds
+        },
         targetType: 'comment'
       });
     }
 
-    // Map the reactions to each comment
-    const commentsWithReactions = comments.map(comment => {
-      const commentObj = comment.toObject();
-      
-      // Initialize reaction counts
-      commentObj.reactionCounts = {
+    // Build a map for faster access
+    const commentMap = {};
+    comments.forEach(comment => {
+      const obj = comment.toObject();
+      obj.reactionCounts = {
         like: 0,
         dislike: 0
       };
 
-      // Add reaction counts
-      reactions.forEach(reaction => {
-        if (reaction._id.targetId.equals(comment._id)) {
-          commentObj.reactionCounts[reaction._id.reactionType] = reaction.count;
+      reactions.forEach(r => {
+        if (r._id.targetId.equals(comment._id)) {
+          obj.reactionCounts[r._id.reactionType] = r.count;
         }
       });
 
-      // Add user's reaction if available
       if (userId) {
         const userReaction = userReactions.find(r => r.targetId.equals(comment._id));
-        commentObj.userReaction = userReaction ? userReaction.reactionType : null;
+        obj.userReaction = userReaction ? userReaction.reactionType : null;
       }
 
-      return commentObj;
+      obj.replies = [];
+      commentMap[comment._id.toString()] = obj;
     });
 
-    return commentsWithReactions;
+    // Nest replies
+    const topLevelComments = [];
+
+    Object.values(commentMap).forEach(comment => {
+      if (comment.parentCommentId) {
+        const parent = commentMap[comment.parentCommentId.toString()];
+        if (parent) {
+          parent.replies.push(comment);
+        }
+      } else {
+        topLevelComments.push(comment);
+      }
+    });
+
+    return topLevelComments;
   }
 
   static async toggleLike(commentId, userId) {
@@ -247,7 +269,7 @@ class CommentService {
     if (!comment) {
       throw new Error("Comment not found");
     }
-    
+
     // Only allow the comment author to edit their own comment
     if (comment.userId.toString() !== userId.toString()) {
       throw new Error("Unauthorized: You can only edit your own comments");
@@ -255,7 +277,7 @@ class CommentService {
 
     comment.commentContent = newContent;
     comment.updatedAt = new Date();
-    
+
     return await comment.save();
   }
 
@@ -264,15 +286,15 @@ class CommentService {
     if (!comment) {
       throw new Error("Comment not found");
     }
-    
+
     // Get user to check if they are admin
     const { User } = await import('../models/index.js');
     const user = await User.findById(userId);
-    
+
     // Allow comment author or admin to delete
     const isAuthor = comment.userId.toString() === userId.toString();
     const isAdmin = user && user.role === 'admin';
-    
+
     if (!isAuthor && !isAdmin) {
       throw new Error("Unauthorized: You can only delete your own comments");
     }
@@ -281,7 +303,7 @@ class CommentService {
     await Comment.deleteMany({
       parentCommentId: comment._id
     });
-    
+
     return await comment.deleteOne();
   }
 }
