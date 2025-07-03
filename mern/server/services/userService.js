@@ -1,6 +1,7 @@
 import { User, Claim, Report, Reaction, Activity } from "../models/index.js";
 import reportService from './reportService.js';
 import claimService from './claimService.js';
+import activityService from './activityService.js';
 
 class UserService {
   // Get all users
@@ -75,13 +76,14 @@ class UserService {
     // Log the activity for profile updates
     if (updated && (updateData.username || updateData.bio || updateData.profilePictureUrl)) {
       try {
-        await Activity.create({
-          user: id,
-          type: 'PROFILE_UPDATE',
-          targetType: 'USER',
-          target: id,
-          targetModel: 'User'
-        });
+        await activityService.logActivity(
+          id,
+          'PROFILE_UPDATE',
+          'USER',
+          id,
+          'User',
+          'info' // Profile information update
+        );
       } catch (activityError) {
         console.error('Error logging profile update activity:', activityError);
         // Don't fail the update if activity logging fails

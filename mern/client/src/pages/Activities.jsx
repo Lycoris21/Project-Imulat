@@ -62,6 +62,13 @@ const Activities = () => {
 
       const data = await response.json();
       
+      // Debug logging
+      console.log('Fetched activities data:', data);
+      console.log('Activities array:', data.activities);
+      if (data.activities && data.activities.length > 0) {
+        console.log('First activity sample:', data.activities[0]);
+      }
+      
       if (pageNum === 1) {
         setActivities(data.activities);
       } else {

@@ -25,24 +25,48 @@ const getActivityIcon = (type) => {
 };
 
 const getActivityText = (activity) => {
-  const { type, targetType, target } = activity;
+  const { type, targetType, target, actionDetails } = activity;
+  
+  // Get owner information from populated target
+  const targetOwner = target?.user?.username || target?.userId?.username || target?.username;
   
   switch (type) {
     case 'LIKE':
+      if (targetType === 'REPORT') return targetOwner ? `liked ${targetOwner}'s report` : 'liked a report';
+      if (targetType === 'CLAIM') return targetOwner ? `liked ${targetOwner}'s claim` : 'liked a claim';
+      if (targetType === 'COMMENT') return targetOwner ? `liked ${targetOwner}'s comment` : 'liked a comment';
+      if (targetType === 'USER') return targetOwner ? `liked ${targetOwner}` : 'liked a user';
       return `liked a ${targetType.toLowerCase()}`;
     case 'DISLIKE':
+      if (targetType === 'REPORT') return targetOwner ? `disliked ${targetOwner}'s report` : 'disliked a report';
+      if (targetType === 'CLAIM') return targetOwner ? `disliked ${targetOwner}'s claim` : 'disliked a claim';
+      if (targetType === 'COMMENT') return targetOwner ? `disliked ${targetOwner}'s comment` : 'disliked a comment';
+      if (targetType === 'USER') return targetOwner ? `disliked ${targetOwner}` : 'disliked a user';
       return `disliked a ${targetType.toLowerCase()}`;
     case 'COMMENT':
+      if (targetType === 'REPORT') return targetOwner ? `commented on ${targetOwner}'s report` : 'commented on a report';
+      if (targetType === 'CLAIM') return targetOwner ? `commented on ${targetOwner}'s claim` : 'commented on a claim';
       return 'commented on';
     case 'REPLY':
-      return 'replied to a comment on';
+      if (targetOwner) return `replied to ${targetOwner}'s comment`;
+      return 'replied to a comment';
     case 'REPORT_CREATE':
       return 'created a report';
     case 'CLAIM_CREATE':
       return 'made a claim';
     case 'BOOKMARK_CREATE':
-      return 'bookmarked a';
+      // For bookmarks, get the bookmarked item details
+      const bookmarkedItem = target?.targetId;
+      const bookmarkedOwner = bookmarkedItem?.user?.username || bookmarkedItem?.userId?.username;
+      const bookmarkedType = target?.targetType?.toLowerCase() || 'item';
+      if (bookmarkedOwner && bookmarkedItem) {
+        return `bookmarked ${bookmarkedOwner}'s ${bookmarkedType}`;
+      }
+      return 'bookmarked an item';
     case 'PROFILE_UPDATE':
+      if (actionDetails === 'password') return 'changed their password';
+      if (actionDetails === 'delete') return 'deleted their account';
+      if (actionDetails === 'info') return 'updated their profile information';
       return 'updated their profile';
     default:
       return 'performed an action';
@@ -50,35 +74,164 @@ const getActivityText = (activity) => {
 };
 
 const getActivityLink = (activity) => {
-  const { targetType, target } = activity;
+  const { type, targetType, target } = activity;
+  
+  // Profile updates are not clickable
+  if (type === 'PROFILE_UPDATE') {
+    return null;
+  }
+  
+  // Helper function to extract ID from target
+  const getTargetId = (target) => {
+    if (typeof target === 'string') return target;
+    if (target?._id) return target._id;
+    if (target?.id) return target.id;
+    return null;
+  };
   
   switch (targetType) {
     case 'REPORT':
-      return `/reports/${target._id}`;
+      const reportId = getTargetId(target);
+      if (!reportId) return '#';
+      // For comments/replies on reports, scroll to comment section
+      if (type === 'COMMENT' || type === 'REPLY') {
+        return `/reports/${reportId}#comments`;
+      }
+      return `/reports/${reportId}`;
     case 'CLAIM':
-      return `/claims/${target._id}`;
+      const claimId = getTargetId(target);
+      if (!claimId) return '#';
+      // For comments/replies on claims, scroll to comment section
+      if (type === 'COMMENT' || type === 'REPLY') {
+        return `/claims/${claimId}#comments`;
+      }
+      return `/claims/${claimId}`;
     case 'COMMENT':
-      // Assuming comments are linked to either reports or claims
-      return target.parentType === 'Report' 
-        ? `/reports/${target.parent}` 
-        : `/claims/${target.parent}`;
+      const commentId = getTargetId(target);
+      const parentId = getTargetId(target?.parent);
+      if (!commentId || !parentId) return '#';
+      // For comment reactions, find the parent and scroll to that comment
+      if (target.parentType === 'Report') {
+        return `/reports/${parentId}#comment-${commentId}`;
+      } else if (target.parentType === 'Claim') {
+        return `/claims/${parentId}#comment-${commentId}`;
+      }
+      return `/reports/${parentId}#comments`;
     case 'USER':
-      return `/profile/${target._id}`;
+      const userId = getTargetId(target);
+      if (!userId) return '#';
+      return `/profile/${userId}`;
     case 'BOOKMARK':
-      return `/bookmarks/${target._id}`;
+      // For bookmarks, navigate to the bookmarked item (report/claim)
+      if (target?.targetId) {
+        const bookmarkedId = getTargetId(target.targetId);
+        if (!bookmarkedId) return '#';
+        const bookmarkedType = target.targetType?.toLowerCase();
+        if (bookmarkedType === 'report') {
+          return `/reports/${bookmarkedId}`;
+        } else if (bookmarkedType === 'claim') {
+          return `/claims/${bookmarkedId}`;
+        }
+      }
+      const bookmarkId = getTargetId(target);
+      return bookmarkId ? `/bookmarks/${bookmarkId}` : '#';
     default:
       return '#';
   }
 };
 
+const getTargetTitle = (activity) => {
+  const { target, targetType, type } = activity;
+  
+  if (!target) return null;
+  
+  // Handle different target structures from populated data
+  if (typeof target === 'string') return null; // Just an ID
+  
+  // For bookmarks, get the title of the bookmarked item
+  if (type === 'BOOKMARK_CREATE' && target.targetId) {
+    return target.targetId.title || target.targetId.claimTitle;
+  }
+  
+  // Standard title fields
+  if (target.title) return target.title;
+  if (target.claimTitle) return target.claimTitle;
+  
+  // For comments, show content preview
+  if (target.commentContent && target.commentContent.length > 0) {
+    return target.commentContent.substring(0, 50) + (target.commentContent.length > 50 ? '...' : '');
+  }
+  
+  // For users
+  if (target.username) return `@${target.username}`;
+  if (target.name) return target.name;
+  
+  return null;
+};
+
+const getTargetTypeLabel = (activity) => {
+  const { targetType, type } = activity;
+  
+  switch (targetType) {
+    case 'REPORT': return 'report';
+    case 'CLAIM': return 'claim';
+    case 'COMMENT': return 'comment';
+    case 'USER': return 'user';
+    case 'BOOKMARK': return 'bookmark';
+    default: return targetType.toLowerCase();
+  }
+};
+
 const ActivityItem = ({ activity }) => {
+  // Debug logging
+  console.log('ActivityItem received:', activity);
+  console.log('Target data:', activity.target);
+  
   const icon = getActivityIcon(activity.type);
   const text = getActivityText(activity);
   const link = getActivityLink(activity);
   const time = format(new Date(activity.createdAt), 'h:mm a');
+  const targetTitle = getTargetTitle(activity);
+  const targetTypeLabel = getTargetTypeLabel(activity);
   
+  // Debug the link generation
+  console.log('Generated link:', link);
+  
+  // If no link (like profile updates), render as non-clickable div
+  if (!link) {
+    return (
+      <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
+        <div className="flex-shrink-0 mt-1">
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-lg">
+            {icon}
+          </div>
+        </div>
+        <div className="flex-grow min-w-0">
+          <div className="text-sm">
+            <span className="text-gray-900">You </span>
+            <span className="font-medium text-gray-700">{text}</span>
+            {targetTitle && (
+              <span className="ml-1">
+                <span className="text-gray-500"> "</span>
+                <span className="text-gray-700 font-medium">{targetTitle}</span>
+                <span className="text-gray-500">"</span>
+              </span>
+            )}
+          </div>
+          <div className="mt-1 flex items-center space-x-2">
+            <p className="text-xs text-gray-500">{time}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render as clickable card
   return (
-    <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 transition-colors duration-200">
+    <Link 
+      to={link}
+      className="flex items-start space-x-4 p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg cursor-pointer"
+    >
       <div className="flex-shrink-0 mt-1">
         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-lg">
           {icon}
@@ -86,18 +239,37 @@ const ActivityItem = ({ activity }) => {
       </div>
       <div className="flex-grow min-w-0">
         <div className="text-sm">
-          <Link to={link} className="font-medium text-gray-900 hover:text-blue-600">
+          <span className="text-gray-900">You </span>
+          <span className="font-medium text-blue-600 hover:text-blue-800 transition-colors">
             {text}
-          </Link>
-          {activity.target && activity.target.title && (
+          </span>
+          {targetTitle && (
+            <span className="ml-1">
+              <span className="text-gray-500"> "</span>
+              <span className="text-gray-700 font-medium">{targetTitle}</span>
+              <span className="text-gray-500">"</span>
+            </span>
+          )}
+          {!targetTitle && targetTypeLabel && activity.type !== 'PROFILE_UPDATE' && (
             <span className="ml-1 text-gray-500">
-              "{activity.target.title}"
+              this {targetTypeLabel}
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-sm text-gray-500">{time}</p>
+        <div className="mt-1 flex items-center space-x-2">
+          <p className="text-xs text-gray-500">{time}</p>
+          {(activity.type === 'COMMENT' || activity.type === 'REPLY') && (
+            <span className="text-xs text-blue-500">• Click to view comment</span>
+          )}
+          {(activity.type === 'LIKE' || activity.type === 'DISLIKE') && activity.targetType === 'COMMENT' && (
+            <span className="text-xs text-blue-500">• Click to view comment</span>
+          )}
+          {activity.type === 'BOOKMARK_CREATE' && (
+            <span className="text-xs text-blue-500">• Click to view bookmarked item</span>
+          )}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

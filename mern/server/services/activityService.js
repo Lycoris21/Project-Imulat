@@ -1,14 +1,15 @@
 import Activity from '../models/Activity.js';
 
 class ActivityService {
-    async logActivity(userId, type, targetType, targetId, targetModelName) {
+    async logActivity(userId, type, targetType, targetId, targetModelName, actionDetails = null) {
         try {
             const activity = new Activity({
                 user: userId,
                 type,
                 targetType,
                 target: targetId,
-                targetModel: targetModelName
+                targetModel: targetModelName,
+                actionDetails
             });
             await activity.save();
             return activity;
@@ -22,12 +23,45 @@ class ActivityService {
         try {
             const skip = (page - 1) * limit;
             
-            const activities = await Activity.find({ user: userId })
+            let activities = await Activity.find({ user: userId })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
                 .populate('user', 'username avatar')
-                .lean(); // Use lean() for better performance
+                .populate('target')
+                .lean();
+
+            // Manually populate user information for different target types
+            for (let activity of activities) {
+                if (activity.target && activity.targetModel) {
+                    try {
+                        let targetWithUser = null;
+                        
+                        if (activity.targetModel === 'Report') {
+                            const { Report } = await import('../models/index.js');
+                            targetWithUser = await Report.findById(activity.target._id).populate('userId', 'username avatar').lean();
+                            if (targetWithUser) {
+                                activity.target.owner = targetWithUser.userId;
+                            }
+                        } else if (activity.targetModel === 'Claim') {
+                            const { Claim } = await import('../models/index.js');
+                            targetWithUser = await Claim.findById(activity.target._id).populate('userId', 'username avatar').lean();
+                            if (targetWithUser) {
+                                activity.target.owner = targetWithUser.userId;
+                            }
+                        } else if (activity.targetModel === 'Comment') {
+                            const { Comment } = await import('../models/index.js');
+                            targetWithUser = await Comment.findById(activity.target._id).populate('userId', 'username avatar').lean();
+                            if (targetWithUser) {
+                                activity.target.owner = targetWithUser.userId;
+                            }
+                        }
+                    } catch (populateError) {
+                        console.error('Error populating target user:', populateError);
+                        // Continue without user info
+                    }
+                }
+            }
 
             const total = await Activity.countDocuments({ user: userId });
 
@@ -43,7 +77,9 @@ class ActivityService {
             console.error('Error fetching user activities:', error);
             throw error;
         }
-    }    async getActivitiesByDateRange(userId, startDate, endDate, page = 1, limit = 10) {
+    }
+
+    async getActivitiesByDateRange(userId, startDate, endDate, page = 1, limit = 10) {
         try {
             const skip = (page - 1) * limit;
             
@@ -60,7 +96,8 @@ class ActivityService {
                 .skip(skip)
                 .limit(limit)
                 .populate('user', 'username avatar')
-                .lean(); // Use lean() for better performance
+                .populate('target')
+                .lean();
 
             const total = await Activity.countDocuments(query);
 

@@ -2,6 +2,7 @@ import { Report, User, Claim, Comment, Activity } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
 import mongoose from "mongoose";
+import activityService from './activityService.js';
 
 let aiEnabled = true;
 
@@ -221,13 +222,13 @@ class ReportService {
 
       // Log the activity
       try {
-        await Activity.create({
-          user: userId,
-          type: 'REPORT_CREATE',
-          targetType: 'REPORT',
-          target: savedReport._id,
-          targetModel: 'Report'
-        });
+        await activityService.logActivity(
+          userId,
+          'REPORT_CREATE',
+          'REPORT',
+          savedReport._id,
+          'Report'
+        );
       } catch (activityError) {
         console.error('Error logging report activity:', activityError);
         // Don't fail the report if activity logging fails

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Comment, Notification, Report, Claim, Reaction, Activity } from '../models/index.js';
 import NotificationService from './notificationService.js';
+import activityService from './activityService.js';
 
 class CommentService {
   static async createComment({
@@ -22,14 +23,14 @@ class CommentService {
 
     // Log the activity
     try {
-      await Activity.create({
-        user: userId,
-        type: parentCommentId ? 'REPLY' : 'COMMENT',
-        targetType: targetType.toUpperCase(),
-        target: targetId,
-        targetModel: targetType === 'report' ? 'Report' : 
-                    targetType === 'claim' ? 'Claim' : 'Comment'
-      });
+      await activityService.logActivity(
+        userId,
+        parentCommentId ? 'REPLY' : 'COMMENT',
+        targetType.toUpperCase(),
+        targetId,
+        targetType === 'report' ? 'Report' : 
+        targetType === 'claim' ? 'Claim' : 'Comment'
+      );
     } catch (activityError) {
       console.error('Error logging comment activity:', activityError);
       // Don't fail the comment if activity logging fails

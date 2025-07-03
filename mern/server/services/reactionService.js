@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Reaction, Claim, Report, Comment, User, Notification, Activity } from '../models/index.js';
 import { parseVerdict } from '../utils/helpers.js';
+import activityService from './activityService.js';
 
 class ReactionService {
   static async getReactionsByTarget(targetId, targetType) {
@@ -64,15 +65,15 @@ class ReactionService {
 
       // Log activity for new reaction
       try {
-        await Activity.create({
-          user: userId,
-          type: reactionType === 'like' ? 'LIKE' : 'DISLIKE',
-          targetType: targetType.toUpperCase(),
-          target: targetId,
-          targetModel: targetType === 'report' ? 'Report' : 
-                      targetType === 'claim' ? 'Claim' : 
-                      targetType === 'comment' ? 'Comment' : 'User'
-        });
+        await activityService.logActivity(
+          userId,
+          reactionType === 'like' ? 'LIKE' : 'DISLIKE',
+          targetType.toUpperCase(),
+          targetId,
+          targetType === 'report' ? 'Report' : 
+          targetType === 'claim' ? 'Claim' : 
+          targetType === 'comment' ? 'Comment' : 'User'
+        );
       } catch (activityError) {
         console.error('Error logging activity:', activityError);
         // Don't fail the reaction if activity logging fails

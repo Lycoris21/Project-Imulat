@@ -2,6 +2,7 @@ import { Claim, Comment, User, Activity } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from './reactionService.js';
 import mongoose from "mongoose";
+import activityService from './activityService.js';
 
 let aiEnabled = true;
 
@@ -241,13 +242,13 @@ class ClaimService {
 
       // Log the activity
       try {
-        await Activity.create({
-          user: claimData.userId,
-          type: 'CLAIM_CREATE',
-          targetType: 'CLAIM',
-          target: savedClaim._id,
-          targetModel: 'Claim'
-        });
+        await activityService.logActivity(
+          claimData.userId,
+          'CLAIM_CREATE',
+          'CLAIM',
+          savedClaim._id,
+          'Claim'
+        );
       } catch (activityError) {
         console.error('Error logging claim activity:', activityError);
         // Don't fail the claim if activity logging fails

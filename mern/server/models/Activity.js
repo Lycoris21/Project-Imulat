@@ -36,6 +36,11 @@ const activitySchema = new mongoose.Schema({
         required: true,
         enum: ['Report', 'Claim', 'Comment', 'User', 'Bookmark']
     },
+    // Additional context for specific actions
+    actionDetails: {
+        type: String, // For profile updates: 'info', 'password', 'delete'
+        enum: ['info', 'password', 'delete', null]
+    },
     createdAt: {
         type: Date,
         default: Date.now,
