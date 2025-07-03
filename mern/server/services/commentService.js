@@ -304,6 +304,19 @@ class CommentService {
       parentCommentId: comment._id
     });
 
+    try {
+      await activityService.logActivity(
+        userId,
+        'COMMENT_DELETE',
+        'COMMENT',
+        comment._id,
+        'Comment'
+      );
+      console.log('📝 [ActivityService] Logged COMMENT_DELETE activity for comment:', commentId);
+    } catch (activityError) {
+      console.error('❌ [ActivityService] Failed to log COMMENT_DELETE activity:', activityError);
+    }
+
     return await comment.deleteOne();
   }
 }

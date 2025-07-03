@@ -18,6 +18,10 @@ const activitySchema = new mongoose.Schema({
             'REPORT_CREATE',
             'CLAIM_CREATE',
             'BOOKMARK_CREATE',
+            'REPORT_DELETE',
+            'CLAIM_DELETE',
+            'BOOKMARK_DELETE',
+            'COMMENT_DELETE',
             'PROFILE_UPDATE'
         ]
     },

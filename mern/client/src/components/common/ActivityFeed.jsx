@@ -19,6 +19,11 @@ const getActivityIcon = (type) => {
       return '🔖';
     case 'PROFILE_UPDATE':
       return '👤';
+    case 'REPORT_DELETE':
+    case 'CLAIM_DELETE':
+    case 'BOOKMARK_DELETE':
+    case 'COMMENT_DELETE':
+      return '🗑️';
     default:
       return '🔔';
   }
@@ -64,10 +69,18 @@ const getActivityText = (activity) => {
       }
       return 'bookmarked an item';
     case 'PROFILE_UPDATE':
-      if (actionDetails === 'password') return 'changed their password';
-      if (actionDetails === 'delete') return 'deleted their account';
-      if (actionDetails === 'info') return 'updated their profile information';
+      if (actionDetails === 'password') return 'changed the password';
+      if (actionDetails === 'delete') return 'deleted the account';
+      if (actionDetails === 'info') return 'updated the profile information';
       return 'updated their profile';
+    case 'REPORT_DELETE':
+      return 'deleted a report';
+    case 'CLAIM_DELETE':
+      return 'deleted a claim';
+    case 'BOOKMARK_DELETE':
+      return 'removed a bookmark';
+    case 'COMMENT_DELETE':
+      return 'deleted a comment';
     default:
       return 'performed an action';
   }
@@ -78,7 +91,7 @@ const getActivityLink = (activity) => {
 
   // Profile updates are not clickable
   if (type === 'PROFILE_UPDATE') {
-    return null;
+    return "#";
   }
 
   // Helper function to extract ID from target
@@ -164,7 +177,7 @@ const getTargetTitle = (activity) => {
   }
 
   // For users
-  if (target.username) return `@${target.username}`;
+  if (target.username) return target.username;
   if (target.name) return target.name;
 
   return null;
@@ -247,24 +260,24 @@ const ActivityItem = ({ activity }) => {
           {targetTitle && (
             <span className="ml-1">
               <span className="text-gray-500">
-                {activity.targetType === 'USER'
-                  ? 'of "'
-                  : activity.type !== "REPLY" &&
-                  (activity.targetType === "COMMENT")
-                  ? 'on "'
-                  : 'titled "'}
+                {(() => {
+                  if (activity.targetType === 'USER' || activity.type === 'PROFILE_UPDATE') return 'of "';
+                  if (activity.targetType === 'COMMENT' && activity.type !== 'REPLY') return 'on "';
+                  return 'titled "';
+                })()}
               </span>
               <span className="text-gray-700 font-medium">{targetTitle}</span>
               <span className="text-gray-500">"</span>
             </span>
           )}
+          {!targetTitle && targetTypeLabel &&
+            activity.type !== 'PROFILE_UPDATE' &&
+            !activity.type.includes('DELETE') && (
+              <span className="ml-1 text-gray-500">
+                on this {targetTypeLabel}
+              </span>
+            )}
 
-
-          {!targetTitle && targetTypeLabel && activity.type !== 'PROFILE_UPDATE' && (
-            <span className="ml-1 text-gray-500">
-              on this {targetTypeLabel}
-            </span>
-          )}
         </div>
         <div className="mt-1 flex items-center space-x-2">
           <p className="text-xs text-gray-500">{time}</p>

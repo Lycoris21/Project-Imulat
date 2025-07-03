@@ -7,18 +7,19 @@ class ReportController {
       const { search, page = 1, limit = 24, sort = 'newest', user } = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
-      
+
       const shouldSearch = search?.trim() || user;
 
       const result = shouldSearch
-        ? await ReportService.searchReports(search ?? '', pageNum, limitNum, sort, user)
-        : await ReportService.getAllReports(pageNum, limitNum, sort);
+         ? await ReportService.searchReports(search ?? '', pageNum, limitNum, sort, user)
+         : await ReportService.getAllReports(pageNum, limitNum, sort);
 
-      
       res.status(200).json(result);
     } catch (error) {
       console.error("Error fetching reports:", error);
-      res.status(500).json({ error: "Error fetching reports" });
+      res.status(500).json({
+        error: "Error fetching reports"
+      });
     }
   }
 
@@ -27,29 +28,23 @@ class ReportController {
     try {
       const report = await ReportService.getReportById(req.params.id);
       if (!report) {
-        return res.status(404).json({ error: "Report not found" });
+        return res.status(404).json({
+          error: "Report not found"
+        });
       }
       res.status(200).json(report);
     } catch (error) {
       console.error("Error fetching report:", error);
-      res.status(500).json({ error: "Error fetching report" });
+      res.status(500).json({
+        error: "Error fetching report"
+      });
     }
   }
 
   // Create new report
   static async createReport(req, res) {
     try {
-      const {
-        userId,
-        claimIds,
-        reportTitle,
-        reportContent,
-        truthVerdict,
-        aiReportSummary,
-        reportConclusion,
-        reportReferences,
-        reportCoverUrl
-      } = req.body;
+      const { userId, claimIds, reportTitle, reportContent, truthVerdict, aiReportSummary, reportConclusion, reportReferences, reportCoverUrl } = req.body;
 
       // Basic validation
       if (!userId || !reportTitle || !reportContent || !truthVerdict || !reportConclusion) {
@@ -75,18 +70,21 @@ class ReportController {
     } catch (error) {
       console.error("Error creating report:", error);
       if (error.name === 'ValidationError') {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({
+          error: error.message
+        });
       }
-      res.status(500).json({ error: "Error creating report" });
+      res.status(500).json({
+        error: "Error creating report"
+      });
     }
   }
-
 
   // Update report
   static async updateReport(req, res) {
     try {
       const { claimIds, reportTitle, reportContent, truthVerdict, aiReportSummary, reportConclusion, reportReferences } = req.body;
-      
+
       const updateData = {
         claimIds,
         reportTitle,
@@ -98,18 +96,24 @@ class ReportController {
       };
 
       const updatedReport = await ReportService.updateReport(req.params.id, updateData);
-      
+
       if (!updatedReport) {
-        return res.status(404).json({ error: "Report not found" });
+        return res.status(404).json({
+          error: "Report not found"
+        });
       }
 
       res.status(200).json(updatedReport);
     } catch (error) {
       console.error("Error updating report:", error);
       if (error.name === 'ValidationError') {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({
+          error: error.message
+        });
       }
-      res.status(500).json({ error: "Error updating report" });
+      res.status(500).json({
+        error: "Error updating report"
+      });
     }
   }
 
@@ -118,29 +122,48 @@ class ReportController {
     try {
       // First get the report to check ownership
       const report = await ReportService.getReportById(req.params.id);
-      if (!report) return res.status(404).json({ error: "Report not found" });
+      if (!report)
+        return res.status(404).json({
+          error: "Report not found"
+        });
 
-      // Check authorization - user must be owner or admin
-      const userId = req.body?.userId || req.headers['user-id']; // Support both body and header
+      // Get userId and role from either body or headers
+      const userId = req.body?.userId || req.headers['user-id'];
+      const userRole = req.body?.userRole || req.headers['user-role'];
+
       if (!userId) {
-        return res.status(401).json({ error: "User ID required" });
+        return res.status(401).json({
+          error: "User ID required"
+        });
       }
 
       // Only owner or admin can delete
-      if (report.userId._id.toString() !== userId && req.body?.userRole !== 'admin') {
-        return res.status(403).json({ error: "You don't have permission to delete this report" });
+      const isOwner = report.userId._id.toString() === userId;
+      const isAdmin = userRole === 'admin';
+
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          error: "You don't have permission to delete this report"
+        });
       }
 
-      const deletedReport = await ReportService.deleteReport(req.params.id);
-      
+      // Pass userId to ReportService so it can log the activity
+      const deletedReport = await ReportService.deleteReport(req.params.id, userId);
+
       if (!deletedReport) {
-        return res.status(404).json({ error: "Report not found" });
+        return res.status(404).json({
+          error: "Report not found"
+        });
       }
 
-      res.status(200).json({ message: "Report deleted successfully" });
+      res.status(200).json({
+        message: "Report deleted successfully"
+      });
     } catch (error) {
       console.error("Error deleting report:", error);
-      res.status(500).json({ error: "Error deleting report" });
+      res.status(500).json({
+        error: "Error deleting report"
+      });
     }
   }
 
@@ -151,7 +174,9 @@ class ReportController {
       res.status(200).json(reports);
     } catch (error) {
       console.error("Error fetching reports by verdict:", error);
-      res.status(500).json({ error: "Error fetching reports by verdict" });
+      res.status(500).json({
+        error: "Error fetching reports by verdict"
+      });
     }
   }
 
@@ -162,10 +187,11 @@ class ReportController {
       res.status(200).json(reports);
     } catch (error) {
       console.error("Error fetching latest reports:", error);
-      res.status(500).json({ error: "Error fetching latest reports" });
+      res.status(500).json({
+        error: "Error fetching latest reports"
+      });
     }
   }
-
 
 }
 

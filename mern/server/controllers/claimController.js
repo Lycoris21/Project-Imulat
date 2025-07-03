@@ -3,31 +3,38 @@ import ClaimService from "../services/claimService.js";
 class ClaimController {
   static async getAllClaims(req, res) {
     try {
-      const { search, page = 1, limit = 24, sort = 'newest', user} = req.query;
+      const { search, page = 1, limit = 24, sort = 'newest', user } = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
-      
+
       const shouldSearch = search?.trim() || user;
 
-      const result = shouldSearch 
-        ? await ClaimService.searchClaims(search, pageNum, limitNum, sort, user)
-        : await ClaimService.getAllClaims(pageNum, limitNum, sort);
-      
+      const result = shouldSearch
+         ? await ClaimService.searchClaims(search, pageNum, limitNum, sort, user)
+         : await ClaimService.getAllClaims(pageNum, limitNum, sort);
+
       res.status(200).json(result);
     } catch (error) {
       console.error("Error fetching claims:", error);
-      res.status(500).json({ error: "Error fetching claims" });
+      res.status(500).json({
+        error: "Error fetching claims"
+      });
     }
   }
 
   static async getClaimById(req, res) {
     try {
       const claim = await ClaimService.getClaimById(req.params.id);
-      if (!claim) return res.status(404).json({ error: "Claim not found" });
+      if (!claim)
+        return res.status(404).json({
+          error: "Claim not found"
+        });
       res.status(200).json(claim);
     } catch (error) {
       console.error("Error fetching claim:", error);
-      res.status(500).json({ error: "Error fetching claim" });
+      res.status(500).json({
+        error: "Error fetching claim"
+      });
     }
   }
 
@@ -37,18 +44,25 @@ class ClaimController {
       res.status(201).json(claim);
     } catch (error) {
       console.error("Error creating claim:", error);
-      res.status(500).json({ error: "Error creating claim" });
+      res.status(500).json({
+        error: "Error creating claim"
+      });
     }
   }
 
   static async updateClaim(req, res) {
     try {
       const claim = await ClaimService.updateClaim(req.params.id, req.body);
-      if (!claim) return res.status(404).json({ error: "Claim not found" });
+      if (!claim)
+        return res.status(404).json({
+          error: "Claim not found"
+        });
       res.status(200).json(claim);
     } catch (error) {
       console.error("Error updating claim:", error);
-      res.status(500).json({ error: "Error updating claim" });
+      res.status(500).json({
+        error: "Error updating claim"
+      });
     }
   }
 
@@ -56,25 +70,42 @@ class ClaimController {
     try {
       // First get the claim to check ownership
       const claim = await ClaimService.getClaimById(req.params.id);
-      if (!claim) return res.status(404).json({ error: "Claim not found" });
+      if (!claim)
+        return res.status(404).json({
+          error: "Claim not found"
+        });
 
       // Check authorization - user must be owner or admin
       const userId = req.body?.userId || req.headers['user-id']; // Support both body and header
       if (!userId) {
-        return res.status(401).json({ error: "User ID required" });
+        return res.status(401).json({
+          error: "User ID required"
+        });
       }
 
       // Only owner or admin can delete
       if (claim.userId._id.toString() !== userId && req.body?.userRole !== 'admin') {
-        return res.status(403).json({ error: "You don't have permission to delete this claim" });
+        return res.status(403).json({
+          error: "You don't have permission to delete this claim"
+        });
       }
 
-      const result = await ClaimService.deleteClaim(req.params.id);
-      if (!result) return res.status(404).json({ error: "Claim not found" });
-      res.status(200).json({ message: "Claim deleted successfully" });
+      // ⬇️ Pass userId to log activity
+      const result = await ClaimService.deleteClaim(req.params.id, userId);
+
+      if (!result)
+        return res.status(404).json({
+          error: "Claim not found"
+        });
+
+      res.status(200).json({
+        message: "Claim deleted successfully"
+      });
     } catch (error) {
       console.error("Error deleting claim:", error);
-      res.status(500).json({ error: "Error deleting claim" });
+      res.status(500).json({
+        error: "Error deleting claim"
+      });
     }
   }
 
@@ -85,7 +116,9 @@ class ClaimController {
       res.status(200).json(claims);
     } catch (error) {
       console.error("Error fetching latest claims:", error); // check backend logs
-      res.status(500).json({ error: "Failed to fetch latest claims" });
+      res.status(500).json({
+        error: "Failed to fetch latest claims"
+      });
     }
   }
 }
