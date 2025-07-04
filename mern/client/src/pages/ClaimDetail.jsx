@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // assumes auth context is available
 import { getTruthIndexColor } from '../utils/colors';
 import { formatRelativeTime } from '../utils/time.js';
 
 // Components
-import { LoadingScreen, ErrorScreen, ReactionBar, CreateReportModal, CommentsSection } from '../components';
+import { LoadingScreen, ErrorScreen, ReactionBar, CreateReportModal, CommentsSection, SuccessToast, SubmitClaimModal } from '../components';
 import BookmarkModal from '../components/modals/BookmarkModal';
 
 export default function ClaimDetail() {
@@ -18,6 +18,9 @@ export default function ClaimDetail() {
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     reportTitle: "",
@@ -77,16 +80,49 @@ export default function ClaimDetail() {
     if (showDeleteConfirm) {
       // Add ESC key listener
       document.addEventListener('keydown', handleEscapeKey);
-      
+
       // Disable background scroll
       document.body.style.overflow = 'hidden';
-      
+
       return () => {
         document.removeEventListener('keydown', handleEscapeKey);
         document.body.style.overflow = 'unset';
       };
     }
   }, [showDeleteConfirm, deleting]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash.startsWith('#comment-')) return;
+
+    const commentId = location.hash.replace('#comment-', '');
+
+    // Wait for comments to be loaded in the DOM
+    const scrollToComment = () => {
+      const el = document.getElementById(`comment-${commentId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring', 'ring-blue-500', 'ring-offset-2', 'transition');
+
+        // Optional: remove highlight after a few seconds
+        setTimeout(() => {
+          el.classList.remove('ring', 'ring-blue-500', 'ring-offset-2');
+        }, 3000);
+      }
+    };
+
+    // Small delay to wait for DOM
+    setTimeout(scrollToComment, 200);
+  }, [location.hash]);
+
+  const handleSubmitFinish = async (successType) => {
+    fetchClaim();
+    if (successType === "claimUpdated") {
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 4000);
+    }
+  };
 
   const handleReaction = async (type) => {
     const newReaction = userReaction === type ? null : type;
@@ -235,6 +271,12 @@ export default function ClaimDetail() {
 
   return (
     <div className="min-h-screen bg-base-gradient py-8">
+      <SuccessToast
+        message="Claim updated successfully!"
+        visible={showSuccessMessage}
+        onClose={() => setShowSuccessMessage(false)}
+      />
+
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
@@ -288,17 +330,27 @@ export default function ClaimDetail() {
           handleOpenModal={() => setShowCreateModal(true)}
           canDelete={canDeleteClaim}
           onDelete={() => setShowDeleteConfirm(true)}
+          canEdit={user._id !== claim.userId?._id || user.role == "admin"}
+          onEdit={() => setShowEditModal(true)}
+          pageType="claim"
         />
 
-
         {/* Comments Section */}
-        <CommentsSection 
-          targetId={claim?._id} 
-          targetType="claim" 
+        <CommentsSection
+          targetId={claim?._id}
+          targetType="claim"
         />
 
         {/* Researcher: Create Report Modal */}
-        <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} claimId={claim?._id}/>
+        <CreateReportModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} claimId={claim?._id} />
+
+        {/* Edit Modal */}
+        <SubmitClaimModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          claim={claim}
+          onSubmitFinish={handleSubmitFinish}
+        />
 
         {/* Bookmark Modal */}
         <BookmarkModal
@@ -314,11 +366,11 @@ export default function ClaimDetail() {
         {showDeleteConfirm && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
             {/* Backdrop */}
-            <div 
+            <div
               className="fixed inset-0 bg-[#00000080] bg-opacity-50"
               onClick={() => !deleting && setShowDeleteConfirm(false)}
             ></div>
-            
+
             {/* Modal */}
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto relative z-10">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Deletion</h3>

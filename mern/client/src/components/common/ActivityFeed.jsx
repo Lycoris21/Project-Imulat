@@ -24,6 +24,12 @@ const getActivityIcon = (type) => {
     case 'BOOKMARK_DELETE':
     case 'COMMENT_DELETE':
       return '🗑️';
+    case 'REPORT_UPDATE':
+    case 'CLAIM_UPDATE':
+    case 'BOOKMARK_UPDATE':
+    case 'COMMENT_UPDATE':
+    case 'COMMENT_EDIT':
+      return '✏️';
     default:
       return '🔔';
   }
@@ -86,6 +92,11 @@ const getActivityText = (activity) => {
       return 'removed a bookmark';
     case 'COMMENT_DELETE':
       return 'deleted a comment';
+    case 'CLAIM_UPDATE':
+      return targetOwner ? `updated ${targetOwner}'s claim` : 'updated a claim';
+    case 'COMMENT_UPDATE':
+    case 'COMMENT_EDIT':
+      return targetOwner ? `edited your comment on ${targetOwner}'s ${target.targetType.toLowerCase()}` : 'edited your comment';
     default:
       return 'performed an action';
   }
@@ -262,12 +273,12 @@ const ActivityItem = ({ activity }) => {
           <span className="font-medium text-[color:var(--color-base)] group-hover:text-[color:var(--color-dark)] transition-colors">
             {text}
           </span>
-          {targetTitle && activity.targetType !== 'USER' && (
+           {targetTitle && activity.targetType !== 'USER' && (
             <span className="ml-1">
               <span className="text-gray-500">
                 {(() => {
                   if (activity.targetType === 'USER' || activity.type === 'PROFILE_UPDATE') return 'of "';
-                  if (activity.targetType === 'COMMENT' && activity.type !== 'REPLY') return 'on "';
+                  if ((activity.targetType === 'COMMENT' && activity.type !== 'COMMENT_EDIT') && activity.type !== 'REPLY') return 'on "';
                   return 'titled "';
                 })()}
               </span>

@@ -95,7 +95,8 @@ class ReportController {
         reportReferences
       };
 
-      const updatedReport = await ReportService.updateReport(req.params.id, updateData);
+      const userId = req.user?.id || req.body?.userId || req.headers['user-id'];
+      const updatedReport = await ReportService.updateReport(req.params.id, updateData, userId);
 
       if (!updatedReport) {
         return res.status(404).json({

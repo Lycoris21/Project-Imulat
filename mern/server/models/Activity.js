@@ -22,6 +22,11 @@ const activitySchema = new mongoose.Schema({
             'CLAIM_DELETE',
             'BOOKMARK_DELETE',
             'COMMENT_DELETE',
+            'REPORT_UPDATE',
+            'CLAIM_UPDATE',
+            'BOOKMARK_UPDATE',
+            'COMMENT_UPDATE',
+            'COMMENT_EDIT', // we went with edit
             'PROFILE_UPDATE'
         ]
     },

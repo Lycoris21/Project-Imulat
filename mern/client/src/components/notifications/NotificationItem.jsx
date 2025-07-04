@@ -51,9 +51,9 @@ export default function NotificationItem({ notification, onClose, refreshNotific
         return `/reports/${notification.targetId}`;
       case "comment":
         if (notification.postType === "claim") {
-          return `/claims/${notification.postId}?highlight=${notification.targetId}`;
+          return `/claims/${notification.postId}#comment-${notification.targetId}`;
         } else if (notification.postType === "report") {
-          return `/reports/${notification.postId}?highlight=${notification.targetId}`;
+          return `/reports/${notification.postId}#comment-${notification.targetId}`;
         }
         return "/";
       default:

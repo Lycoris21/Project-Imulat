@@ -351,11 +351,33 @@ class ClaimService {
     }
   }
 
-  static async updateClaim(id, updateData) {
-    return await Claim.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true
-    });
+  static async updateClaim(id, updateData, userId) {
+    const updatedClaim = await Claim.findByIdAndUpdate(
+        id,
+        updateData, {
+        new: true,
+        runValidators: true
+      });
+
+    if (!updatedClaim)
+      return null;
+
+    try {
+      if (userId) {
+        await activityService.logActivity(
+          userId,
+          'CLAIM_UPDATE',
+          'CLAIM',
+          updatedClaim._id,
+          'Claim');
+      } else {
+        console.warn(`[ActivityService] Skipping activity log: userId missing for claim update`);
+      }
+    } catch (err) {
+      console.error('Error logging CLAIM_UPDATE activity:', err);
+    }
+
+    return updatedClaim;
   }
 
   static async deleteClaim(id, userId) {

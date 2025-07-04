@@ -278,6 +278,24 @@ class CommentService {
     comment.commentContent = newContent;
     comment.updatedAt = new Date();
 
+    const updatedComment = await comment.save();
+
+    try {
+      await activityService.logActivity(
+        userId,
+        'COMMENT_EDIT',
+        'COMMENT',
+        comment._id,
+        'Comment',
+      );
+      console.log('📝 [ActivityService] Logged COMMENT_EDIT activity for comment:', commentId);
+    } catch (activityError) {
+      console.error('❌ [ActivityService] Failed to log COMMENT_EDIT activity:', activityError);
+      // Do not throw; editing should not fail just because activity logging failed
+    }
+
+    return await updatedComment;
+
     return await comment.save();
   }
 
@@ -310,8 +328,7 @@ class CommentService {
         'COMMENT_DELETE',
         'COMMENT',
         comment._id,
-        'Comment'
-      );
+        'Comment');
       console.log('📝 [ActivityService] Logged COMMENT_DELETE activity for comment:', commentId);
     } catch (activityError) {
       console.error('❌ [ActivityService] Failed to log COMMENT_DELETE activity:', activityError);

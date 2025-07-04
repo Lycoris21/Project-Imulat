@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import AlertModal from "../modals/AlertModal";
 
-export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claimId = null }) {
+export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claim = null }) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Form state for submit claim modal
   const [claimFormData, setClaimFormData] = useState({
     claimTitle: "",
     claimContent: "",
@@ -16,13 +15,42 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
   const [alert, setAlert] = useState({
     isOpen: false,
-    title: '',
-    message: '',
-    type: 'error',
+    title: "",
+    message: "",
+    type: "error",
   });
 
+  // Autofill form when editing an existing claim
+  useEffect(() => {
+    if (isOpen && claim) {
+      setClaimFormData({
+        claimTitle: claim.claimTitle || "",
+        claimContent: claim.claimContent || "",
+        claimSources: claim.claimSources || ""
+      });
+    }
+  }, [isOpen, claim]);
 
-  // Handle claim submission
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setClaimFormData({
+        claimTitle: "",
+        claimContent: "",
+        claimSources: ""
+      });
+      setIsAnimating(false);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150);
+  };
+
+  // Submit handler
   const handleSubmitClaim = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -32,11 +60,14 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         userId: user._id,
         claimTitle: claimFormData.claimTitle,
         claimContent: claimFormData.claimContent,
-        claimSources: claimFormData.claimSources
+        claimSources: claimFormData.claimSources,
       };
 
-      const response = await fetch("http://localhost:5050/api/claims", {
-        method: "POST",
+      const method = claim ? "PATCH" : "POST";
+      const endpoint = claim ? `http://localhost:5050/api/claims/${claim._id}` : `http://localhost:5050/api/claims`;
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,21 +82,20 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         } else if (errorData.error) {
           message = errorData.error;
         }
-
         throw new Error(message);
       }
 
-      // Clear form and close modal
+      // Clear and close
       setClaimFormData({
         claimTitle: "",
         claimContent: "",
-        claimSources: "",
+        claimSources: ""
       });
 
       handleClose();
 
       if (onSubmitFinish) {
-        await onSubmitFinish('claimSubmitted');
+        await onSubmitFinish(claim ? "claimUpdated" : "claimSubmitted");
       }
     } catch (error) {
       console.error("Error submitting claim:", error);
@@ -73,73 +103,47 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         isOpen: true,
         title: "Submission Failed",
         message: error.message || "Something went wrong. Please try again.",
-        type: "error"
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle claim form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setClaimFormData(prev => ({
+    setClaimFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  // Handle animation states
   useEffect(() => {
-    if (isOpen) {
-      setIsAnimating(true);
-    }
+    if (isOpen) setIsAnimating(true);
   }, [isOpen]);
 
-  const handleClose = () => {
-    setIsAnimating(false);
-    setTimeout(() => {
-      onClose();
-    }, 150); // Wait for animation to complete
-  };
-
-  // Reset form
-  useEffect(() => {
-    if (!isOpen) {
-      setClaimFormData({
-        claimTitle: "",
-        claimContent: "",
-        claimSources: ""
-      });
-      setIsAnimating(false);
-    }
-  }, [isOpen]);
-
-  // Handle ESC key press to close modal
   useEffect(() => {
     const handleEscKey = (event) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         handleClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscKey);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscKey);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscKey);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscKey);
+      document.body.style.overflow = "unset";
     };
-  }, [isOpen, handleClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${isAnimating ? 'opacity-100' : 'opacity-0'
-      }`}>
-      {/* Loading Overlay */}
+    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${isAnimating ? "opacity-100" : "opacity-0"}`}>
       {isSubmitting && (
         <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center space-y-4">
@@ -149,12 +153,10 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         </div>
       )}
 
-      <div className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all duration-150 ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        }`}>
-        {/* Modal Header - Fixed */}
+      <div className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all duration-150 ${isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}>
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-800">Submit New Claim</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{claim ? "Edit Claim" : "Submit New Claim"}</h2>
             <button
               onClick={handleClose}
               className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
@@ -166,16 +168,11 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
           </div>
         </div>
 
-        {/* Modal Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
-            {/* Modal Form */}
             <form id="claim-form" onSubmit={handleSubmitClaim} className="space-y-4">
-              {/* Claim Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Claim Title
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Claim Title</label>
                 <input
                   type="text"
                   name="claimTitle"
@@ -187,11 +184,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                 />
               </div>
 
-              {/* Claim Content */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Claim Content (Min: 250 Characters)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Claim Content (Min: 250 Characters)</label>
                 <textarea
                   name="claimContent"
                   value={claimFormData.claimContent}
@@ -203,11 +197,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                 />
               </div>
 
-              {/* Sources */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sources (Optional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sources (Optional)</label>
                 <textarea
                   name="claimSources"
                   value={claimFormData.claimSources}
@@ -216,15 +207,12 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
                   placeholder="Enter sources and references (URLs, citations, etc.)..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Optional: Provide sources to support your claim
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Optional: Provide sources to support your claim</p>
               </div>
             </form>
           </div>
         </div>
 
-        {/* Modal Actions - Fixed */}
         <div className="p-6 border-t border-gray-200 flex-shrink-0">
           <div className="flex gap-4">
             <button
@@ -238,12 +226,9 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
               type="submit"
               form="claim-form"
               disabled={isSubmitting}
-              className={`px-6 py-2 rounded-lg transition-colors flex-1 ${isSubmitting
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                : 'bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer'
-                }`}
+              className={`px-6 py-2 rounded-lg transition-colors flex-1 ${isSubmitting ? "bg-gray-400 text-gray-600 cursor-not-allowed" : "bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer"}`}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Claim'}
+              {isSubmitting ? "Submitting..." : (claim ? "Update Claim" : "Submit Claim")}
             </button>
           </div>
         </div>
@@ -251,11 +236,11 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
       <AlertModal
         isOpen={alert.isOpen}
-        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => setAlert((prev) => ({ ...prev, isOpen: false }))}
         title={alert.title}
         message={alert.message}
         type={alert.type}
       />
     </div>
   );
-};
+}

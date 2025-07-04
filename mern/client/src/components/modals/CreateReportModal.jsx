@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import AlertModal from "../modals/AlertModal";
 
-export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, claimId = null }) {
+export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, claimId = null, report = null }) {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -59,8 +59,12 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                 reportCoverUrl: uploadedCoverUrl
             };
 
-            const response = await fetch("http://localhost:5050/api/reports", {
-                method: "POST",
+            const url = report
+                ? `http://localhost:5050/api/reports/${report._id}`
+                : "http://localhost:5050/api/reports";
+
+            const response = await fetch(url, {
+                method: report ? "PATCH" : "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -93,7 +97,7 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
             handleClose();
 
             if (onSubmitFinish) {
-                await onSubmitFinish('reportSubmitted');
+                await onSubmitFinish(report ? "reportUpdated" : "reportSubmitted");
             }
         } catch (error) {
             console.error("Error creating report:", error);
@@ -143,7 +147,20 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
 
     // Reset form
     useEffect(() => {
-        if (!isOpen) {
+        if (report && isOpen) {
+            setFormData({
+                reportTitle: report.reportTitle || "",
+                reportContent: report.reportContent || "",
+                truthVerdict: report.truthVerdict || "",
+                reportConclusion: report.reportConclusion || "",
+                references: report.reportReferences || "",
+                claimId: typeof report.claimIds?.[0] === "string"
+                    ? report.claimIds[0]
+                    : report.claimIds?.[0]?._id || claimId || "",
+                reportCoverFile: null // You can't pre-fill the file input
+            });
+        } else if (!isOpen) {
+            // Reset when closed
             setFormData({
                 reportTitle: "",
                 reportContent: "",
@@ -155,7 +172,8 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
             });
             setIsAnimating(false);
         }
-    }, [isOpen]);
+    }, [isOpen, report]);
+
 
 
     // Handle ESC key press to close modal
@@ -197,7 +215,10 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                 {/* Modal Header - Fixed */}
                 <div className="p-6 border-b border-gray-200 flex-shrink-0">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold text-gray-800">{claimId ? "Create a Report for this Claim" : "Create New Report"}</h2>
+                        <h2 className="text-2xl font-bold text-gray-800">
+                            {report ? "Edit Report" : claimId ? "Create a Report for this Claim" : "Create New Report"}
+                        </h2>
+
                         <button
                             onClick={handleClose}
                             className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
@@ -368,7 +389,10 @@ export default function CreateReportModal({ isOpen, onClose, onSubmitFinish, cla
                                 : 'bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer'
                                 }`}
                         >
-                            {isSubmitting ? 'Creating Report...' : 'Submit Report'}
+                            {isSubmitting
+                                ? (report ? 'Updating Report...' : 'Creating Report...')
+                                : (report ? 'Update Report' : 'Submit Report')}
+
                         </button>
                     </div>
                 </div>

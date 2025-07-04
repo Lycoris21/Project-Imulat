@@ -57,11 +57,15 @@ class ClaimController {
 
   static async updateClaim(req, res) {
     try {
-      const claim = await ClaimService.updateClaim(req.params.id, req.body);
+      const userId = req.user?.id || req.body?.userId || req.headers['user-id'];
+
+      const claim = await ClaimService.updateClaim(req.params.id, req.body, userId);
+
       if (!claim)
         return res.status(404).json({
           error: "Claim not found"
         });
+
       res.status(200).json(claim);
     } catch (error) {
       console.error("Error updating claim:", error);

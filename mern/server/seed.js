@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import Notification from './models/Notification.js';
+import Activity from './models/Activity.js';
 
 dotenv.config({ path: './config.env' });
 
@@ -9,12 +9,12 @@ async function deleteAllNotifications() {
     await mongoose.connect(process.env.ATLAS_URI);
 
     // Delete all notifications
-    await Notification.deleteMany({});
-    console.log("🗑️ All notifications deleted");
+    await Activity.deleteMany({});
+    console.log("🗑️ All activities deleted");
 
     process.exit(0);
   } catch (err) {
-    console.error("❌ Error deleting notifications:", err);
+    console.error("❌ Error deleting activities:", err);
     process.exit(1);
   }
 }

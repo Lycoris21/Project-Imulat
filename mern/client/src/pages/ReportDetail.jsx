@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { parseTruthVerdict } from "../utils/strings";
 import { useAuth } from "../context/AuthContext";
 import { formatRelativeTime } from '../utils/time.js';
 import { getVerdictColor } from '../utils/colors.js';
 
 // Components
-import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection } from '../components'
+import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection, CreateReportModal, SuccessToast } from '../components'
 import BookmarkModal from '../components/modals/BookmarkModal';
 
 export default function ReportDetail() {
@@ -15,57 +15,15 @@ export default function ReportDetail() {
   const [loading, setLoading] = useState(true);
   const [userReaction, setUserReaction] = useState(null); // 'like', 'dislike', or null
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-
-      try {
-        // Fetch report first
-        const reportRes = await fetch(`http://localhost:5050/api/reports/${id}`);
-        if (!reportRes.ok) throw new Error("Failed to fetch report");
-        const reportData = await reportRes.json();
-
-        setReport(reportData);
-
-        // Check bookmark status if user is logged in
-        if (user?._id) {
-          try {
-            const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user._id}/${id}/report`);
-            if (bookmarkRes.ok) {
-              const bookmarkData = await bookmarkRes.json();
-              setIsBookmarked(bookmarkData.isBookmarked);
-            }
-          } catch (err) {
-            console.error('Error checking bookmark status:', err);
-          }
-        }
-
-        // Fetch user reaction (only if logged in)
-        if (user?._id) {
-          const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/report/${id}/${user._id}`);
-          if (reactionRes.ok) {
-            const reactionData = await reactionRes.json();
-            setUserReaction(reactionData?.reactionType || null);
-          } else {
-            setUserReaction(null);
-          }
-        } else {
-          setUserReaction(null);
-        }
-      } catch (err) {
-        console.error("Error loading data:", err);
-        setReport(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInitialData();
   }, [id, user?._id]);
 
@@ -81,16 +39,86 @@ export default function ReportDetail() {
     if (showDeleteConfirm) {
       // Add ESC key listener
       document.addEventListener('keydown', handleEscapeKey);
-      
+
       // Disable background scroll
       document.body.style.overflow = 'hidden';
-      
+
       return () => {
         document.removeEventListener('keydown', handleEscapeKey);
         document.body.style.overflow = 'unset';
       };
     }
   }, [showDeleteConfirm, deleting]);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash.startsWith('#comment-')) return;
+
+    const commentId = location.hash.replace('#comment-', '');
+
+    // Wait for comments to be loaded in the DOM
+    const scrollToComment = () => {
+      const el = document.getElementById(`comment-${commentId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring', 'ring-blue-500', 'ring-offset-2', 'transition');
+
+        // Optional: remove highlight after a few seconds
+        setTimeout(() => {
+          el.classList.remove('ring', 'ring-blue-500', 'ring-offset-2');
+        }, 3000);
+      }
+    };
+
+    // Small delay to wait for DOM
+    setTimeout(scrollToComment, 200);
+  }, [location.hash]);
+
+  const fetchInitialData = async () => {
+    setLoading(true);
+
+    try {
+      // Fetch report first
+      const reportRes = await fetch(`http://localhost:5050/api/reports/${id}`);
+      if (!reportRes.ok) throw new Error("Failed to fetch report");
+      const reportData = await reportRes.json();
+
+      setReport(reportData);
+
+      // Check bookmark status if user is logged in
+      if (user?._id) {
+        try {
+          const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user._id}/${id}/report`);
+          if (bookmarkRes.ok) {
+            const bookmarkData = await bookmarkRes.json();
+            setIsBookmarked(bookmarkData.isBookmarked);
+          }
+        } catch (err) {
+          console.error('Error checking bookmark status:', err);
+        }
+      }
+
+      // Fetch user reaction (only if logged in)
+      if (user?._id) {
+        const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/report/${id}/${user._id}`);
+        if (reactionRes.ok) {
+          const reactionData = await reactionRes.json();
+          setUserReaction(reactionData?.reactionType || null);
+        } else {
+          setUserReaction(null);
+        }
+      } else {
+        setUserReaction(null);
+      }
+    } catch (err) {
+      console.error("Error loading data:", err);
+      setReport(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleReaction = async (type) => {
     const newReaction = userReaction === type ? null : type;
@@ -127,6 +155,14 @@ export default function ReportDetail() {
       }));
     } catch (err) {
       console.error("Reaction error:", err);
+    }
+  };
+
+  const handleUpdateFinish = async (successType) => {
+    fetchInitialData();
+    if (successType === "reportUpdated") {
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 4000);
     }
   };
 
@@ -234,26 +270,32 @@ export default function ReportDetail() {
 
   if (loading) {
     return (
-      <LoadingScreen message = "Loading report..."/>
+      <LoadingScreen message="Loading report..." />
     );
   }
 
   if (!report) {
     return (
-      <ErrorScreen title="Report Not Found" message="The report you're looking for doesn't exist."/>
+      <ErrorScreen title="Report Not Found" message="The report you're looking for doesn't exist." />
     );
   }
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
+      <SuccessToast
+        message="Report updated successfully!"
+        visible={showSuccessMessage}
+        onClose={() => setShowSuccessMessage(false)}
+      />
+
       <div className="max-w-4xl mx-auto px-4">
         {/* Report Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {/* Cover Image */}
           {report.reportCoverUrl && (
             <div className="mb-6">
-              <img 
-                src={report.reportCoverUrl} 
+              <img
+                src={report.reportCoverUrl}
                 alt={`Cover for ${report.reportTitle}`}
                 className="w-full h-64 object-cover rounded-lg shadow-md"
                 onError={(e) => {
@@ -262,7 +304,7 @@ export default function ReportDetail() {
               />
             </div>
           )}
-          
+
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-800 mb-2 mr-2">{report.reportTitle}</h1>
@@ -341,16 +383,20 @@ export default function ReportDetail() {
           dislikes={report.reactionCounts.dislike}
           isBookmarked={isBookmarked}
           userReaction={userReaction}
-          onReact={handleReaction} // or "Report"
+          onReact={handleReaction}
           onBookmark={handleBookmark}
           canDelete={canDeleteReport}
           onDelete={() => setShowDeleteConfirm(true)}
+          canEdit={user._id !== report.userId?._id || user.role == "admin"}
+          onEdit={() => setShowEditModal(true)}
+          pageType="report"
         />
 
+
         {/* Comments Section */}
-        <CommentsSection 
-          targetId={report?._id} 
-          targetType="report" 
+        <CommentsSection
+          targetId={report?._id}
+          targetType="report"
         />
       </div>
 
@@ -364,15 +410,23 @@ export default function ReportDetail() {
         itemTitle={report?.reportTitle}
       />
 
+      {/* Edit Modal */}
+      <CreateReportModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmitFinish={handleUpdateFinish}
+        report={report}
+      />
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 bg-[#00000080] bg-opacity-50"
             onClick={() => !deleting && setShowDeleteConfirm(false)}
           ></div>
-          
+
           {/* Modal */}
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto relative z-10">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Deletion</h3>

@@ -36,24 +36,24 @@ export default function CommentsSection({ targetId, targetType }) {
     try {
       setLoading(true);
       let url = `http://localhost:5050/api/comments?targetId=${targetId}&targetType=${targetType}`;
-      
+
       // Add userId to get user reaction status
       if (user?._id) {
         url += `&userId=${user._id}`;
       }
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch comments');
       }
-      
+
       const data = await response.json();
       setComments(data);
       setError(null);
 
-      const params = new URLSearchParams(window.location.search);
-      const highlightId = params.get("highlight");
+      const hash = window.location.hash;
+      const highlightId = hash.startsWith("#comment-") ? hash.replace("#comment-", "") : null;
 
       if (highlightId) {
         // Wait a bit to ensure DOM renders
@@ -106,14 +106,14 @@ export default function CommentsSection({ targetId, targetType }) {
     if (!user) return;
 
     // Update UI immediately
-    setComments(prevComments => 
+    setComments(prevComments =>
       updateCommentReaction(prevComments, commentId, (comment) => {
         const currentReaction = comment.userReaction;
         const wasLiked = currentReaction === 'like';
         const wasDisliked = currentReaction === 'dislike';
         const currentLikes = comment.reactionCounts?.like || 0;
         const currentDislikes = comment.reactionCounts?.dislike || 0;
-        
+
         return {
           ...comment,
           reactionCounts: {
@@ -156,14 +156,14 @@ export default function CommentsSection({ targetId, targetType }) {
     if (!user) return;
 
     // Update UI immediately
-    setComments(prevComments => 
+    setComments(prevComments =>
       updateCommentReaction(prevComments, commentId, (comment) => {
         const currentReaction = comment.userReaction;
         const wasLiked = currentReaction === 'like';
         const wasDisliked = currentReaction === 'dislike';
         const currentLikes = comment.reactionCounts?.like || 0;
         const currentDislikes = comment.reactionCounts?.dislike || 0;
-        
+
         return {
           ...comment,
           reactionCounts: {
@@ -209,9 +209,9 @@ export default function CommentsSection({ targetId, targetType }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           commentContent: newContent,
-          userId: user._id 
+          userId: user._id
         }),
       });
 

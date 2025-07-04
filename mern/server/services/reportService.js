@@ -336,8 +336,7 @@ class ReportService {
     }
   }
 
-  // Update report
-  static async updateReport(id, updateData) {
+  static async updateReport(id, updateData, userId) {
     const updated = await Report.findByIdAndUpdate(
         id,
         updateData, {
@@ -347,9 +346,28 @@ class ReportService {
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex');
 
-    return updated?.toObject({
+    if (!updated)
+      return null;
+
+    // Log activity
+    try {
+      if (userId) {
+        await activityService.logActivity(
+          userId,
+          'REPORT_UPDATE',
+          'REPORT',
+          updated._id,
+          'Report');
+      } else {
+        console.warn(`[ActivityService] Skipping activity log: userId missing for update`);
+      }
+    } catch (err) {
+      console.error('Error logging REPORT_UPDATE activity:', err);
+    }
+
+    return updated.toObject({
       virtuals: true
-    }) || null;
+    });
   }
 
   // Delete report

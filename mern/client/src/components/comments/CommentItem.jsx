@@ -212,7 +212,7 @@ export default function CommentItem({
                 <button
                   onClick={handleEditSave}
                   disabled={editText.trim().length === 0}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-[color:var(--color-dark)] text-white text-sm rounded-lg hover:bg-[color:var(--color-base)] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Save
                 </button>
