@@ -7,11 +7,11 @@ const ReportCardDetailed = ({ report }) => (
     <Link
         key={report._id}
         to={`/reports/${report._id}`}
-        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 transition-all duration-300 transform hover:-translate-y-1 group"
+        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full max-w-sm mx-auto transition-all duration-300 transform hover:-translate-y-1 group"
     >
         {/* Cover Image */}
         {report.reportCoverUrl && (
-            <div className="h-48 overflow-hidden">
+            <div className="h-40 sm:h-48 overflow-hidden">
                 <img
                     src={report.reportCoverUrl}
                     alt={`Cover for ${report.reportTitle}`}
@@ -24,23 +24,23 @@ const ReportCardDetailed = ({ report }) => (
         )}
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
             {/* Header with Verdict */}
             <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.75em]">
+                <h3 className="font-bold text-gray-800 text-base sm:text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.5em] sm:min-h-[2.75em]">
                     {report.reportTitle}
                 </h3>
-                <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdictParsed)}`}>
+                <span className={`px-2 py-1 sm:px-3 sm:py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdictParsed)}`}>
                     {report.truthVerdictParsed}
                 </span>
             </div>
 
             {/* AI Summary */}
-            <p className="text-gray-600 text-sm mb-4 line-clamp-3 min-h-[4rem]">
+            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 min-h-[3.5rem] sm:min-h-[4rem]">
                 <span className="font-medium">AI-generated summary:</span> {truncateWords(report.aiReportSummary)}
             </p>                  
             {/* Author & Claim Count */}
-            <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
+            <div className="flex justify-between items-center mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500">
                 <span>By <span className="font-medium">{report.userId?.username || "Unknown"}</span></span>
                 {report.claims?.length > 0 && (
                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
@@ -50,8 +50,8 @@ const ReportCardDetailed = ({ report }) => (
             </div>
 
             {/* Stats & Date */}
-            <div className="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-                <div className="flex items-center space-x-4">
+            <div className="flex justify-between items-center text-xs text-gray-500 pt-3 sm:pt-4 border-t border-gray-200">
+                <div className="flex items-center space-x-3 sm:space-x-4">
                     {/* Likes */}
                     <span className="flex items-center space-x-1">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -78,7 +78,7 @@ const ReportCardDetailed = ({ report }) => (
                 </div>
 
                 {/* Date */}
-                <span className="italic">{formatRelativeTime(report.createdAt)}</span>
+                <span className="italic text-xs sm:text-xs">{formatRelativeTime(report.createdAt)}</span>
             </div>
         </div>
     </Link>
