@@ -33,7 +33,12 @@ const getActivityText = (activity) => {
   const { type, targetType, target, actionDetails } = activity;
 
   // Get owner information from populated target
-  const targetOwner = target?.user?.username || target?.userId?.username || target?.username;
+  const targetOwner =
+    target?.owner?.username ||
+    target?.user?.username ||
+    target?.userId?.username ||
+    target?.username;
+
 
   switch (type) {
     case 'LIKE':
@@ -46,7 +51,7 @@ const getActivityText = (activity) => {
       if (targetType === 'REPORT') return targetOwner ? `disliked ${targetOwner}'s report` : 'disliked a report';
       if (targetType === 'CLAIM') return targetOwner ? `disliked ${targetOwner}'s claim` : 'disliked a claim';
       if (targetType === 'COMMENT') return targetOwner ? `disliked ${targetOwner}'s comment` : 'disliked a comment';
-      if (targetType === 'USER') return targetOwner ? `disliked the profile` : 'disliked a user';
+      if (targetType === 'USER') return targetOwner ? `disliked ${targetOwner}'s profile` : 'disliked a user';
       return `disliked a ${targetType.toLowerCase()}`;
     case 'COMMENT':
       if (targetType === 'REPORT') return targetOwner ? `commented on ${targetOwner}'s report` : 'commented on a report';
@@ -69,9 +74,9 @@ const getActivityText = (activity) => {
       }
       return 'bookmarked an item';
     case 'PROFILE_UPDATE':
-      if (actionDetails === 'password') return 'changed the password';
-      if (actionDetails === 'delete') return 'deleted the account';
-      if (actionDetails === 'info') return 'updated the profile information';
+      if (actionDetails === 'password') return 'changed your password';
+      if (actionDetails === 'delete') return 'deleted your account';
+      if (actionDetails === 'info') return 'updated your profile information';
       return 'updated their profile';
     case 'REPORT_DELETE':
       return 'deleted a report';
@@ -244,20 +249,20 @@ const ActivityItem = ({ activity }) => {
   return (
     <Link
       to={link}
-      className="flex items-start space-x-4 p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg cursor-pointer"
+      className="flex items-start space-x-4 p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg cursor-pointer group"
     >
       <div className="flex-shrink-0 mt-1">
-        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-lg">
+        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[color:var(--color-base)] text-lg">
           {icon}
         </div>
       </div>
       <div className="flex-grow min-w-0">
         <div className="text-sm">
           <span className="text-gray-900">You </span>
-          <span className="font-medium text-blue-600 hover:text-blue-800 transition-colors">
+          <span className="font-medium text-[color:var(--color-base)] group-hover:text-[color:var(--color-dark)] transition-colors">
             {text}
           </span>
-          {targetTitle && (
+          {targetTitle && activity.targetType !== 'USER' && (
             <span className="ml-1">
               <span className="text-gray-500">
                 {(() => {
@@ -277,22 +282,22 @@ const ActivityItem = ({ activity }) => {
                 on this {targetTypeLabel}
               </span>
             )}
-
         </div>
         <div className="mt-1 flex items-center space-x-2">
           <p className="text-xs text-gray-500">{time}</p>
           {(activity.type === 'COMMENT' || activity.type === 'REPLY') && (
-            <span className="text-xs text-blue-500">• Click to view comment</span>
+            <span className="text-xs text-[color:var(--color-base)]">• Click to view comment</span>
           )}
           {(activity.type === 'LIKE' || activity.type === 'DISLIKE') && activity.targetType === 'COMMENT' && (
-            <span className="text-xs text-blue-500">• Click to view comment</span>
+            <span className="text-xs text-[color:var(--color-base)]">• Click to view comment</span>
           )}
           {activity.type === 'BOOKMARK_CREATE' && (
-            <span className="text-xs text-blue-500">• Click to view bookmarked item</span>
+            <span className="text-xs text-[color:var(--color-base)]">• Click to view bookmarked item</span>
           )}
         </div>
       </div>
     </Link>
+
   );
 };
 

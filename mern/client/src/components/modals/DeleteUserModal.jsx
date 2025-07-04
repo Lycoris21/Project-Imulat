@@ -1,43 +1,46 @@
-// DeleteUserModal.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { ConfirmPasswordModal } from "../index";
 
 export default function DeleteUserModal({ isOpen, onClose, onConfirm }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const handleKeyPress = useCallback((e) => {
-    if (e.key === 'Escape') {
-      if (showConfirmPassword) {
-        setShowConfirmPassword(false);
-      } else {
-        onClose();
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Escape") {
+        if (showConfirmPassword) {
+          setShowConfirmPassword(false);
+        } else {
+          handleClose();
+        }
       }
-    }
-  }, [onClose, showConfirmPassword]);
+    },
+    [showConfirmPassword]
+  );
 
   useEffect(() => {
-    if ((isOpen || showConfirmPassword) && !showConfirmPassword) {
-      // Prevent body scroll when either modal should be showing
-      document.body.style.overflow = 'hidden';
-      
-      // Add ESC key listener
-      document.addEventListener('keydown', handleKeyPress);
-      
-      return () => {
-        // Only restore body scroll if no modals are showing
-        if (!isOpen && !showConfirmPassword) {
-          document.body.style.overflow = 'unset';
-        }
-        
-        // Remove ESC key listener
-        document.removeEventListener('keydown', handleKeyPress);
-      };
+    if (isOpen) {
+      setIsAnimating(true);
+      document.addEventListener("keydown", handleKeyPress);
+      document.body.style.overflow = "hidden";
     }
-  }, [isOpen, showConfirmPassword, handleKeyPress]);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, handleKeyPress]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150); // Match transition duration
+  };
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -54,21 +57,32 @@ export default function DeleteUserModal({ isOpen, onClose, onConfirm }) {
     setShowConfirmPassword(false);
   };
 
+  if (!isOpen && !showConfirmPassword) return null;
+
   return (
     <>
       {isOpen && !showConfirmPassword && (
-        <div 
-          className="fixed inset-0 bg-[#00000080] flex justify-center items-center z-50"
+        <div
+          className={`fixed inset-0 bg-[#00000080] flex justify-center items-center z-50 transition-opacity duration-150 ${
+            isAnimating ? "opacity-100" : "opacity-0"
+          }`}
           onClick={handleOutsideClick}
         >
-          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
-            <h2 className="text-xl font-semibold mb-4 text-red-600">Confirm Account Deletion</h2>
+          <div
+            className={`bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center transform transition-all duration-150 ${
+              isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            }`}
+          >
+            <h2 className="text-xl font-semibold mb-4 text-red-600">
+              Confirm Account Deletion
+            </h2>
             <p className="text-gray-700 mb-6">
-              Are you sure you want to delete your account? This action cannot be undone.
+              Are you sure you want to delete your account? This action cannot
+              be undone.
             </p>
             <div className="flex justify-center gap-4">
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
               >
                 Cancel
@@ -84,7 +98,7 @@ export default function DeleteUserModal({ isOpen, onClose, onConfirm }) {
         </div>
       )}
 
-      <ConfirmPasswordModal 
+      <ConfirmPasswordModal
         isOpen={showConfirmPassword}
         onClose={handlePasswordModalClose}
         onConfirm={handlePasswordConfirmed}

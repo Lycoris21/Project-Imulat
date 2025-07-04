@@ -8,11 +8,12 @@ import {
   ReportCard,
   CreateReportModal,
   SearchBar,
+  SuccessToast,
 } from "../components";
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
-  const { search, sort, page, user: queryUser, updateParams } = useQueryParams();
+  const { search, sort, page, user: queryUser , updateParams } = useQueryParams();
 
   const [searchQuery, setSearchQuery] = useState(search);
   const [reports, setReports] = useState([]);
@@ -27,7 +28,7 @@ export default function Reports() {
 
   useEffect(() => {
     fetchReports();
-  }, [search, sort, page, queryUser]);
+  }, [search, sort, page, queryUser ]);
 
   const fetchReports = async () => {
     try {
@@ -40,8 +41,7 @@ export default function Reports() {
         sort,
       });
       if (search.trim()) params.append("search", search.trim());
-      if (queryUser?.trim()) params.append("user", queryUser.trim());
-
+      if (queryUser ?.trim()) params.append("user", queryUser .trim());
 
       const response = await fetch(`http://localhost:5050/api/reports?${params}`);
       if (!response.ok) throw new Error("Failed to fetch reports");
@@ -138,17 +138,12 @@ export default function Reports() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
-      {showSuccessMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-in">
-          <span className="font-medium">Report created successfully</span>
-          <button
-            onClick={() => setShowSuccessMessage(false)}
-            className="ml-2 text-green-200 hover:text-white"
-          >
-            ✕
-          </button>
-        </div>
-      )}
+      {/* Success Notification */}
+      <SuccessToast 
+        message="Report created successfully!" 
+        visible={showSuccessMessage} 
+        onClose={() => setShowSuccessMessage(false)} 
+      />
 
       <div className="mb-8">
         <div className="relative mb-6 text-center">

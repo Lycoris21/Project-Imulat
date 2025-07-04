@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
-import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal } from '../components';
+import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast } from '../components';
 
 export default function Claims() {
   const { isLoggedIn = false } = useAuth() || {};
-  const { search, sort, page, user: queryUser, updateParams } = useQueryParams();
+  const { search, sort, page, user: queryUser , updateParams } = useQueryParams();
 
   const [searchQuery, setSearchQuery] = useState(search);
   const [claims, setClaims] = useState([]);
@@ -18,7 +18,7 @@ export default function Claims() {
 
   useEffect(() => {
     fetchClaims();
-  }, [search, sort, page, queryUser]);
+  }, [search, sort, page, queryUser ]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -30,13 +30,13 @@ export default function Claims() {
       setLoading(true);
       setSearchLoading(true);
 
-       const params = new URLSearchParams({
+      const params = new URLSearchParams({
         page: page.toString(),
         limit: itemsPerPage.toString(),
         sort,
       });
       if (search.trim()) params.append("search", search.trim());
-      if (queryUser?.trim()) params.append("user", queryUser.trim());
+      if (queryUser ?.trim()) params.append("user", queryUser .trim());
 
       const response = await fetch(`http://localhost:5050/api/claims?${params}`);
       const data = await response.json();
@@ -105,14 +105,12 @@ export default function Claims() {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[linear-gradient(to_bottom,_#4B548B_0%,_#2F3558_75%,_#141625_100%)] px-4 py-8">
-      {showSuccessMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-in">
-          <span className="font-medium">Claim submitted successfully!</span>
-          <button onClick={() => setShowSuccessMessage(false)} className="ml-2 text-green-200 hover:text-white">
-            ✕
-          </button>
-        </div>
-      )}
+      {/* Success Notification */}
+      <SuccessToast 
+        message="Claim submitted successfully!" 
+        visible={showSuccessMessage} 
+        onClose={() => setShowSuccessMessage(false)} 
+      />
 
       {/* Header + Controls */}
       <div className="mb-8">

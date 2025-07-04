@@ -7,7 +7,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Form state for create report modal
+  // Form state for submit claim modal
   const [claimFormData, setClaimFormData] = useState({
     claimTitle: "",
     claimContent: "",
@@ -37,7 +37,14 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create claim");
+        let message = "Validation failed.";
+        if (Array.isArray(errorData.errors)) {
+          message = errorData.errors.map((e) => `• ${e.msg}`).join("\n");
+        } else if (errorData.error) {
+          message = errorData.error;
+        }
+
+        throw new Error(message);
       }
 
       // Clear form and close modal
@@ -172,7 +179,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
               {/* Claim Content */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Claim Content
+                  Claim Content (Min: 250 Characters)
                 </label>
                 <textarea
                   name="claimContent"
@@ -219,7 +226,6 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
             <button
               type="submit"
               form="claim-form"
-    
               disabled={isSubmitting}
               className={`px-6 py-2 rounded-lg transition-colors flex-1 ${
                 isSubmitting 

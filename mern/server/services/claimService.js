@@ -342,7 +342,6 @@ class ClaimService {
           'Claim');
       } catch (activityError) {
         console.error('Error logging claim activity:', activityError);
-        // Don't fail the claim if activity logging fails
       }
 
       return savedClaim;

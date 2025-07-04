@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 // Components
-import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard, UserReactionBar } from '../components';
+import { LoadingScreen, ErrorScreen, ClaimCard, ReportCard, UserReactionBar, SuccessToast } from '../components';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -72,7 +72,6 @@ export default function Profile() {
         setReactionCounts({ likes: newLikes, dislikes: newDislikes });
     };
 
-
     if (loading) {
         return (
             <LoadingScreen message="Loading profile..." />
@@ -81,32 +80,20 @@ export default function Profile() {
 
     if (!profileData) {
         return (
-            <ErrorScreen title="User Not Found" message="The user you're looking for doesn't exist." />
+            <ErrorScreen title="User  Not Found" message="The user you're looking for doesn't exist." />
         );
     }
 
     return (
         <div className="min-h-screen bg-base-gradient px-4 pt-[0rem] flex justify-center">
             {/* Success Notification */}
-            {showSuccessMessage && (
-                <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-in">
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="font-medium">Profile updated successfully!</span>
-                    <button
-                        onClick={() => setShowSuccessMessage(false)}
-                        className="ml-2 text-green-200 hover:text-white"
-                    >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            )}
+            <SuccessToast 
+                message="Profile updated successfully!" 
+                visible={showSuccessMessage} 
+                onClose={() => setShowSuccessMessage(false)} 
+            />
 
             <div className="w-[1000px] bg-white rounded shadow-xl pt-0 p-8">
-
                 <div className="relative h-60 bg-cover bg-center rounded-sm mb-6">
                     {profileData.coverPhotoUrl ? (
                         <div
@@ -119,7 +106,6 @@ export default function Profile() {
                         </div>
                     )}
                 </div>
-
 
                 {/* Profile Info */}
                 <div className="flex items-center justify-between mb-6">
@@ -155,8 +141,8 @@ export default function Profile() {
                             </Link>
                         ) : (
                             /* Show Like/Dislike for other users' profiles */
-                            <UserReactionBar
-                                targetUserId={profileData._id}
+                            <User ReactionBar
+                                targetUser Id={profileData._id}
                                 initialLikes={reactionCounts.likes}
                                 initialDislikes={reactionCounts.dislikes}
                                 onReactionUpdate={handleReactionUpdate}
