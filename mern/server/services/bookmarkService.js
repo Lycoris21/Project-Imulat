@@ -495,6 +495,50 @@ static async getUserCollections(userId) {
   return collectionsWithCounts;
 }
 
+// Get paginated collections for a user with search
+static async getUserCollectionsPaginated(userId, options = {}) {
+  const { page = 1, limit = 12, search = null } = options;
+  
+  const skip = (page - 1) * limit;
+  
+  // Build search query
+  let searchQuery = { userId };
+  if (search) {
+    searchQuery.collectionName = { $regex: search, $options: 'i' };
+  }
+  
+  // Get total count
+  const total = await Collection.countDocuments(searchQuery);
+  
+  // Get collections
+  const collections = await Collection.find(searchQuery)
+    .sort({ collectionName: 1 })
+    .skip(skip)
+    .limit(limit);
+
+  // Get bookmark count for each collection
+  const collectionsWithCounts = await Promise.all(
+    collections.map(async(collection) => {
+      const bookmarkCount = await Bookmark.countDocuments({
+        userId,
+        collectionId: collection._id
+      });
+      return {
+        ...collection.toObject(),
+        bookmarkCount
+      };
+    })
+  );
+
+  return {
+    collections: collectionsWithCounts,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit)
+  };
+}
+
 // Update collection
 static async updateCollection(collectionId, userId, updateData) {
   return await Collection.findOneAndUpdate({

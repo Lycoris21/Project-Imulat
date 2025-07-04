@@ -46,8 +46,21 @@ class BookmarkController {
   static async getUserCollections(req, res) {
     try {
       const { userId } = req.params;
-      const collections = await BookmarkService.getUserCollections(userId);
-      res.status(200).json(collections);
+      const { search, page, limit, paginated } = req.query;
+
+      if (paginated === 'true') {
+        const options = {
+          page: parseInt(page, 10) || 1,
+          limit: parseInt(limit, 10) || 12,
+          search
+        };
+        
+        const result = await BookmarkService.getUserCollectionsPaginated(userId, options);
+        res.status(200).json(result);
+      } else {
+        const collections = await BookmarkService.getUserCollections(userId);
+        res.status(200).json(collections);
+      }
     } catch (error) {
       console.error('Error fetching collections:', error);
       res.status(500).json({ error: 'Failed to fetch collections' });

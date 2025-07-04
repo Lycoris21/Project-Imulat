@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useSearchSuggestions } from "../hooks/useSearchSuggestions";
 
 // Components
-import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard } from '../components';
+import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard, PaginationControls } from '../components';
 import CollectionCard from '../components/bookmarks/CollectionCard';
 
 export default function BookmarksSearch() {
@@ -14,9 +14,25 @@ export default function BookmarksSearch() {
     const searchQuery = searchParams.get('q') || '';
     
     const [bookmarks, setBookmarks] = useState([]);
+    const [reports, setReports] = useState([]);
+    const [claims, setClaims] = useState([]);
     const [collections, setCollections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // Pagination state for each section
+    const [reportsPage, setReportsPage] = useState(1);
+    const [claimsPage, setClaimsPage] = useState(1);
+    const [collectionsPage, setCollectionsPage] = useState(1);
+    const [reportsTotalPages, setReportsTotalPages] = useState(0);
+    const [claimsTotalPages, setClaimsTotalPages] = useState(0);
+    const [collectionsTotalPages, setCollectionsTotalPages] = useState(0);
+    const [reportsTotal, setReportsTotal] = useState(0);
+    const [claimsTotal, setClaimsTotal] = useState(0);
+    const [collectionsTotal, setCollectionsTotal] = useState(0);
+    
+    const itemsPerPage = 10;
+    const collectionsPerPage = 12;
     
     // Search functionality with suggestions
     const {
@@ -34,29 +50,71 @@ export default function BookmarksSearch() {
     }, [user, navigate]);
 
     // Fetch data
-    const fetchData = async () => {
+    const fetchData = async (reportsPageNum = reportsPage, claimsPageNum = claimsPage, collectionsPageNum = collectionsPage) => {
         if (!user?._id) return;
+
+        if (!searchQuery.trim()) {
+            setBookmarks([]);
+            setReports([]);
+            setClaims([]);
+            setCollections([]);
+            setReportsTotalPages(0);
+            setClaimsTotalPages(0);
+            setCollectionsTotalPages(0);
+            setReportsTotal(0);
+            setClaimsTotal(0);
+            setCollectionsTotal(0);
+            setLoading(false);
+            return;
+        }
 
         try {
             setLoading(true);
             
-            // Fetch bookmarks and collections in parallel
-            const [bookmarksResponse, collectionsResponse] = await Promise.all([
-                fetch(`http://localhost:5050/api/bookmarks/user/${user._id}${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ''}`),
-                fetch(`http://localhost:5050/api/bookmarks/collections/${user._id}`)
+            // Fetch bookmarks and collections with pagination
+            const [reportsResponse, claimsResponse, collectionsResponse] = await Promise.all([
+                fetch(`http://localhost:5050/api/bookmarks/user/${user._id}/search/reports?search=${encodeURIComponent(searchQuery)}&page=${reportsPageNum}&limit=${itemsPerPage}&targetType=report&paginated=true`),
+                fetch(`http://localhost:5050/api/bookmarks/user/${user._id}/search/claims?search=${encodeURIComponent(searchQuery)}&page=${claimsPageNum}&limit=${itemsPerPage}&targetType=claim&paginated=true`),
+                fetch(`http://localhost:5050/api/bookmarks/collections/${user._id}?search=${encodeURIComponent(searchQuery)}&page=${collectionsPageNum}&limit=${collectionsPerPage}&paginated=true`)
             ]);
             
-            if (!bookmarksResponse.ok || !collectionsResponse.ok) {
+            if (!reportsResponse.ok || !claimsResponse.ok || !collectionsResponse.ok) {
                 throw new Error('Failed to fetch data');
             }
             
-            const [bookmarksData, collectionsData] = await Promise.all([
-                bookmarksResponse.json(),
+            const [reportsData, claimsData, collectionsData] = await Promise.all([
+                reportsResponse.json(),
+                claimsResponse.json(),
                 collectionsResponse.json()
             ]);
 
-            setBookmarks(bookmarksData);
-            setCollections(collectionsData);
+            console.log('BookmarksSearch API responses:', {
+                reportsData,
+                claimsData,
+                collectionsData
+            });
+
+            // Extract arrays from API responses
+            const reportsArray = reportsData.bookmarks || [];
+            const claimsArray = claimsData.bookmarks || [];
+            const collectionsArray = collectionsData.collections || collectionsData || [];
+            
+            // Set separate states for reports and claims
+            setReports(reportsArray);
+            setClaims(claimsArray);
+            setCollections(Array.isArray(collectionsArray) ? collectionsArray : []);
+            
+            // Keep bookmarks for backward compatibility
+            setBookmarks([...reportsArray, ...claimsArray]);
+            
+            // Set pagination data (handle nested pagination object)
+            setReportsTotalPages(reportsData.pagination?.totalPages || 0);
+            setClaimsTotalPages(claimsData.pagination?.totalPages || 0);
+            setCollectionsTotalPages(collectionsData.totalPages || 0);
+            setReportsTotal(reportsData.pagination?.totalItems || 0);
+            setClaimsTotal(claimsData.pagination?.totalItems || 0);
+            setCollectionsTotal(collectionsData.total || (Array.isArray(collectionsArray) ? collectionsArray.length : 0));
+            
             setError(null);
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -81,19 +139,38 @@ export default function BookmarksSearch() {
         setLocalSearchQuery(e.target.value);
     };
 
-    // Filter collections based on search
-    const filteredCollections = collections.filter(collection => {
-        if (!searchQuery.trim()) return false; // Only show collections when there's a search query
-        
-        const searchLower = searchQuery.toLowerCase();
-        return collection.collectionName?.toLowerCase().includes(searchLower);
-    });
+    // Pagination handlers
+    const handleReportsPageChange = (newPage) => {
+        setReportsPage(newPage);
+        fetchData(newPage, claimsPage, collectionsPage);
+    };
 
-    // Filter bookmarks for display (server already filtered if search query exists)
-    const filteredBookmarks = searchQuery ? bookmarks : [];
+    const handleClaimsPageChange = (newPage) => {
+        setClaimsPage(newPage);
+        fetchData(reportsPage, newPage, collectionsPage);
+    };
+
+    const handleCollectionsPageChange = (newPage) => {
+        setCollectionsPage(newPage);
+        fetchData(reportsPage, claimsPage, newPage);
+    };
+
+    // Filter collections based on search
+    const filteredCollections = searchQuery ? collections : [];
+
+    // Use separate arrays for reports and claims
+    const filteredReports = reports;
+    const filteredClaims = claims;
+
+    // Calculate total results from API metadata
+    const totalResults = reportsTotal + claimsTotal + collectionsTotal;
 
     useEffect(() => {
-        fetchData();
+        // Reset pagination when search query changes
+        setReportsPage(1);
+        setClaimsPage(1);
+        setCollectionsPage(1);
+        fetchData(1, 1, 1);
     }, [user?._id, searchQuery]);
 
     useEffect(() => {
@@ -117,8 +194,6 @@ export default function BookmarksSearch() {
             />
         );
     }
-
-    const totalResults = filteredBookmarks.length + filteredCollections.length;
 
     return (
         <div className="min-h-screen bg-base-gradient py-8">
@@ -159,13 +234,13 @@ export default function BookmarksSearch() {
                                 {totalResults} {totalResults === 1 ? 'result' : 'results'} found
                             </span>
                             <span>
-                                {filteredBookmarks.filter(b => b.targetType === 'report').length} reports
+                                {reportsTotal} reports
                             </span>
                             <span>
-                                {filteredBookmarks.filter(b => b.targetType === 'claim').length} claims
+                                {claimsTotal} claims
                             </span>
                             <span>
-                                {filteredCollections.length} collections
+                                {collectionsTotal} collections
                             </span>
                         </div>
                     )}
@@ -203,56 +278,70 @@ export default function BookmarksSearch() {
                 ) : (
                     <div className="space-y-8">
                         {/* Reports Section */}
-                        {filteredBookmarks.filter(b => b.targetType === 'report').length > 0 && (
+                        {reportsTotal > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        Reports ({filteredBookmarks.filter(b => b.targetType === 'report').length})
+                                        Reports ({reportsTotal})
                                     </h2>
                                 </div>
                                 <div className="space-y-4">
-                                    {filteredBookmarks
-                                        .filter(bookmark => bookmark.targetType === 'report')
-                                        .map((bookmark) => (
-                                            <div key={`report-${bookmark.targetId._id}`}>
-                                                <ReportCard report={bookmark.targetId} variant="compact" />
-                                            </div>
-                                        ))
-                                    }
+                                    {filteredReports.map((bookmark) => (
+                                        <div key={`report-${bookmark.targetId._id}`}>
+                                            <ReportCard report={bookmark.targetId} variant="compact" />
+                                        </div>
+                                    ))}
                                 </div>
+                                {reportsTotalPages > 1 && (
+                                    <div className="flex justify-center mt-6">
+                                        <PaginationControls
+                                            currentPage={reportsPage}
+                                            totalPages={reportsTotalPages}
+                                            onPageChange={handleReportsPageChange}
+                                            className="justify-center"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {/* Claims Section */}
-                        {filteredBookmarks.filter(b => b.targetType === 'claim').length > 0 && (
+                        {claimsTotal > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        Claims ({filteredBookmarks.filter(b => b.targetType === 'claim').length})
+                                        Claims ({claimsTotal})
                                     </h2>
                                 </div>
                                 <div className="space-y-4">
-                                    {filteredBookmarks
-                                        .filter(bookmark => bookmark.targetType === 'claim')
-                                        .map((bookmark) => (
-                                            <div key={`claim-${bookmark.targetId._id}`}>
-                                                <ClaimCard claim={bookmark.targetId} variant="compact" />
-                                            </div>
-                                        ))
-                                    }
+                                    {filteredClaims.map((bookmark) => (
+                                        <div key={`claim-${bookmark.targetId._id}`}>
+                                            <ClaimCard claim={bookmark.targetId} variant="compact" />
+                                        </div>
+                                    ))}
                                 </div>
+                                {claimsTotalPages > 1 && (
+                                    <div className="flex justify-center mt-6">
+                                        <PaginationControls
+                                            currentPage={claimsPage}
+                                            totalPages={claimsTotalPages}
+                                            onPageChange={handleClaimsPageChange}
+                                            className="justify-center"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {/* Collections Section */}
-                        {filteredCollections.length > 0 && (
+                        {collectionsTotal > 0 && (
                             <div className="bg-white rounded-2xl shadow-xl p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        Collections ({filteredCollections.length})
+                                        Collections ({collectionsTotal})
                                     </h2>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {filteredCollections.map((collection) => (
                                         <CollectionCard
                                             key={collection._id}
@@ -261,6 +350,16 @@ export default function BookmarksSearch() {
                                         />
                                     ))}
                                 </div>
+                                {collectionsTotalPages > 1 && (
+                                    <div className="flex justify-center mt-6">
+                                        <PaginationControls
+                                            currentPage={collectionsPage}
+                                            totalPages={collectionsTotalPages}
+                                            onPageChange={handleCollectionsPageChange}
+                                            className="justify-center"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

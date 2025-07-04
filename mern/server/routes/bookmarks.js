@@ -6,6 +6,10 @@ const router = express.Router();
 // Get user bookmarks (with optional collection filter and search)
 router.get('/user/:userId', BookmarkController.getUserBookmarks);
 
+// Search endpoints for paginated results
+router.get('/user/:userId/search/reports', BookmarkController.getUserBookmarks);
+router.get('/user/:userId/search/claims', BookmarkController.getUserBookmarks);
+
 // Get user collections
 router.get('/collections/:userId', BookmarkController.getUserCollections);
 
