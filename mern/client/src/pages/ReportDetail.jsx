@@ -288,7 +288,7 @@ export default function ReportDetail() {
         onClose={() => setShowSuccessMessage(false)}
       />
 
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         {/* Report Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           {/* Cover Image */}

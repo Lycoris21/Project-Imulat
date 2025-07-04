@@ -270,14 +270,14 @@ export default function ClaimDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-base-gradient py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
       <SuccessToast
         message="Claim updated successfully!"
         visible={showSuccessMessage}
         onClose={() => setShowSuccessMessage(false)}
       />
 
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
