@@ -1,6 +1,6 @@
-// SubmitClaimModal.js
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import AlertModal from "../modals/AlertModal";
 
 export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claimId = null }) {
   const { user } = useAuth();
@@ -13,6 +13,14 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     claimContent: "",
     claimSources: ""
   });
+
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error',
+  });
+
 
   // Handle claim submission
   const handleSubmitClaim = async (e) => {
@@ -36,15 +44,15 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       });
 
       if (!response.ok) {
-          const errorData = await response.json();
-          let message = "Validation failed.";
-          if (Array.isArray(errorData.details)) {
-              message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
-          } else if (errorData.error) {
-              message = errorData.error;
-          }
+        const errorData = await response.json();
+        let message = "Validation failed.";
+        if (Array.isArray(errorData.details)) {
+          message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
+        } else if (errorData.error) {
+          message = errorData.error;
+        }
 
-          throw new Error(message);
+        throw new Error(message);
       }
 
       // Clear form and close modal
@@ -53,15 +61,20 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         claimContent: "",
         claimSources: "",
       });
-      
+
       handleClose();
 
       if (onSubmitFinish) {
-          await onSubmitFinish('claimSubmitted');
+        await onSubmitFinish('claimSubmitted');
       }
     } catch (error) {
       console.error("Error submitting claim:", error);
-      alert(error.message || "Error submitting claim. Please try again.");
+      setAlert({
+        isOpen: true,
+        title: "Submission Failed",
+        message: error.message || "Something went wrong. Please try again.",
+        type: "error"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -124,9 +137,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${
-      isAnimating ? 'opacity-100' : 'opacity-0'
-    }`}>
+    <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${isAnimating ? 'opacity-100' : 'opacity-0'
+      }`}>
       {/* Loading Overlay */}
       {isSubmitting && (
         <div className="absolute inset-0 bg-[#00000080] flex items-center justify-center z-10">
@@ -137,9 +149,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         </div>
       )}
 
-      <div className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all duration-150 ${
-        isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-      }`}>
+      <div className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden relative transform transition-all duration-150 ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}>
         {/* Modal Header - Fixed */}
         <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex justify-between items-center">
@@ -227,17 +238,24 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
               type="submit"
               form="claim-form"
               disabled={isSubmitting}
-              className={`px-6 py-2 rounded-lg transition-colors flex-1 ${
-                isSubmitting 
-                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                  : 'bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer'
-              }`}
+              className={`px-6 py-2 rounded-lg transition-colors flex-1 ${isSubmitting
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                : 'bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer'
+                }`}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Claim'}
             </button>
           </div>
         </div>
       </div>
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+      />
     </div>
   );
 };

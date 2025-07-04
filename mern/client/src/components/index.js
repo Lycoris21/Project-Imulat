@@ -6,6 +6,7 @@ export { default as SearchBar } from './common/SearchBar';
 export { default as ReactionBar } from './common/ReactionBar';
 export { default as UserReactionBar } from './common/UserReactionBar';
 export { default as SuccessToast } from './common/SuccessToast';
+export { default as AlertModal } from './modals/AlertModal';
 export { default as ConfirmPasswordModal } from './modals/ConfirmPasswordModal';
 export { default as ChangePasswordModal } from './modals/ChangePasswordModal';
 export { default as CreateReportModal } from './modals/CreateReportModal';
