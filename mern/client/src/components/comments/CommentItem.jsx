@@ -32,8 +32,10 @@ export default function CommentItem({
   });
   
   const maxLevel = 3; // Maximum nesting level
-  const indentWidth = Math.min(level * 40, maxLevel * 40); // Cap indentation
-  const avatarSize = Math.max(32 - (level * 4), 24); // Smaller avatars for deeper levels
+  const baseIndent = window.innerWidth < 640 ? 15 : 20; // Base indent for mobile/desktop
+  const maxIndent = window.innerWidth < 640 ? 60 : 80; // Max indent to prevent overflow
+  const indentWidth = Math.min(level * baseIndent, maxIndent); // Responsive indent with max limit
+  const avatarSize = Math.max(window.innerWidth < 640 ? 28 - (level * 2) : 32 - (level * 3), 20); // Responsive avatar size
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -123,12 +125,15 @@ export default function CommentItem({
     <div id={`comment-${comment._id}`} className="group relative">
       {/* Main Comment */}
       <div 
-        className="flex space-x-3 py-3"
+        className="flex space-x-2 sm:space-x-3 py-2 sm:py-3 pr-2 sm:pr-4"
         style={{ marginLeft: `${indentWidth}px` }}
       >
         {/* Left border for replies */}
         {level > 0 && (
-          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200" style={{ marginLeft: `${indentWidth - 20}px` }} />
+          <div 
+            className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200" 
+            style={{ marginLeft: `${Math.max(indentWidth - 10, 5)}px` }} 
+          />
         )}
 
         {/* User Avatar */}
@@ -144,7 +149,7 @@ export default function CommentItem({
                 className="w-full h-full object-cover hover:opacity-80 transition-opacity"
               />
             ) : (
-              <span className="text-gray-600 font-medium text-sm hover:text-blue-600 transition-colors">
+              <span className="text-gray-600 font-medium text-xs sm:text-sm hover:text-blue-600 transition-colors">
                 {comment.userId.username?.charAt(0).toUpperCase() || "U"}
               </span>
             )}
@@ -152,18 +157,18 @@ export default function CommentItem({
         </div>
 
         {/* Comment Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 max-w-full overflow-hidden">
           {/* User Info and Timestamp */}
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between mb-1 flex-wrap sm:flex-nowrap gap-1">
+            <div className="flex items-center space-x-1 sm:space-x-2 min-w-0 flex-shrink">
               <Link 
                 to={`/profile/${comment.userId._id}`}
-                className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                className="font-medium text-gray-900 hover:text-blue-600 transition-colors text-sm sm:text-base truncate"
               >
                 {comment.userId.username}
               </Link>
-              <span className="text-gray-500 text-sm">•</span>
-              <span className="text-gray-500 text-sm">
+              <span className="text-gray-500 text-xs sm:text-sm flex-shrink-0">•</span>
+              <span className="text-gray-500 text-xs sm:text-sm flex-shrink-0">
                 {formatTimeAgo(comment.createdAt)}
               </span>
             </div>
@@ -175,23 +180,23 @@ export default function CommentItem({
                   onClick={() => setShowDropdown(!showDropdown)}
                   className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-100 transition-all"
                 >
-                  <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
                 </button>
 
                 {/* Dropdown menu */}
                 {showDropdown && (
-                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]">
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[100px] sm:min-w-[120px]">
                     {canEdit && (
                       <button
                         onClick={() => {
                           setIsEditing(true);
                           setShowDropdown(false);
                         }}
-                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        className="w-full text-left px-2 py-2 sm:px-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-1 sm:gap-2"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                         Edit
@@ -220,29 +225,29 @@ export default function CommentItem({
               <textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
+                className="w-full max-w-full p-2 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                rows={window.innerWidth < 640 ? 2 : 3}
                 autoFocus
                 placeholder="Edit your comment..."
               />
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-1 sm:gap-2 mt-2 flex-wrap">
                 <button
                   onClick={handleEditSave}
                   disabled={editText.trim().length === 0}
-                  className="px-3 py-1 bg-[color:var(--color-dark)] text-white text-sm rounded-lg hover:bg-[color:var(--color-base)] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-2 py-1 sm:px-3 sm:py-1 bg-[color:var(--color-dark)] text-white text-xs sm:text-sm rounded-lg hover:bg-[color:var(--color-base)] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Save
                 </button>
                 <button
                   onClick={handleEditCancel}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-2 py-1 sm:px-3 sm:py-1 bg-gray-200 text-gray-700 text-xs sm:text-sm rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
               </div>
             </div>
           ) : (
-            <div className="text-gray-800 mb-2 whitespace-pre-wrap break-words">
+            <div className="text-gray-800 mb-2 whitespace-pre-wrap break-words text-sm sm:text-base overflow-wrap-anywhere">
               {comment.commentContent}
               {comment.updatedAt && new Date(comment.updatedAt) > new Date(comment.createdAt) && (
                 <span className="text-gray-500 text-xs ml-2">(edited)</span>
@@ -264,7 +269,7 @@ export default function CommentItem({
 
           {/* Reply Form */}
           {showReplyForm && (
-            <div className="mt-3">
+            <div className="mt-3 overflow-hidden">
               <CommentForm
                 onSubmit={handleSubmitReply}
                 placeholder={`Reply to ${comment.userId.username}...`}
@@ -283,24 +288,25 @@ export default function CommentItem({
               {/* Toggle Replies Button */}
               <button
                 onClick={toggleReplies}
-                className="text-sm text-blue-600 hover:text-blue-800 transition-colors mb-2 flex items-center space-x-1"
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 transition-colors mb-2 flex items-center space-x-1"
               >
                 <svg 
-                  className={`w-4 h-4 transition-transform ${showReplies ? 'rotate-90' : ''}`}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 transition-transform ${showReplies ? 'rotate-90' : ''}`}
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
+                  strokeWidth={3}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-                <span>
+                <span className="text-xs sm:text-sm">
                   {showReplies ? 'Hide' : 'Show'} {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
                 </span>
               </button>
 
               {/* Render Replies */}
               {showReplies && (
-                <div>
+                <div className="overflow-hidden">
                   {comment.replies.map((reply) => (
                     <CommentItem
                       key={reply._id}
