@@ -21,6 +21,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPasswordSuccessMessage, setShowPasswordSuccessMessage] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
 
@@ -67,21 +68,21 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
         </div>
       )}
 
-      <nav className="h-20 bg-white border-b shadow-sm px-6 py-4 flex justify-between items-center">
+      <nav className="h-16 sm:h-20 bg-white border-b shadow-sm px-3 sm:px-6 py-2 sm:py-4 flex justify-between items-center">
       {/* Left side - Logo and App Name */}
-      <Link to="/Home" className="flex items-center space-x-3">
-        <div style={{ height: '60px' }}>
+      <Link to="/Home" className="flex items-center space-x-2 sm:space-x-3">
+        <div className="h-10 sm:h-12 md:h-14 lg:h-16">
           <img
             src="/logo.png"
             alt="Project IMULAT Logo"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            className="w-full h-full object-contain"
           />
         </div>
-        <h1 className="text-xl font-bold text-[color:var(--color-base)] -m-5">Project IMULAT</h1>
+        <h1 className="text-sm sm:text-lg md:text-xl font-bold text-[color:var(--color-base)] -ml-1 sm:-ml-2 md:-ml-3 lg:-ml-5">Project IMULAT</h1>
       </Link>
 
       {/* Center - Navigation Items */}
-      <div className="flex items-center space-x-8">
+      <div className="hidden sm:flex items-center space-x-4 md:space-x-6 lg:space-x-8">
         {navItems.map((item) => (
           <NavItem
             key={item.name}
@@ -94,7 +95,18 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
       {/* Right side - User Authentication */}
       <div className="flex items-center">
         {isLoggedIn && user ? (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Mobile Menu Button - only shown when logged in */}
+            <button
+              className="sm:hidden p-2 text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
             {/* Notifications Bell */}
             <NotificationBell
               user={user}
@@ -103,17 +115,28 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
               refreshNotifications={fetchNotifications}
             />
 
-
             {/* User Profile Dropdown */}
             <UserDropdown user={user} onLogout={() => setShowLogoutConfirm(true)} onPasswordChanged={handlePasswordChanged} />
           </div>
         ) : (
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Mobile Menu Button - only shown when not logged in */}
+            <button
+              className="sm:hidden p-2 text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
             <Link
               to="/login"
-              className="px-4 py-2 border-1 border-[color:var(--color-base)] text-[color:var(--color-base)] hover:text-white hover:border-white hover:bg-[color:var(--color-base)] font-medium rounded-lg transition-colors"
+              className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm border-1 border-[color:var(--color-base)] text-[color:var(--color-base)] hover:text-white hover:border-white hover:bg-[color:var(--color-base)] font-medium rounded-lg transition-colors"
             >
-              Login / Sign up
+              <span className="hidden sm:inline">Login / Sign up</span>
+              <span className="sm:hidden">Login</span>
             </Link>
           </div>
         )}
@@ -130,6 +153,30 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
       />
 
     </nav>
+
+    {/* Mobile Menu */}
+    {mobileMenuOpen && (
+      <div className="sm:hidden bg-white border-b shadow-lg">
+        <div className="px-4 py-2 space-y-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.to}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  isActive 
+                    ? "text-[color:var(--color-dark)] bg-gray-100" 
+                    : "text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] hover:bg-gray-50"
+                }`
+              }
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.name}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    )}
     </>
   );
 }
