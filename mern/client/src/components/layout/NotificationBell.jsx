@@ -128,7 +128,7 @@ export default function NotificationBell({ user, notifications, setNotifications
           />
 
           {totalPages > 1 && (
-            <div className="p-3 border-t border-gray-200 bg-gray-50">
+            <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
