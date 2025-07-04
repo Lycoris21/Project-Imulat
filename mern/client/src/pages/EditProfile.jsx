@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 // Components
 import { LoadingScreen, ErrorScreen, ConfirmPasswordModal, DeleteUserModal } from '../components';
+import AlertModal from '../components/modals/AlertModal';
 
 export default function EditProfile() {
   const { user, logout, setUser } = useAuth();
@@ -22,6 +23,12 @@ export default function EditProfile() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
 
   useEffect(() => {
     if (user) {
@@ -96,7 +103,12 @@ export default function EditProfile() {
       navigate(`/profile/${user._id}`, { state: { profileUpdated: true } });
     } catch (err) {
       console.error("Error updating profile:", err);
-      alert("Could not update profile.");
+      setAlert({
+        isOpen: true,
+        title: 'Update Failed',
+        message: 'Could not update profile.',
+        type: 'error'
+      });
     }
   };
 
@@ -109,7 +121,12 @@ export default function EditProfile() {
       logout();
     } catch (err) {
       console.error("Delete failed", err);
-      alert("Could not delete account.");
+      setAlert({
+        isOpen: true,
+        title: 'Delete Failed',
+        message: 'Could not delete account.',
+        type: 'error'
+      });
     }
   }
 
@@ -269,9 +286,7 @@ export default function EditProfile() {
           setShowConfirmModal(false);
           handleSave(password); // optionally pass this to backend for validation
         }}
-      />
-
-      <DeleteUserModal
+      />      <DeleteUserModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={async () => {
@@ -280,7 +295,13 @@ export default function EditProfile() {
         }}
       />
 
-
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+      />
     </div>
   );
 }

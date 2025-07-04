@@ -21,8 +21,17 @@ export default function ConfirmLogoutModal({ isOpen, onCancel, onConfirm }) {
   // Prevent body scroll and handle ESC key when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Prevent body scroll
+      // Disable background scroll while keeping scrollbar visible
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Store original styles
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // Apply styles to prevent scroll but keep scrollbar space
       document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
       
       // Handle ESC key
       const handleEscKey = (event) => {
@@ -35,7 +44,9 @@ export default function ConfirmLogoutModal({ isOpen, onCancel, onConfirm }) {
       
       // Cleanup
       return () => {
-        document.body.style.overflow = 'unset';
+        // Restore original styles
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
         document.removeEventListener('keydown', handleEscKey);
       };
     }

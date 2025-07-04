@@ -15,6 +15,39 @@ export default function AlertModal({
     }
   }, [isOpen]);
 
+  // Handle ESC key press and disable background scroll
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      // Add ESC key listener
+      document.addEventListener('keydown', handleEscapeKey);
+
+      // Disable background scroll while keeping scrollbar visible
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Store original styles
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // Apply styles to prevent scroll but keep scrollbar space
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+      return () => {
+        document.removeEventListener('keydown', handleEscapeKey);
+        // Restore original styles
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      };
+    }
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {

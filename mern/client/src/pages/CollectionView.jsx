@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 // Components
 import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard, PaginationControls } from '../components';
 import CreateCollectionModal from '../components/bookmarks/CreateCollectionModal';
+import AlertModal from '../components/modals/AlertModal';
 
 export default function CollectionView() {
     const { user } = useAuth();
@@ -19,6 +20,12 @@ export default function CollectionView() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeSearchQuery, setActiveSearchQuery] = useState(""); // The actual search query used for fetching
+    const [alert, setAlert] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'error'
+    });
     
     // Pagination state
     const [reportsPage, setReportsPage] = useState(1);
@@ -150,7 +157,12 @@ export default function CollectionView() {
             navigate('/bookmarks');
         } catch (error) {
             console.error('Error deleting collection:', error);
-            alert('Failed to delete collection');
+            setAlert({
+                isOpen: true,
+                title: 'Delete Failed',
+                message: 'Failed to delete collection',
+                type: 'error'
+            });
         }
     };
 
@@ -187,7 +199,12 @@ export default function CollectionView() {
             }
         } catch (error) {
             console.error('Error removing bookmark:', error);
-            alert('Failed to remove bookmark');
+            setAlert({
+                isOpen: true,
+                title: 'Remove Failed',
+                message: 'Failed to remove bookmark',
+                type: 'error'
+            });
         }
     };
 
@@ -495,6 +512,14 @@ export default function CollectionView() {
                 onClose={() => setShowEditModal(false)}
                 onCreate={handleUpdateCollection}
                 collection={collection}
+            />
+
+            <AlertModal
+                isOpen={alert.isOpen}
+                onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+                title={alert.title}
+                message={alert.message}
+                type={alert.type}
             />
         </div>
     );

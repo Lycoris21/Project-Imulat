@@ -7,6 +7,7 @@ import { useSearchSuggestions } from "../hooks/useSearchSuggestions";
 import { LoadingScreen, ErrorScreen, SearchBar } from '../components';
 import CollectionCard from '../components/bookmarks/CollectionCard';
 import CreateCollectionModal from '../components/bookmarks/CreateCollectionModal';
+import AlertModal from '../components/modals/AlertModal';
 
 export default function Bookmarks() {
     const { user } = useAuth();
@@ -16,6 +17,12 @@ export default function Bookmarks() {
     const [error, setError] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingCollection, setEditingCollection] = useState(null);
+    const [alert, setAlert] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'error'
+    });
     
     // Search functionality with suggestions
     const {
@@ -129,7 +136,12 @@ export default function Bookmarks() {
             await fetchCollections();
         } catch (error) {
             console.error('Error deleting collection:', error);
-            alert('Failed to delete collection');
+            setAlert({
+                isOpen: true,
+                title: 'Delete Failed',
+                message: 'Failed to delete collection',
+                type: 'error'
+            });
         }
     };
 
@@ -290,6 +302,14 @@ export default function Bookmarks() {
                 }}
                 onCreate={editingCollection ? handleUpdateCollection : handleCreateCollection}
                 collection={editingCollection}
+            />
+
+            <AlertModal
+                isOpen={alert.isOpen}
+                onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+                title={alert.title}
+                message={alert.message}
+                type={alert.type}
             />
         </div>
     );

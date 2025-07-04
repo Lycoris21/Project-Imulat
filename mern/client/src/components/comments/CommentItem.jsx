@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { formatTimeAgo } from '../../utils/time';
 import CommentActions from './CommentActions';
 import CommentForm from './CommentForm';
+import AlertModal from '../modals/AlertModal';
 
 export default function CommentItem({ 
   comment, 
@@ -23,6 +24,12 @@ export default function CommentItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(comment.commentContent);
   const dropdownRef = useRef(null);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
   
   const maxLevel = 3; // Maximum nesting level
   const indentWidth = Math.min(level * 40, maxLevel * 40); // Cap indentation
@@ -65,7 +72,12 @@ export default function CommentItem({
         console.error('Failed to edit comment:', error);
         // Reset the edit text on error
         setEditText(comment.commentContent);
-        alert('Failed to edit comment. Please try again.');
+        setAlert({
+          isOpen: true,
+          title: 'Edit Failed',
+          message: 'Failed to edit comment. Please try again.',
+          type: 'error'
+        });
       }
     } else {
       setIsEditing(false);
@@ -90,7 +102,12 @@ export default function CommentItem({
         setShowDropdown(false);
       } catch (error) {
         console.error('Failed to delete comment:', error);
-        alert('Failed to delete comment. Please try again.');
+        setAlert({
+          isOpen: true,
+          title: 'Delete Failed',
+          message: 'Failed to delete comment. Please try again.',
+          type: 'error'
+        });
         setShowDropdown(false);
       }
     } else {
@@ -304,6 +321,14 @@ export default function CommentItem({
           )}
         </div>
       </div>
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+      />
     </div>
   );
 }

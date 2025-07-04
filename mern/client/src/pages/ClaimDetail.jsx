@@ -7,6 +7,7 @@ import { formatRelativeTime } from '../utils/time.js';
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CreateReportModal, CommentsSection, SuccessToast, SubmitClaimModal } from '../components';
 import BookmarkModal from '../components/modals/BookmarkModal';
+import AlertModal from '../components/modals/AlertModal';
 
 export default function ClaimDetail() {
   const { id } = useParams();
@@ -22,6 +23,12 @@ export default function ClaimDetail() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
   const [formData, setFormData] = useState({
     reportTitle: "",
     reportContent: "",
@@ -221,7 +228,12 @@ export default function ClaimDetail() {
 
   const handleDeleteClaim = async () => {
     if (!user || (user._id !== claim.userId?._id && user.role !== 'admin')) {
-      alert('You do not have permission to delete this claim');
+      setAlert({
+        isOpen: true,
+        title: 'Permission Denied',
+        message: 'You do not have permission to delete this claim',
+        type: 'error'
+      });
       return;
     }
 
@@ -247,7 +259,12 @@ export default function ClaimDetail() {
       navigate('/claims');
     } catch (error) {
       console.error('Error deleting claim:', error);
-      alert('Failed to delete claim: ' + error.message);
+      setAlert({
+        isOpen: true,
+        title: 'Delete Failed',
+        message: `Failed to delete claim: ${error.message}`,
+        type: 'error'
+      });
     } finally {
       setDeleting(false);
       setShowDeleteConfirm(false);
@@ -399,6 +416,14 @@ export default function ClaimDetail() {
             </div>
           </div>
         )}
+
+        <AlertModal
+          isOpen={alert.isOpen}
+          onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+          title={alert.title}
+          message={alert.message}
+          type={alert.type}
+        />
       </div>
     </div>
   );

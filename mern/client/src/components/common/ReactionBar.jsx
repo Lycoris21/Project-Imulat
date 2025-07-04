@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { LoginRequiredModal } from "../index";
 import { useState } from "react";
+import AlertModal from "../modals/AlertModal";
 
 export default function ReactionBar({
   likes,
@@ -20,6 +21,12 @@ export default function ReactionBar({
 }) {
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
 
   const handleReaction = (reactionType) => {
     if (!user) {
@@ -110,8 +117,18 @@ export default function ReactionBar({
               onShare ||
               (() => {
                 navigator.clipboard.writeText(window.location.href)
-                  .then(() => alert("Link copied to clipboard!"))
-                  .catch(() => alert("Failed to copy link."));
+                  .then(() => setAlert({
+                    isOpen: true,
+                    title: 'Success',
+                    message: 'Link copied to clipboard!',
+                    type: 'success'
+                  }))
+                  .catch(() => setAlert({
+                    isOpen: true,
+                    title: 'Copy Failed',
+                    message: 'Failed to copy link.',
+                    type: 'error'
+                  }));
               })
             }
             className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer"
@@ -171,6 +188,14 @@ export default function ReactionBar({
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         action="like, dislike, bookmark, edit or delete content"
+      />
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
       />
     </div>
   );

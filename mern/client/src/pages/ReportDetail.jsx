@@ -8,6 +8,7 @@ import { getVerdictColor } from '../utils/colors.js';
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection, CreateReportModal, SuccessToast } from '../components'
 import BookmarkModal from '../components/modals/BookmarkModal';
+import AlertModal from '../components/modals/AlertModal';
 
 export default function ReportDetail() {
   const { id } = useParams();
@@ -20,6 +21,12 @@ export default function ReportDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error'
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -232,7 +239,12 @@ export default function ReportDetail() {
 
   const handleDeleteReport = async () => {
     if (!user || (user._id !== report.userId?._id && user.role !== 'admin')) {
-      alert('You do not have permission to delete this report');
+      setAlert({
+        isOpen: true,
+        title: 'Permission Denied',
+        message: 'You do not have permission to delete this report',
+        type: 'error'
+      });
       return;
     }
 
@@ -258,7 +270,12 @@ export default function ReportDetail() {
       navigate('/reports');
     } catch (error) {
       console.error('Error deleting report:', error);
-      alert('Failed to delete report: ' + error.message);
+      setAlert({
+        isOpen: true,
+        title: 'Delete Failed',
+        message: `Failed to delete report: ${error.message}`,
+        type: 'error'
+      });
     } finally {
       setDeleting(false);
       setShowDeleteConfirm(false);
@@ -448,13 +465,21 @@ export default function ReportDetail() {
               >
                 {deleting && (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                )}
-                {deleting ? 'Deleting...' : 'Delete Report'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+        {deleting ? 'Deleting...' : 'Delete Report'}
+      </button>
+    </div>
+  </div>
+</div>
+)}
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+      />
     </div>
   );
 }

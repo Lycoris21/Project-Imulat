@@ -134,13 +134,26 @@ export default function ChangePasswordModal({ isOpen, onClose, onPasswordChanged
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscKey);
+      
+      // Disable background scroll while keeping scrollbar visible
+      // Calculate scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Store original styles
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // Apply styles to prevent scroll but keep scrollbar space
       document.body.style.overflow = 'hidden';
-    }
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
 
-    return () => {
-      document.removeEventListener('keydown', handleEscKey);
-      document.body.style.overflow = 'unset';
-    };
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+        // Restore original styles
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      };
+    }
   }, [isOpen, handleClose, isSubmitting]);
 
   if (!isOpen) return null;
