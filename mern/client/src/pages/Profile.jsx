@@ -187,7 +187,7 @@ export default function Profile() {
                                         to={`/claims?user=${profileData._id}`}
                                         className="block w-fit mt-4 mx-auto text-sm font-semibold text-[color:var(--color-selected)] hover:underline"
                                     >
-                                        See more claims →
+                                        See more claims by this user→
                                     </Link>
                                 )}
                             </div>
@@ -203,7 +203,7 @@ export default function Profile() {
                                         to={`/reports?user=${profileData._id}`}
                                         className="block w-fit mt-4 mx-auto text-sm font-semibold text-[color:var(--color-selected)] hover:underline"
                                     >
-                                        See more reports →
+                                        See more reports by this user →
                                     </Link>
                                 )}
                             </div>
