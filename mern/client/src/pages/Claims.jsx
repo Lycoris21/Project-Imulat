@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
-import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast } from '../components';
+import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast, PaginationControls } from '../components';
 
 export default function Claims() {
   const { isLoggedIn = false } = useAuth() || {};
@@ -64,43 +64,6 @@ export default function Claims() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const PaginationControls = () => {
-    if (totalPages <= 1) return null;
-
-    const getVisiblePages = () => {
-      const delta = 2;
-      const range = [];
-      const rangeWithDots = [];
-      for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {
-        range.push(i);
-      }
-      if (page - delta > 2) rangeWithDots.push(1, '...');
-      else rangeWithDots.push(1);
-      rangeWithDots.push(...range);
-      if (page + delta < totalPages - 1) rangeWithDots.push('...', totalPages);
-      else rangeWithDots.push(totalPages);
-      return rangeWithDots;
-    };
-
-    return (
-      <div className="flex justify-center items-center space-x-0.5">
-        <button onClick={() => handlePageChange(page - 1)} disabled={page === 1} className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-medium">
-          Previous
-        </button>
-        <div className="flex space-x-0.5 mx-1">
-          {getVisiblePages().map((p, i) => (
-            <button key={i} onClick={() => typeof p === 'number' && handlePageChange(p)} disabled={p === '...'} className={`px-2 py-1 rounded-md transition-colors text-xs font-medium min-w-[28px] ${p === page ? 'bg-[color:var(--color-dark)] text-white shadow-sm' : p === '...' ? 'bg-transparent text-gray-400 cursor-default' : 'bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50'}`}>
-              {p}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages} className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-medium">
-          Next
-        </button>
-      </div>
-    );
-  };
-
   if (loading) return <LoadingScreen message="Loading claims..." />;
 
   return (
@@ -154,7 +117,14 @@ export default function Claims() {
                 <option value="highestTruth">Highest Truth Index</option>
               </select>
             </div>
-            {claims.length > 0 && totalPages > 1 && <PaginationControls />}
+            {claims.length > 0 && totalPages > 1 && (
+              <PaginationControls 
+                currentPage={page} 
+                totalPages={totalPages} 
+                onPageChange={handlePageChange}
+                className="justify-center"
+              />
+            )}
           </div>
 
           <div className="text-center mb-6">
@@ -182,7 +152,12 @@ export default function Claims() {
 
         {claims.length > 0 && totalPages > 1 && (
           <div className="mt-12">
-            <PaginationControls />
+            <PaginationControls 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={handlePageChange}
+              className="justify-center"
+            />
           </div>
         )}
       </div>

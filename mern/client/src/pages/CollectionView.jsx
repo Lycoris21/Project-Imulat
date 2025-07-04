@@ -3,7 +3,7 @@ import { useNavigate, Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // Components
-import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard } from '../components';
+import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard, PaginationControls } from '../components';
 import CreateCollectionModal from '../components/bookmarks/CreateCollectionModal';
 
 export default function CollectionView() {
@@ -437,6 +437,7 @@ export default function CollectionView() {
                                     currentPage={reportsPage}
                                     totalPages={getTotalReportsPages()}
                                     onPageChange={handleReportsPageChange}
+                                    className="justify-center"
                                 />
                             )}
                         </div>
@@ -480,6 +481,7 @@ export default function CollectionView() {
                                     currentPage={claimsPage}
                                     totalPages={getTotalClaimsPages()}
                                     onPageChange={handleClaimsPageChange}
+                                    className="justify-center"
                                 />
                             )}
                         </div>
@@ -497,97 +499,3 @@ export default function CollectionView() {
         </div>
     );
 }
-
-// Pagination Component
-const PaginationControls = ({ currentPage, totalPages, onPageChange, className = "" }) => {
-    if (totalPages <= 1) return null;
-
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxVisiblePages = 5;
-        
-        if (totalPages <= maxVisiblePages) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // Always show first page
-            pages.push(1);
-            
-            let startPage = Math.max(2, currentPage - 1);
-            let endPage = Math.min(totalPages - 1, currentPage + 1);
-            
-            // Add ellipsis if needed
-            if (startPage > 2) {
-                pages.push('...');
-            }
-            
-            // Add pages around current page
-            for (let i = startPage; i <= endPage; i++) {
-                if (i !== 1 && i !== totalPages) {
-                    pages.push(i);
-                }
-            }
-            
-            // Add ellipsis if needed
-            if (endPage < totalPages - 1) {
-                pages.push('...');
-            }
-            
-            // Always show last page
-            if (totalPages > 1) {
-                pages.push(totalPages);
-            }
-        }
-        
-        return pages;
-    };
-
-    return (
-        <div className={`flex items-center justify-center gap-2 mt-6 ${className}`}>
-            {/* Previous Button */}
-            <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                }`}
-            >
-                Previous
-            </button>
-
-            {/* Page Numbers */}
-            {getPageNumbers().map((page, index) => (
-                <button
-                    key={index}
-                    onClick={() => typeof page === 'number' && onPageChange(page)}
-                    disabled={page === '...'}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        page === currentPage
-                            ? 'bg-[color:var(--color-dark)] text-white'
-                            : page === '...'
-                            ? 'text-gray-400 cursor-default'
-                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                >
-                    {page}
-                </button>
-            ))}
-
-            {/* Next Button */}
-            <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                }`}
-            >
-                Next
-            </button>
-        </div>
-    );
-};
