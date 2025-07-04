@@ -36,15 +36,15 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        let message = "Validation failed.";
-        if (Array.isArray(errorData.errors)) {
-          message = errorData.errors.map((e) => `• ${e.msg}`).join("\n");
-        } else if (errorData.error) {
-          message = errorData.error;
-        }
+          const errorData = await response.json();
+          let message = "Validation failed.";
+          if (Array.isArray(errorData.details)) {
+              message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
+          } else if (errorData.error) {
+              message = errorData.error;
+          }
 
-        throw new Error(message);
+          throw new Error(message);
       }
 
       // Clear form and close modal
