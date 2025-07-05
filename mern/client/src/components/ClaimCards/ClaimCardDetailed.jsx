@@ -4,7 +4,7 @@ import { formatRelativeTime } from '../../utils/time.js';
 import { truncateWords } from '../../utils/strings';
 
 const ClaimCardDetailed = ({ claim }) => (
-  <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full sm:w-80 md:w-96 relative transition-all duration-300 transform hover:-translate-y-1 group">
+  <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl min-w-[22rem] max-w-[28rem] w-full flex-shrink-0 relative transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/claims/${claim._id}`} className="block">
       <div className="p-6">
         <div className="flex justify-between items-start mb-3">

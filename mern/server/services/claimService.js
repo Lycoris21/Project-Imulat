@@ -402,7 +402,7 @@ class ClaimService {
     return updatedClaim;
   }
 
-  static async getLatestClaims(limit = 10) {
+  static async getLatestClaims(limit = 5) {
     const claims = await Claim.find({
       deletedAt: null
     })

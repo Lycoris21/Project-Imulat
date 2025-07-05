@@ -75,7 +75,7 @@ export default function Home() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setSearchLoading(true);
-      
+
       // Navigate to search page with query
       setTimeout(() => {
         navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
@@ -86,7 +86,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <LoadingScreen message="Loading latest content..."/>
+      <LoadingScreen message="Loading latest content..." />
     );
   }
 
@@ -114,38 +114,56 @@ export default function Home() {
         />
       </div>
 
-      {/* Two Column Layout */}
-      
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Two ROW Layout */}
+
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
         {/* Latest Reports Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Latest Reports</h2>
-            <Link to="/reports" className="text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] font-medium">
+            <h2 className="text-2xl font-bold text-white">Latest Reports</h2>
+            <Link
+              to="/reports"
+              className="text-white hover:text-[color:var(--color-selected)] font-medium transition"
+            >
               View All →
             </Link>
-          </div>            
-          <div className="space-y-4">
-            {latestReports.map((report) => ( 
-              <ReportCard key={report._id} report={report} variant="compact"/>            
-            ))}
           </div>
+          {latestReports.length === 0 ? (
+            <div className="text-center py-6 text-white">No reports found.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="flex gap-4 min-w-full">
+                {latestReports.map((report) => (
+                  <ReportCard key={report._id} report={report} variant="detailed" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Latest Claims Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Latest Claims</h2>
-            <Link to="/claims" className="text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] font-medium">
+            <h2 className="text-2xl font-bold text-white">Latest Claims</h2>
+            <Link
+              to="/claims"
+              className="text-white hover:text-[color:var(--color-selected)] font-medium transition"
+            >
               View All →
             </Link>
-          </div>            
-          <div className="space-y-4">
-            {latestClaims.map((claim) => (
-               <ClaimCard key={claim._id} claim={claim} variant="compact"/>
-            ))}
           </div>
-        </div>      
+          {latestClaims.length === 0 ? (
+            <div className="text-center py-6 text-gray-500">No claims found.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="flex gap-4 min-w-full">
+                {latestClaims.map((claim) => (
+                  <ClaimCard key={claim._id} claim={claim} variant="detailed" />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

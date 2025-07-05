@@ -227,7 +227,7 @@ export default function Bookmarks() {
                     {/* Create Collection Card */}
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="bg-white rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left group"
+                        className="bg-white rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors text-left group cursor-pointer"
                     >
                         <div className="flex items-center mb-3">
                             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">

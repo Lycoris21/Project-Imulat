@@ -117,7 +117,7 @@ export default function Login() {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                className="mr-2 accent-[color:var(--color-dark)] focus:ring-0"
+                className="mr-2 accent-[color:var(--color-dark)] focus:ring-0 cursor-pointer"
                 checked={rememberMe}
                 name="remember"
                 onChange={(e) => setRememberMe(e.target.checked)}
@@ -133,7 +133,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition"
+            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition cursor-pointer"
           >
             Log In
           </button>

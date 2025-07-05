@@ -88,7 +88,7 @@ export const forgotPassword = async(req, res) => {
     await sendPasswordResetEmail(user, token);
 
     res.status(200).json({
-      message: "Reset email sent if account exists."
+      message: "If an account with that email exists, a reset link has been sent."
     });
   } catch (err) {
     console.error("Forgot password error:", err);

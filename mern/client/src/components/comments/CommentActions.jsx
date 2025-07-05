@@ -64,7 +64,7 @@ export default function CommentActions({
         <button
           onClick={handleLike}
           disabled={isLiking}
-          className={`flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg transition-colors hover:bg-gray-100 ${
+          className={`flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg transition-colors hover:bg-gray-100 cursor-pointer ${
             userReaction === 'like' 
               ? 'text-green-600' 
               : 'text-gray-600'
@@ -80,7 +80,7 @@ export default function CommentActions({
         <button
           onClick={handleDislike}
           disabled={isDisliking}
-          className={`flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg transition-colors hover:bg-gray-100 ${
+          className={`flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg transition-colors hover:bg-gray-100 cursor-pointer ${
             userReaction === 'dislike' 
               ? 'text-red-600' 
               : 'text-gray-600'
@@ -95,7 +95,7 @@ export default function CommentActions({
         {/* Reply Button */}
         <button
           onClick={handleReply}
-          className="flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          className="flex items-center space-x-1 px-1 py-1 sm:px-2 sm:py-1 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />

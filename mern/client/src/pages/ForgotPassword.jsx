@@ -18,8 +18,14 @@ export default function ForgotPassword() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Request failed");
-      setMessage("If an account with that email exists, a reset link has been sent.");
+      let message = "Something went wrong.";
+      if (Array.isArray(data.details)) {
+        message = data.details.map((e) => `• ${e.msg}`).join("\n");
+      } else if (data.message) {
+        message = data.message;
+      }
+
+      res.ok ? setMessage(message) : setError(message);
     } catch (err) {
       setError(err.message);
     }

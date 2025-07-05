@@ -7,7 +7,7 @@ const ReportCardDetailed = ({ report }) => (
     <Link
         key={report._id}
         to={`/reports/${report._id}`}
-        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl w-full max-w-sm mx-auto transition-all duration-300 transform hover:-translate-y-1 group"
+        className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl min-w-[22rem] max-w-[28rem] w-full flex-shrink-0 transition-all duration-300 transform hover:-translate-y-1 group"
     >
         {/* Cover Image */}
         {report.reportCoverUrl && (

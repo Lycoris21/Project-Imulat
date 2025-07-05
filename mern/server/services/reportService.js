@@ -474,7 +474,7 @@ class ReportService {
       .sort({
         createdAt: -1
       })
-      .limit(10);
+      .limit(5);
 
     const reportsWithMeta = await Promise.all(
         reports.map(async(report) => {

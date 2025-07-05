@@ -143,7 +143,7 @@ export default function Claims() {
             <p className="text-gray-400">Try adjusting your search terms</p>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-6 justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
             {claims.map((claim) => (
               <ClaimCard key={claim._id} claim={claim} variant="detailed" />
             ))}
