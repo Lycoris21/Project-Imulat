@@ -54,10 +54,16 @@ export const formatError = (message, details = null) => {
   return response;
 };
 
+// String stuff
 export const parseVerdict = (verdict) => {
   if (!verdict) return "Unknown";
   return verdict
     .split("_")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+};
+
+export const capitalize = (str) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };

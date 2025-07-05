@@ -1,7 +1,16 @@
 import Activity from '../models/Activity.js';
 
 class ActivityService {
-    async logActivity(userId, type, targetType, targetId, targetModelName, actionDetails = null) {
+    async logActivity(
+        userId,
+        type,
+        targetType,
+        targetId,
+        targetModelName, {
+        actionDetails = null,
+        postType = null,
+        postId = null
+    } = {}) {
         try {
             const activity = new Activity({
                 user: userId,
@@ -9,8 +18,11 @@ class ActivityService {
                 targetType,
                 target: targetId,
                 targetModel: targetModelName,
+                postType,
+                postId,
                 actionDetails
             });
+
             await activity.save();
             return activity;
         } catch (error) {
@@ -33,6 +45,13 @@ class ActivityService {
                 .limit(limit)
                 .populate('user', 'username avatar')
                 .populate('target')
+                .populate('postId').populate({
+                    path: 'postId',
+                    populate: {
+                        path: 'userId',
+                        select: 'username'
+                    }
+                })
                 .lean();
 
             // Manually populate user information for different target types

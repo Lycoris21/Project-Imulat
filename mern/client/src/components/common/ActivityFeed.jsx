@@ -36,15 +36,23 @@ const getActivityIcon = (type) => {
 };
 
 const getActivityText = (activity) => {
-  const { type, targetType, target, actionDetails } = activity;
+  const { type, targetType, target, actionDetails, postId } = activity;
 
   // Get owner information from populated target
-  const targetOwner =
-    target?.owner?.username ||
-    target?.user?.username ||
-    target?.userId?.username ||
-    target?.username;
+  let targetOwner;
 
+  if (postId) {
+    targetOwner =
+      postId.owner?.username ||
+      postId.user?.username ||
+      postId.userId?.username;
+  } else {
+    targetOwner =
+      target?.owner?.username ||
+      target?.user?.username ||
+      target?.userId?.username ||
+      target?.username;
+  }
 
   switch (type) {
     case 'LIKE':
@@ -92,6 +100,8 @@ const getActivityText = (activity) => {
       return 'removed a bookmark';
     case 'COMMENT_DELETE':
       return 'deleted a comment';
+    case 'REPORT_UPDATE':
+      return targetOwner ? `updated ${targetOwner}'s report` : 'updated a report';
     case 'CLAIM_UPDATE':
       return targetOwner ? `updated ${targetOwner}'s claim` : 'updated a claim';
     case 'COMMENT_UPDATE':
@@ -103,7 +113,7 @@ const getActivityText = (activity) => {
 };
 
 const getActivityLink = (activity) => {
-  const { type, targetType, target } = activity;
+  const { type, targetType, target, postId, postType} = activity;
 
   // Profile updates are not clickable
   if (type === 'PROFILE_UPDATE') {
@@ -120,29 +130,32 @@ const getActivityLink = (activity) => {
 
   switch (targetType) {
     case 'REPORT':
-      const reportId = getTargetId(target);
+      const reportId = getTargetId(postId || target);
       if (!reportId) return '#';
       // For comments/replies on reports, scroll to comment section
-      if (type === 'COMMENT' || type === 'REPLY') {
-        return `/reports/${reportId}#comments`;
+      if (['COMMENT', 'REPLY', 'COMMENT_EDIT', 'COMMENT_UPDATE'].includes(type)) {
+        const commentId = getTargetId(target);
+        return `/reports/${reportId}#comment-${commentId}`;
       }
       return `/reports/${reportId}`;
     case 'CLAIM':
-      const claimId = getTargetId(target);
+      const claimId = getTargetId(postId || target);
       if (!claimId) return '#';
+
       // For comments/replies on claims, scroll to comment section
-      if (type === 'COMMENT' || type === 'REPLY') {
-        return `/claims/${claimId}#comments`;
+      if (['COMMENT', 'REPLY', 'COMMENT_EDIT', 'COMMENT_UPDATE'].includes(type)) {
+        const commentId = getTargetId(target);
+        return `/claims/${claimId}#comment-${commentId}`;
       }
       return `/claims/${claimId}`;
     case 'COMMENT':
       const commentId = getTargetId(target);
-      const parentId = getTargetId(target?.parent);
+      const parentId = getTargetId(postId || target?.parent);
       if (!commentId || !parentId) return '#';
       // For comment reactions, find the parent and scroll to that comment
-      if (target.parentType === 'Report') {
+      if (postType === 'Report') {
         return `/reports/${parentId}#comment-${commentId}`;
-      } else if (target.parentType === 'Claim') {
+      } else if (postType === 'Claim') {
         return `/claims/${parentId}#comment-${commentId}`;
       }
       return `/reports/${parentId}#comments`;
@@ -170,7 +183,7 @@ const getActivityLink = (activity) => {
 };
 
 const getTargetTitle = (activity) => {
-  const { target, targetType, type } = activity;
+  const { target, targetType, type, postId } = activity;
 
   if (!target) return null;
 
@@ -183,6 +196,12 @@ const getTargetTitle = (activity) => {
   }
 
   // Standard title fields
+  if (postId) {
+    if (postId.title) return postId.title;
+    if (postId.claimTitle) return postId.claimTitle;
+    if (postId.reportTitle) return postId.reportTitle;
+  }
+
   if (target.title) return target.title;
   if (target.reportTitle) return target.reportTitle;
   if (target.claimTitle) return target.claimTitle;
@@ -214,8 +233,8 @@ const getTargetTypeLabel = (activity) => {
 
 const ActivityItem = ({ activity }) => {
   // Debug logging
-  console.log('ActivityItem received:', activity);
-  console.log('Target data:', activity.target);
+  // console.log('ActivityItem received:', activity);
+  // console.log('Target data:', activity.target);
 
   const icon = getActivityIcon(activity.type);
   const text = getActivityText(activity);
@@ -273,7 +292,7 @@ const ActivityItem = ({ activity }) => {
           <span className="font-medium text-[color:var(--color-base)] group-hover:text-[color:var(--color-dark)] transition-colors">
             {text}
           </span>
-           {targetTitle && activity.targetType !== 'USER' && (
+          {targetTitle && activity.targetType !== 'USER' && (
             <span className="ml-1">
               <span className="text-gray-500">
                 {(() => {

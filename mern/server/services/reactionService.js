@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Reaction, Claim, Report, Comment, User, Notification, Activity } from '../models/index.js';
-import { parseVerdict } from '../utils/helpers.js';
+import { parseVerdict, capitalize } from '../utils/helpers.js';
 import activityService from './activityService.js';
 
 class ReactionService {
@@ -101,9 +101,7 @@ class ReactionService {
         reactionType === 'like' ? 'LIKE' : 'DISLIKE',
         targetType.toUpperCase(),
         targetId,
-        targetType === 'report' ? 'Report' :
-        targetType === 'claim' ? 'Claim' :
-        targetType === 'comment' ? 'Comment' : 'User'
+        capitalize(targetType)
       );
 
       const counts = await this.countReactions(targetId, targetType);
@@ -249,9 +247,8 @@ class ReactionService {
           reactionType === 'like' ? 'LIKE' : 'DISLIKE',
           targetType.toUpperCase(),
           targetId,
-          targetType === 'report' ? 'Report' :
-          targetType === 'claim' ? 'Claim' :
-          targetType === 'comment' ? 'Comment' : 'User');
+          capitalize(targetType)
+        )
       }
     } catch (activityError) {
       console.error('Error logging activity:', activityError);

@@ -1,6 +1,6 @@
 // Because the front end needs utils too
 
-export function capitalizeWords(str) {
+export function capitalize(str) {
   return str
     .toLowerCase()
     .split(" ")

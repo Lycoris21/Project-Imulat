@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Comment, Notification, Report, Claim, Reaction, Activity } from '../models/index.js';
-import NotificationService from './notificationService.js';
+import { capitalize } from '../utils/helpers.js';
 import activityService from './activityService.js';
 
 class CommentService {
@@ -21,15 +21,29 @@ class CommentService {
 
     const savedComment = await newComment.save();
 
+    let postType = targetType;
+    let postId = targetId;
+
     // Log the activity
     try {
+      if (parentCommentId) {
+        // If it's a reply, use the root comment's post context
+        const parentComment = await Comment.findById(parentCommentId);
+        if (parentComment) {
+          postType = parentComment.targetType;
+          postId = parentComment.targetId;
+        }
+      }
+
       await activityService.logActivity(
         userId,
         parentCommentId ? 'REPLY' : 'COMMENT',
         targetType.toUpperCase(),
-        targetId,
-        targetType === 'report' ? 'Report' :
-        targetType === 'claim' ? 'Claim' : 'Comment');
+        savedComment._id,
+        'Comment', {
+        postType: capitalize(postType),
+        postId
+      });
     } catch (activityError) {
       console.error('Error logging comment activity:', activityError);
       // Don't fail the comment if activity logging fails
@@ -37,24 +51,15 @@ class CommentService {
 
     try {
       let recipientId = null;
-      let postType = targetType;
-      let postId = targetId;
 
-      // If replying to a comment
       if (parentCommentId) {
         const parentComment = await Comment.findById(parentCommentId).populate("userId");
         if (parentComment) {
-          // Override postType/postId with root comment's context
-          postType = parentComment.targetType;
-          postId = parentComment.targetId;
-
-          // Notify parent comment's author (if not self)
           if (String(parentComment.userId._id) !== String(userId)) {
             recipientId = parentComment.userId._id;
           }
         }
       } else {
-        // Not a reply, notify post owner (report/claim author)
         const Model = targetType === "claim" ? Claim : Report;
         const parent = await Model.findById(targetId).populate("userId");
         if (parent && String(parent.userId._id) !== String(userId)) {
@@ -62,20 +67,18 @@ class CommentService {
         }
       }
 
-      // Create notification
       if (recipientId) {
         const notif = await Notification.create({
           recipientId,
           senderId: userId,
           type: "comment",
-          targetType: "comment", // still pointing to the comment created
+          targetType: "comment",
           targetId: savedComment._id,
           postType,
           postId,
           read: false,
         });
 
-        // Emit via socket
         const { io } = await import("../server.js");
         io.to(recipientId.toString()).emit("new-notification", notif);
       }
@@ -287,6 +290,10 @@ class CommentService {
         'COMMENT',
         comment._id,
         'Comment',
+        {
+          postId: comment.targetId,      // this is the original post (claim/report) ID
+          postType: capitalize(comment.targetType)  // e.g., 'Claim' or 'Report'
+        }
       );
       console.log('📝 [ActivityService] Logged COMMENT_EDIT activity for comment:', commentId);
     } catch (activityError) {
@@ -295,8 +302,6 @@ class CommentService {
     }
 
     return await updatedComment;
-
-    return await comment.save();
   }
 
   static async deleteComment(commentId, userId) {
