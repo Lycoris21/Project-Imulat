@@ -47,7 +47,7 @@ export default function EditProfile() {
   }, [user, navigate]);
 
   const [status, setStatus] = useState("");
-  const [coverFile, setcoverFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -137,137 +137,143 @@ export default function EditProfile() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-8 bg-base-gradient">
-      <div className="bg-white bg-opacity-90 rounded-2xl p-6 shadow-xl max-w-lg w-full">
-        <h1 className="text-3xl font-bold mb-4 text-center">
+    <div className="min-h-screen flex justify-center items-start px-4 py-12 bg-base-gradient">
+      <div className="bg-white bg-opacity-90 rounded-3xl shadow-2xl w-full max-w-5xl p-8">
+        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
           Profile Settings
         </h1>
 
-        <div className="space-y-4 mt-4 text-gray-700">
-          <div className="text-center">
-            {form.profilePictureUrl ? (
-              <img
-                src={form.profilePictureUrl}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover mx-auto"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto">
-                <span className="text-gray-600 font-medium text-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-700">
+          {/* Left Column – Profile Picture and Cover */}
+          <div className="space-y-8">
+            {/* Profile Picture */}
+            <div className="text-center">
+              {form.profilePictureUrl ? (
+                <img
+                  src={form.profilePictureUrl}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover mx-auto shadow"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mx-auto text-2xl text-gray-600 font-semibold shadow">
                   {form.username?.charAt(0).toUpperCase() || "U"}
-                </span>
-              </div>
-            )}
+                </div>
+              )}
 
-            <div className="mt-4">
-              <label className="block font-semibold text-left mb-2">Profile Picture</label>
+              <div className="mt-4 text-left">
+                <label className="block font-semibold mb-2">Profile Picture</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setProfilePictureFile(e.target.files[0])}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="w-full px-3 py-2 border rounded bg-white flex items-center">
+                    <span className="text-gray-900">Choose File</span>
+                    <span className="mx-2">|</span>
+                    <span className={`${profilePictureFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate`}>
+                      {profilePictureFile ? profilePictureFile.name : 'No file chosen'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cover Photo */}
+            <div>
+              <label className="block font-semibold mb-2">Cover Photo</label>
+              {form.coverPhotoUrl ? (
+                <img
+                  src={form.coverPhotoUrl}
+                  alt="Cover Photo"
+                  className="w-full h-48 object-cover mb-2 rounded shadow"
+                />
+              ) : (
+                <p className="text-sm text-gray-500 mb-2">No cover photo set.</p>
+              )}
               <div className="relative">
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setProfilePictureFile(e.target.files[0])}
+                  onChange={(e) => setCoverFile(e.target.files[0])}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
-                <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
+                <div className="w-full px-3 py-2 border rounded bg-white flex items-center">
                   <span className="text-gray-900">Choose File</span>
                   <span className="mx-2">|</span>
-                  <span className={`${profilePictureFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
-                    {profilePictureFile ? profilePictureFile.name : 'No file chosen'}
+                  <span className={`${coverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate`}>
+                    {coverFile ? coverFile.name : 'No file chosen'}
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div>
-            <label className="block font-semibold">Username</label>
-            <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold">Email</label>
-            <input
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              type="email"
-              className="w-full border p-2 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold">Birth Date</label>
-            <input
-              name="birthdate"
-              value={form.birthdate}
-              onChange={handleChange}
-              type="date"
-              className="w-full border p-2 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold">Bio</label>
-            <textarea
-              name="bio"
-              value={form.bio}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-1">Cover Photo</label>
-            {form.coverPhotoUrl ? (
-              <img
-                src={form.coverPhotoUrl}
-                alt="Cover Photo"
-                className="w-full h-40 object-cover mb-2 rounded"
-              />
-            ) : (
-              <p className="text-sm text-gray-500 mb-2">No cover photo set.</p>
-            )}
-            <div className="relative">
+          {/* Right Column – Form Fields */}
+          <div className="space-y-6">
+            <div>
+              <label className="block font-semibold mb-1">Username</label>
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setcoverFile(e.target.files[0])}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                className="w-full border p-3 rounded text-base"
               />
-              <div className="w-full px-3 py-2 border rounded focus-within:ring-2 focus-within:ring-blue-400 bg-white flex items-center">
-                <span className="text-gray-900">Choose File</span>
-                <span className="mx-2">|</span>
-                <span className={`${coverFile ? 'text-gray-500' : 'text-gray-400'} flex-1 truncate text-left`}>
-                  {coverFile ? coverFile.name : 'No file chosen'}
-                </span>
-              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold mb-1">Email</label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                type="email"
+                className="w-full border p-3 rounded text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold mb-1">Birth Date</label>
+              <input
+                name="birthdate"
+                value={form.birthdate}
+                onChange={handleChange}
+                type="date"
+                className="w-full border p-3 rounded text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold mb-1">Bio</label>
+              <textarea
+                name="bio"
+                value={form.bio}
+                onChange={handleChange}
+                rows={4}
+                className="w-full border p-3 rounded text-base"
+              />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-between mt-6">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-10 gap-4">
           <button
             onClick={() => navigate(`/profile/${user._id}`)}
-
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition"
           >
             Cancel
           </button>
           <button
             onClick={() => setShowConfirmModal(true)}
-            className="px-4 py-2 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] cursor-pointer"
+            className="w-full sm:w-auto px-6 py-3 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] font-medium transition"
           >
             Save Changes
           </button>
         </div>
 
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <button
             onClick={() => setShowDeleteModal(true)}
             className="text-sm text-red-600 hover:text-red-800 underline"
@@ -276,17 +282,19 @@ export default function EditProfile() {
           </button>
         </div>
 
-        {status && <p className="text-sm mt-2 text-center text-gray-600">{status}</p>}
+        {status && <p className="text-sm mt-4 text-center text-gray-600">{status}</p>}
       </div>
 
+      {/* Modals */}
       <ConfirmPasswordModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
         onConfirm={(password) => {
           setShowConfirmModal(false);
-          handleSave(password); // optionally pass this to backend for validation
+          handleSave(password);
         }}
-      />      <DeleteUserModal
+      />
+      <DeleteUserModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={async () => {
@@ -294,10 +302,9 @@ export default function EditProfile() {
           handleDelete();
         }}
       />
-
       <AlertModal
         isOpen={alert.isOpen}
-        onClose={() => setAlert(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => setAlert((prev) => ({ ...prev, isOpen: false }))}
         title={alert.title}
         message={alert.message}
         type={alert.type}
