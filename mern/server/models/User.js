@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     minlength: 3,
-    maxlength: 50
+    maxlength: 50,
+    match: [/^[a-zA-Z0-9_]{3,50}$/, 'Username can only contain letters, numbers, and underscores (3–50 chars)']
   },
   passwordHash: {
     type: String,
