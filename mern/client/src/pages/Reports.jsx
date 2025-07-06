@@ -10,6 +10,7 @@ import {
   SearchBar,
   SuccessToast,
   PaginationControls,
+  ScrollToTop,
 } from "../components";
 
 export default function Reports() {
@@ -189,17 +190,6 @@ export default function Reports() {
             ))}
           </div>
         )}
-
-        {reports.length > 0 && totalPages > 1 && (
-          <div className="mt-8 sm:mt-12">
-            <PaginationControls 
-              currentPage={page} 
-              totalPages={totalPages} 
-              onPageChange={handlePageChange}
-              className="justify-center"
-            />
-          </div>
-        )}
       </div>
 
       <CreateReportModal
@@ -207,6 +197,9 @@ export default function Reports() {
         onClose={() => setShowCreateModal(false)}
         onSubmitFinish={handleSubmitFinish}
       />
+      
+      {/* Scroll to Top */}
+      <ScrollToTop totalItems={totalReports} />
     </div>
   );
 }

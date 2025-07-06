@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
-import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast, PaginationControls } from '../components';
+import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast, PaginationControls, ScrollToTop } from '../components';
 
 export default function Claims() {
   const { isLoggedIn = false } = useAuth() || {};
@@ -150,19 +150,13 @@ export default function Claims() {
           </div>
         )}
 
-        {claims.length > 0 && totalPages > 1 && (
-          <div className="mt-12">
-            <PaginationControls 
-              currentPage={page} 
-              totalPages={totalPages} 
-              onPageChange={handlePageChange}
-              className="justify-center"
-            />
-          </div>
-        )}
+        
       </div>
 
       <SubmitClaimModal isOpen={showSubmitModal} onClose={() => setShowSubmitModal(false)} onSubmitFinish={handleSubmitFinish} />
+      
+      {/* Scroll to Top */}
+      <ScrollToTop totalItems={totalClaims} />
     </div>
   );
 }
