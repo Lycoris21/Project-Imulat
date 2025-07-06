@@ -77,19 +77,45 @@ export default function Claims() {
 
       {/* Header + Controls */}
       <div className="mb-8">
-        <div className="relative mb-6 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">All Claims</h1>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">Browse through all user-submitted claims for fact-checking</p>
+        <div className="relative mb-4 sm:mb-6 text-center">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-4">All Claims</h1>
+          <p className="text-gray-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-2">
+            Browse through all user-submitted claims for fact-checking
+          </p>
           {isLoggedIn && (
-            <div className="absolute top-0 right-0">
-              <button onClick={() => setShowSubmitModal(true)} className="px-6 py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 cursor-pointer">
-                + Submit A Claim
+            <div className="absolute top-0 right-0 hidden sm:block">
+              <button
+                onClick={() => setShowSubmitModal(true)}
+                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-1 sm:gap-2 cursor-pointer text-sm sm:text-base"
+              >
+                {/* Plus icon - always visible */}
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                {/* Full text on larger screens, abbreviated on mobile */}
+                <span className="hidden sm:inline">Submit A Claim</span>
+                <span className="sm:hidden">Claim</span>
               </button>
             </div>
           )}
         </div>
 
-        <div className="max-w-6xl mx-auto mb-6">
+        {/* Mobile "Submit A Claim" button */}
+        {isLoggedIn && (
+          <div className="block sm:hidden mb-4 max-w-2xl mx-auto px-2">
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="w-full px-3 py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-base"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Submit A Claim
+            </button>
+          </div>
+        )}
+
+        <div className="max-w-6xl mx-auto mb-4 sm:mb-6">
           <SearchBar
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
