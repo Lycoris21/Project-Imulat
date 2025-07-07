@@ -85,7 +85,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-base-gradient px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 flex justify-center">
+        <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 sm:px-6 lg:px-8 py-6 sm:pt-6 lg:pt-8 flex justify-center">
             {/* Success Notification */}
             <SuccessToast 
                 message="Profile updated successfully!" 
