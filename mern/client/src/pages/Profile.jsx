@@ -141,7 +141,7 @@ export default function Profile() {
                             </Link>
                         ) : (
                             /* Show Like/Dislike for other users' profiles */
-                            <User ReactionBar
+                            <UserReactionBar
                                 targetUser Id={profileData._id}
                                 initialLikes={reactionCounts.likes}
                                 initialDislikes={reactionCounts.dislikes}
