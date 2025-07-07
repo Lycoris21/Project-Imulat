@@ -14,7 +14,7 @@ export default function Claims() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [totalClaims, setTotalClaims] = useState(0);
-  const itemsPerPage = 4;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     fetchClaims();

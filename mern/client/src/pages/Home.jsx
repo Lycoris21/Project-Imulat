@@ -91,7 +91,41 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
+    <>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 12px;
+          margin-top: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 10px;
+          margin-top: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(107, 114, 128, 0.8);
+          border-radius: 10px;
+          transition: background 0.2s ease;
+          margin-top: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.9);
+        }
+        
+        .custom-scrollbar {
+          padding-bottom: 8px;
+        }
+        
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: auto;
+          scrollbar-color: rgba(107, 114, 128, 0.8) transparent;
+        }
+      `}</style>
+      <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 py-8">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-4">Welcome to Project IMULAT</h1>
@@ -131,7 +165,7 @@ export default function Home() {
           {latestReports.length === 0 ? (
             <div className="text-center py-6 text-white">No reports found.</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
               <div className="flex gap-4 min-w-full">
                 {latestReports.map((report) => (
                   <ReportCard key={report._id} report={report} variant="detailed" />
@@ -155,7 +189,7 @@ export default function Home() {
           {latestClaims.length === 0 ? (
             <div className="text-center py-6 text-gray-500">No claims found.</div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
               <div className="flex gap-4 min-w-full">
                 {latestClaims.map((claim) => (
                   <ClaimCard key={claim._id} claim={claim} variant="detailed" />
@@ -166,5 +200,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }
