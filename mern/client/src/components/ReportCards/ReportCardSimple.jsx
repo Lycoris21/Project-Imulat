@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
-import { truncateWords } from '../../utils/strings';
 import { getVerdictColor } from '../../utils/colors';
 import { formatRelativeTime } from '../../utils/time';
 
 const ReportCardSimple = ({ report }) => (
-  <div key={report._id} className="bg-white rounded-lg shadow-md p-4 border-none flex hover:bg-[color:var(--color-background-hover)] transition-all duration-300 transform hover:-translate-y-1 group">
+  <div key={report._id} className="bg-white rounded-lg shadow-md p-3 sm:p-4 border-none flex hover:bg-[color:var(--color-background-hover)] transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/reports/${report._id}`} className="flex-1 hover:text-blue-600 cursor-pointer">
-      <div className="flex justify-start items-center">
+      <div className="flex items-start space-x-3 sm:space-x-4">
         {report.reportCoverUrl && (
-          <div className="w-24 h-20 overflow-hidden rounded-lg flex-shrink-0 mr-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-lg flex-shrink-0">
             <img
               src={report.reportCoverUrl}
               alt={`Cover for ${report.reportTitle}`}
@@ -20,22 +19,27 @@ const ReportCardSimple = ({ report }) => (
           </div>  
         )}
 
-        <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2">
-          {report.reportTitle}
-        </h3>
+        <div className="flex-1 min-w-0 overflow-hidden flex items-center h-16 sm:h-20" style={{ width: 0 }}>
+          <h3 className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors line-clamp-3 pr-3">
+            {report.reportTitle}
+          </h3>
+        </div>
 
-        <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getVerdictColor(report.truthVerdictParsed)}`}>
-            {report.truthVerdictParsed}
-        </span>
+        <div className="flex-shrink-0">
+          <span className={`inline-block px-2 py-1 rounded text-xs font-medium w-fit ${getVerdictColor(report.truthVerdictParsed)}`}>
+              {report.truthVerdictParsed}
+          </span>
+        </div>
       </div>
 
-      <p className="text-gray-600 mt-2">
-        <span className="font-medium">AI-generated summary:</span> {truncateWords(report.aiReportSummary, 30)}
+      <p className="text-gray-600 text-xs sm:text-sm mt-2">
+        <span className="font-medium">AI-generated summary:</span>{' '}
+        <span className="line-clamp-3">{report.aiReportSummary}</span>
       </p>
 
       {/* Stats & Date */}
-      <div className="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-200 mt-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex justify-between items-center text-xs sm:text-sm text-gray-500 pt-3 sm:pt-4 border-t border-gray-200 mt-3 sm:mt-4">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           {/* Likes */}
           <span className="flex items-center space-x-1">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">

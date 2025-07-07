@@ -85,7 +85,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-base-gradient px-4 pt-[0rem] flex justify-center">
+        <div className="min-h-screen bg-base-gradient px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 flex justify-center">
             {/* Success Notification */}
             <SuccessToast 
                 message="Profile updated successfully!" 
@@ -93,24 +93,25 @@ export default function Profile() {
                 onClose={() => setShowSuccessMessage(false)} 
             />
 
-            <div className="w-[1000px] bg-white rounded shadow-xl pt-0 p-8">
-                <div className="relative h-60 bg-cover bg-center rounded-sm mb-6">
+            <div className="w-full max-w-4xl bg-white rounded-lg sm:rounded-xl shadow-xl p-4 sm:p-6 lg:p-8">
+                {/* Cover Photo */}
+                <div className="relative h-32 sm:h-48 lg:h-60 bg-cover bg-center rounded-sm sm:rounded-md mb-4 sm:mb-6">
                     {profileData.coverPhotoUrl ? (
                         <div
-                            className="absolute inset-0 bg-cover bg-center"
+                            className="absolute inset-0 bg-cover bg-center rounded-sm sm:rounded-md"
                             style={{ backgroundImage: `url(${profileData.coverPhotoUrl})` }}
                         />
                     ) : (
-                        <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-5xl font-bold text-gray-600 uppercase">
+                        <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-600 uppercase rounded-sm sm:rounded-md">
                             {profileData.username?.charAt(0)}
                         </div>
                     )}
                 </div>
 
                 {/* Profile Info */}
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center">
-                        <div className="w-16 h-16 mr-4 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="flex items-start justify-between mb-4 sm:mb-6 space-x-3">
+                    <div className="flex items-center min-w-0 flex-1">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 mr-3 sm:mr-4 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                             {profileData.profilePictureUrl ? (
                                 <img
                                     src={profileData.profilePictureUrl}
@@ -118,31 +119,31 @@ export default function Profile() {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <span className="text-gray-600 font-medium text-sm">
+                                <span className="text-gray-600 font-medium text-xs sm:text-sm">
                                     {profileData.username?.charAt(0).toUpperCase() || "U"}
                                 </span>
                             )}
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-bold">{profileData.username}</h1>
-                            <p className="text-gray-500">
+                        <div className="min-w-0 flex-1 pr-3">
+                            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">{profileData.username}</h1>
+                            <p className="text-gray-500 text-sm sm:text-base">
                                 {reactionCounts.likes} likes | {reactionCounts.dislikes} dislikes
                             </p>
-                            <p className="italic">{profileData.bio}</p>
+                            <p className="italic text-sm sm:text-base text-gray-600 line-clamp-2 sm:line-clamp-3 break-words">{profileData.bio}</p>
                         </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex justify-end flex-shrink-0">
                         {/* Show Edit Profile only for current user's own profile */}
                         {user && profileData && user._id === profileData._id ? (
                             <Link
                                 to="/edit-profile"
-                                className="border-[0.5px] border-[color:var(--color-dark)] bg-white text-[color:var(--color-dark)] py-1 px-4 rounded hover:bg-[color:var(--color-dark)] hover:text-white hover:border-white">
+                                className="text-center border-[0.5px] border-[color:var(--color-dark)] bg-white text-[color:var(--color-dark)] py-1 sm:py-2 px-3 sm:px-4 rounded hover:bg-[color:var(--color-dark)] hover:text-white hover:border-white transition-colors text-xs sm:text-sm whitespace-nowrap">
                                 Edit Profile
                             </Link>
                         ) : (
                             /* Show Like/Dislike for other users' profiles */
                             <UserReactionBar
-                                targetUser Id={profileData._id}
+                                targetUserId={profileData._id}
                                 initialLikes={reactionCounts.likes}
                                 initialDislikes={reactionCounts.dislikes}
                                 onReactionUpdate={handleReactionUpdate}
@@ -153,12 +154,12 @@ export default function Profile() {
 
                 {/* Claims / Reports Tabs */}
                 {(canResearch && Array.isArray(profileData.reports) && profileData.reports.length > 0) ? (
-                    <div className="mt-8">
+                    <div className="mt-6 sm:mt-8">
                         {/* Tabs */}
-                        <div className="flex border-b mb-4 space-x-4 ">
+                        <div className="flex border-b mb-4 sm:mb-6 space-x-4 sm:space-x-6">
                             <button
                                 onClick={() => setActiveTab("claims")}
-                                className={`pb-2 text-sm font-medium transition-colors ${activeTab === "claims"
+                                className={`pb-2 text-sm sm:text-base font-medium transition-colors ${activeTab === "claims"
                                     ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2"
                                     : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
                                     }`}
@@ -167,8 +168,8 @@ export default function Profile() {
                             </button>
                             <button
                                 onClick={() => setActiveTab("reports")}
-                                className={`pb-2 text-sm font-medium transition-colors ${activeTab === "reports"
-                                    ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2 "
+                                className={`pb-2 text-sm sm:text-base font-medium transition-colors ${activeTab === "reports"
+                                    ? "border-[color:var(--color-selected)] text-[color:var(--color-selected)] border-b-2"
                                     : "text-gray-500 hover:text-[color:var(--color-selected)] cursor-pointer"
                                     }`}
                             >
@@ -178,7 +179,7 @@ export default function Profile() {
 
                         {/* Tab Content */}
                         {activeTab === "claims" && (
-                            <div className="space-y-4">
+                            <div className="space-y-3 sm:space-y-4">
                                 {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
                                     <ClaimCard key={claim._id} claim={claim} variant="simple" />
                                 ))}
@@ -194,7 +195,7 @@ export default function Profile() {
                         )}
 
                         {activeTab === "reports" && (
-                            <div className="space-y-4">
+                            <div className="space-y-3 sm:space-y-4">
                                 {profileData.reports.slice(0, REPORT_LIMIT).map((report) => (
                                     <ReportCard key={report._id} report={report} variant="simple" />
                                 ))}
@@ -212,9 +213,9 @@ export default function Profile() {
                     </div>
                 ) : (
                     // Show just Claims if user is not researcher or has no reports
-                    <div className="mt-8">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Claims</h2>
-                        <div className="space-y-4">
+                    <div className="mt-6 sm:mt-8">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Claims</h2>
+                        <div className="space-y-3 sm:space-y-4">
                             {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
                                 <ClaimCard key={claim._id} claim={claim} variant="simple" />
                             ))}
