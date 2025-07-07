@@ -298,23 +298,23 @@ export default function ReportDetail() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-4 sm:py-8">
       <SuccessToast
         message="Report updated successfully!"
         visible={showSuccessMessage}
         onClose={() => setShowSuccessMessage(false)}
       />
 
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-2 sm:px-4">
         {/* Report Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           {/* Cover Image */}
           {report.reportCoverUrl && (
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <img
                 src={report.reportCoverUrl}
                 alt={`Cover for ${report.reportTitle}`}
-                className="w-full h-64 object-cover rounded-lg shadow-md"
+                className="w-full h-48 sm:h-56 lg:h-64 object-cover rounded-lg shadow-md"
                 onError={(e) => {
                   e.target.style.display = 'none';
                 }}
@@ -322,10 +322,10 @@ export default function ReportDetail() {
             </div>
           )}
 
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4 sm:gap-0">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2 mr-2">{report.reportTitle}</h1>
-              <p className="text-gray-600 mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 mr-2">{report.reportTitle}</h1>
+              <p className="text-gray-600 mb-2 text-sm sm:text-base">
                 By{" "}
                 <Link
                   to={`/profile/${report.userId?._id}`}
@@ -335,23 +335,23 @@ export default function ReportDetail() {
                 </Link>
               </p>
 
-              <p className="text-gray-500 text-sm">{formatRelativeTime(report.createdAt)}</p>
+              <p className="text-gray-500 text-xs sm:text-sm">{formatRelativeTime(report.createdAt)}</p>
             </div>
-            <div className={`px-4 py-2 rounded-lg border ${getVerdictColor(report.truthVerdictParsed)}`}>
-              <span className="font-semibold">{report.truthVerdictParsed}</span>
+            <div className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg border ${getVerdictColor(report.truthVerdictParsed)} self-start`}>
+              <span className="font-semibold text-sm sm:text-base">{report.truthVerdictParsed}</span>
             </div>
           </div>
 
           {/* Related Claims */}
           {report.claimIds && report.claimIds.length > 0 && (
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Related Claims</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Related Claims</h3>
               <div className="bg-blue-50 p-3 rounded-lg space-y-2">
                 {report.claimIds.slice(0, 3).map((claim) => (
                   <Link
                     key={claim._id}
                     to={`/claims/${claim._id}`}
-                    className="block text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] text-sm underline"
+                    className="block text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] text-xs sm:text-sm underline"
                   >
                     {claim.claimTitle || 'Untitled Claim'}
                   </Link>
@@ -363,33 +363,33 @@ export default function ReportDetail() {
 
           {/* AI Summary */}
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
-            <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
-              <p className="text-gray-700">{report.aiReportSummary}</p>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
+            <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border-l-4 border-purple-400">
+              <p className="text-gray-700 text-sm sm:text-base">{report.aiReportSummary}</p>
             </div>
           </div>
         </div>
 
         {/* Report Content */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Full Report</h2>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Full Report</h2>
           <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words">
+            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words text-sm sm:text-base">
               {report.reportContent}
             </div>
           </div>
         </div>
 
         {/* Report Conclustion */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Conclusion</h2>
-          <p className="text-gray-700 whitespace-pre-wrap break-words">{report.reportConclusion}</p>
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Conclusion</h2>
+          <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base">{report.reportConclusion}</p>
         </div>
 
         {/* References */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">References</h2>
-          <div className="whitespace-pre-wrap text-gray-700 break-words">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">References</h2>
+          <div className="whitespace-pre-wrap text-gray-700 break-words text-sm sm:text-base">
             {report.reportReferences}
           </div>
         </div>
