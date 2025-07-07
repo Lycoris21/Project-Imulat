@@ -53,7 +53,7 @@ const PaginationControls = ({ currentPage, totalPages, onPageChange, className =
                 disabled={currentPage === 1 || disabled}
                 className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -69,7 +69,7 @@ const PaginationControls = ({ currentPage, totalPages, onPageChange, className =
                         key={page}
                         onClick={() => onPageChange(page)}
                         disabled={disabled}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
                             currentPage === page
                                 ? 'bg-[#1E275E] text-white border border-[#1E275E]'
                                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-200'
@@ -86,7 +86,7 @@ const PaginationControls = ({ currentPage, totalPages, onPageChange, className =
                 disabled={currentPage === totalPages || disabled}
                 className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
             </button>

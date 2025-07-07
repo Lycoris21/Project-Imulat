@@ -36,7 +36,7 @@ const ReportCardDetailed = ({ report }) => (
             </div>
 
             {/* AI Summary */}
-            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 min-h-[3.5rem] sm:min-h-[4rem]">
+            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3 min-h-[3rem] sm:min-h-[4rem]">
                 <span className="font-medium">AI-generated summary:</span> {truncateWords(report.aiReportSummary)}
             </p>                  
             {/* Author & Claim Count */}

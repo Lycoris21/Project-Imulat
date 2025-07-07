@@ -6,19 +6,19 @@ import { truncateWords } from '../../utils/strings';
 const ClaimCardDetailed = ({ claim }) => (
   <div key={claim._id} className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl min-w-[18rem] max-w-[28rem] w-full flex-shrink-0 relative transition-all duration-300 transform hover:-translate-y-1 group">
     <Link to={`/claims/${claim._id}`} className="block">
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-bold text-gray-800 text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.75em]">
+          <h3 className="font-bold text-gray-800 text-base sm:text-lg leading-tight group-hover:text-[color:var(--color-selected)] transition-colors flex-1 mr-3 line-clamp-2 min-h-[2.5em] sm:min-h-[2.75em]">
             {claim.claimTitle}
           </h3>
-          <span className={`px-3 py-1 rounded text-xs font-medium flex-shrink-0 ${getTruthIndexColor(claim.aiTruthIndex)}`}>
+          <span className={`px-2 py-1 sm:px-3 sm:py-1 rounded text-xs font-medium flex-shrink-0 ${getTruthIndexColor(claim.aiTruthIndex)}`}>
             AI Truth Index: {claim.aiTruthIndex}%
           </span>
         </div>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2rem]">
+        <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-4 min-h-[4rem] sm:min-h-[5rem]">
           <span className="font-medium">AI-generated summary:</span> {truncateWords(claim.aiClaimSummary)}
         </p>
-        <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
+        <div className="flex justify-between items-center mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500">
           <span>By <span className="font-medium">{claim.userId?.username || "Unknown"}</span></span>
           <div className="flex items-center gap-2">
             {claim.hasReport && (
@@ -34,8 +34,8 @@ const ClaimCardDetailed = ({ claim }) => (
           </div>
         </div>
         {/* Stats & Date */}
-        <div className="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-200">
-            <div className="flex items-center space-x-4">
+        <div className="flex justify-between items-center text-xs text-gray-500 pt-3 sm:pt-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3 sm:space-x-4">
                 {/* Likes */}
                 <span className="flex items-center space-x-1">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -62,7 +62,7 @@ const ClaimCardDetailed = ({ claim }) => (
             </div>
 
             {/* Date */}
-            <span className="italic">{formatRelativeTime(claim.createdAt)}</span>
+            <span className="italic text-xs sm:text-xs">{formatRelativeTime(claim.createdAt)}</span>
         </div>
       </div>
     </Link>

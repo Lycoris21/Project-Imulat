@@ -124,13 +124,13 @@ export default function Claims() {
             isLoading={searchLoading}
           />
 
-          <div className="max-w-2xl mx-auto mb-4 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-white text-xs font-medium">Sort by:</span>
+          <div className="max-w-2xl mx-auto mb-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
+            <div className="flex items-center gap-2 order-1 sm:order-1">
+              <span className="text-white text-xs sm:text-sm font-medium">Sort by:</span>
               <select
                 value={sort}
                 onChange={(e) => updateParams({ sort: e.target.value, page: 1 })}
-                className="px-2 py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 cursor-pointer text-xs min-w-[120px]"
+                className="px-2 py-1 sm:px-3 sm:py-1 rounded-md bg-white text-[color:var(--color-dark)] border border-gray-300 cursor-pointer text-xs sm:text-sm min-w-[120px] sm:min-w-[140px]"
               >
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
@@ -148,7 +148,7 @@ export default function Claims() {
                 currentPage={page} 
                 totalPages={totalPages} 
                 onPageChange={handlePageChange}
-                className="justify-center"
+                className="justify-center order-2 sm:order-2"
               />
             )}
           </div>

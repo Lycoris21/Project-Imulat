@@ -139,7 +139,7 @@ export default function Reports() {
           />
 
           <div className="max-w-2xl mx-auto mb-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
-            <div className="flex items-center gap-2 order-2 sm:order-1">
+            <div className="flex items-center gap-2 order-1 sm:order-1">
               <span className="text-white text-xs sm:text-sm font-medium">Sort by:</span>
               <select
                 value={sort}
@@ -161,7 +161,7 @@ export default function Reports() {
                 currentPage={page} 
                 totalPages={totalPages} 
                 onPageChange={handlePageChange}
-                className="justify-center order-1 sm:order-2"
+                className="justify-center order-2 sm:order-2"
               />
             )}
           </div>
