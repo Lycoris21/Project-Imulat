@@ -90,9 +90,9 @@ export default function NotificationItem({ notification, onClose, refreshNotific
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
-              <span className="text-gray-600 font-medium text-sm hover:text-blue-600 transition-colors">
+              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-medium text-sm hover:bg-gray-400 transition-colors">
                 {notification.senderId.username?.charAt(0).toUpperCase() || "U"}
-              </span>
+              </div>
             )}
           </Link>
           <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5 shadow-sm">
