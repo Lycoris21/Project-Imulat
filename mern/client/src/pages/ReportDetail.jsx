@@ -331,7 +331,7 @@ export default function ReportDetail() {
                   to={`/profile/${report.userId?._id}`}
                   className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
                 >
-                  {report.userId?.username}
+                  {report.userId?.username || "Unknown"}
                 </Link>
               </p>
 

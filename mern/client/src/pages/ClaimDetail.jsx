@@ -304,7 +304,7 @@ export default function ClaimDetail() {
                   to={`/profile/${claim.userId?._id}`}
                   className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
                 >
-                  {claim.userId?.username}
+                  {claim.userId?.username || "Unknown"}
                 </Link>
               </p>
               <p className="text-gray-500 text-xs sm:text-sm">{formatRelativeTime(claim.createdAt)}</p>
