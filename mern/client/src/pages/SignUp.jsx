@@ -97,8 +97,8 @@ export default function SignUp() {
 
 
   return (
-    <div className="min-h-screen bg-base-gradient flex flex-col justify-center items-center text-center px-4">
-      <div className="bg-[#ffffff] shadow-xl rounded-2xl w-[40%] p-8 m-auto">
+    <div className="min-h-[calc(100vh-5rem)] bg-base-gradient flex flex-col justify-center items-center text-center py-6 px-4">
+      <div className="bg-[#ffffff] shadow-xl rounded-xl w-full max-w-lg p-8 m-auto">
         <h2 className="text-3xl font-bold text-center text-[color:var(--color-deep)] mb-6">
           Create Your Account
         </h2>
