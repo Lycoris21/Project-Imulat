@@ -68,21 +68,21 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
         </div>
       )}
 
-      <nav className="h-16 sm:h-20 bg-white border-b shadow-sm px-3 sm:px-6 py-2 sm:py-4 flex justify-between items-center">
+      <nav className="h-16 sm:h-20 bg-white border-b shadow-sm px-1 xs:px-2 sm:px-4 lg:px-6 py-2 sm:py-4 flex justify-between items-center">
       {/* Left side - Logo and App Name */}
-      <Link to="/Home" className="flex items-center space-x-2 sm:space-x-3">
-        <div className="h-10 sm:h-12 md:h-14 lg:h-16">
+      <Link to="/Home" className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 flex-shrink-0">
+        <div className="h-14 w-14">
           <img
             src="/logo.png"
             alt="Project IMULAT Logo"
             className="w-full h-full object-contain"
           />
         </div>
-        <h1 className="text-sm sm:text-lg md:text-xl font-bold text-[color:var(--color-base)] -ml-1 sm:-ml-2 md:-ml-3 lg:-ml-5">Project IMULAT</h1>
+        <h1 className="text-base sm:text-base md:text-lg lg:text-xl font-medium sm:font-bold text-[color:var(--color-base)] -ml-1 sm:-ml-2 md:-ml-3 lg:-ml-4 whitespace-nowrap">Project IMULAT</h1>
       </Link>
 
       {/* Center - Navigation Items */}
-      <div className="hidden sm:flex items-center space-x-4 md:space-x-6 lg:space-x-8">
+      <div className="hidden sm:flex items-center space-x-1 md:space-x-3 lg:space-x-5 xl:space-x-7 flex-shrink-0">
         {navItems.map((item) => (
           <NavItem
             key={item.name}
