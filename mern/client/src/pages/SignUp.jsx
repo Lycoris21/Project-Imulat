@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext"; // adjust path if needed
 export default function SignUp() {
   const navigate = useNavigate();
   const datePickerRef = useRef(null);
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   const [form, setForm] = useState({
     username: "",
@@ -78,18 +78,20 @@ export default function SignUp() {
         }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
         let message = "Validation failed.";
-        if (Array.isArray(errorData.details)) {
-          message = errorData.details.map((e) => `• ${e.msg}`).join("\n");
-        } else if (errorData.error) {
-          message = errorData.error;
+        if (Array.isArray(data.details)) {
+          message = data.details.map((e) => `• ${e.msg}`).join("\n");
+        } else if (data.message) {
+          message = data.message;
         }
         throw new Error(message);
       }
 
-      navigate("/login");
+      login(data.user);
+      navigate("/home");
     } catch (err) {
       setError(err.message);
     }
@@ -123,7 +125,7 @@ export default function SignUp() {
                 value={form.username}
                 onChange={handleChange}
                 required
-                maxLength={50}
+                maxLength={20}
                 placeholder="Enter Username"
                 className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
               />
