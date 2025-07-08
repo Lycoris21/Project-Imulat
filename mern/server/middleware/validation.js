@@ -18,9 +18,9 @@ export const validateUser = [
   .trim()
   .isLength({
     min: 3,
-    max: 20
+    max: 15
   })
-  .withMessage('Username must be between 3 and 20 characters')
+  .withMessage('Username must be between 3 and 15 characters')
   .matches(/^[a-zA-Z0-9_]+$/)
   .withMessage('Username can only contain letters, numbers, and underscores'),
   body('email')

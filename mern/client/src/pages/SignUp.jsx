@@ -125,7 +125,7 @@ export default function SignUp() {
                 value={form.username}
                 onChange={handleChange}
                 required
-                maxLength={20}
+                maxLength={15}
                 placeholder="Enter Username"
                 className="appearance-none bg-transparent border-none w-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-b-2 focus:border-blue-600"
               />
