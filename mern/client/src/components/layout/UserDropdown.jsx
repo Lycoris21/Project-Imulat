@@ -78,9 +78,14 @@ export default function UserDropdown({ user, onLogout, onPasswordChanged }) {
 
             {open && (
                 <div
-                    className={`absolute -right-6 mt-1 min-w-[200px] bg-white shadow-lg border border-gray-200 text-sm rounded-lg origin-top-right transform transition-all duration-150 z-50 ${
+                    className={`fixed min-w-[200px] bg-white shadow-lg border border-gray-200 text-sm rounded-lg origin-top-right transform transition-all duration-150 z-50 ${
                         isAnimating ? "opacity-100 scale-100" : "opacity-0 scale-95"
                     }`}
+                    style={{
+                        top: (ref.current?.getBoundingClientRect().bottom || 0) + 4,
+                        right: 0,
+                        maxWidth: '100vw',
+                    }}
                 >
                     {[
                         { to: `/profile/${user?._id}`, label: "Profile" },
