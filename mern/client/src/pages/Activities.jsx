@@ -103,7 +103,7 @@ const Activities = () => {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-2">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-white">Activity Log</h1>
             <button

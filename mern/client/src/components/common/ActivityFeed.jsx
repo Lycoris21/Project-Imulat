@@ -208,7 +208,7 @@ const getTargetTitle = (activity) => {
 
   // For comments, show content preview
   if (target.commentContent && target.commentContent.length > 0) {
-    return target.commentContent.substring(0, 50) + (target.commentContent.length > 50 ? '...' : '');
+    return target.commentContent.substring(0, 95) + (target.commentContent.length > 50 ? '...' : '');
   }
 
   // For users
@@ -254,19 +254,19 @@ const ActivityItem = ({ activity }) => {
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-lg">
             {icon}
           </div>
-        </div>
+        </div>      
         <div className="flex-grow min-w-0">
-          <div className="text-sm">
-            <span className="text-gray-900">You </span>
-            <span className="font-medium text-gray-700">{text}</span>
-            {targetTitle && (
-              <span className="ml-1">
-                <span className="text-gray-500"> "</span>
-                <span className="text-gray-700 font-medium">{targetTitle}</span>
-                <span className="text-gray-500">"</span>
-              </span>
-            )}
-          </div>
+        <div className="text-sm break-words">
+          <span className="text-gray-900">You </span>
+          <span className="font-medium text-gray-700 break-words">{text}</span>
+          {targetTitle && (
+            <span className="ml-1">
+              <span className="text-gray-500"> "</span>
+              <span className="text-gray-700 font-medium break-words overflow-wrap-anywhere">{targetTitle}</span>
+              <span className="text-gray-500">"</span>
+            </span>
+          )}
+        </div>
           <div className="mt-1 flex items-center space-x-2">
             <p className="text-xs text-gray-500">{time}</p>
           </div>
@@ -287,9 +287,9 @@ const ActivityItem = ({ activity }) => {
         </div>
       </div>
       <div className="flex-grow min-w-0">
-        <div className="text-sm">
+        <div className="text-sm break-words">
           <span className="text-gray-900">You </span>
-          <span className="font-medium text-[color:var(--color-base)] group-hover:text-[color:var(--color-dark)] transition-colors">
+          <span className="font-medium text-[color:var(--color-base)] group-hover:text-[color:var(--color-dark)] transition-colors break-words">
             {text}
           </span>
           {targetTitle && activity.targetType !== 'USER' && (
@@ -301,7 +301,7 @@ const ActivityItem = ({ activity }) => {
                   return 'titled "';
                 })()}
               </span>
-              <span className="text-gray-700 font-medium">{targetTitle}</span>
+              <span className="text-gray-700 font-medium break-words overflow-wrap-anywhere">{targetTitle}</span>
               <span className="text-gray-500">"</span>
             </span>
           )}
