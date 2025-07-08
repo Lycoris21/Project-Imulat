@@ -330,7 +330,7 @@ export default function HomeSearch() {
                                     currentPage={usersPage}
                                     totalPages={usersTotalPages}
                                     onPageChange={handleUsersPageChange}
-                                    className="justify-center"
+                                    className="justify-center mt-3"
                                 />
                             </div>
                         )}

@@ -32,7 +32,7 @@ export default function BookmarksSearch() {
     const [collectionsTotal, setCollectionsTotal] = useState(0);
     
     const itemsPerPage = 10;
-    const collectionsPerPage = 12;
+    const collectionsPerPage = 9;
     
     // Search functionality with suggestions
     const {
