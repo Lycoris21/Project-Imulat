@@ -3,6 +3,8 @@ import { useAuth } from "../../context/AuthContext";
 import { LoginRequiredModal } from "../index";
 import { useState } from "react";
 import AlertModal from "../modals/AlertModal";
+import ReviewReportModal from "../modals/ReviewReportModal";
+import SuccessToast from "./SuccessToast";
 
 export default function ReactionBar({
   likes,
@@ -18,9 +20,13 @@ export default function ReactionBar({
   canEdit = false,
   handleOpenModal,
   pageType, // "claim" or "report"
+  onReviewReport, // Function to handle review report action
 }) {
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [alert, setAlert] = useState({
     isOpen: false,
     title: '',
@@ -61,6 +67,30 @@ export default function ReactionBar({
   };
 
   const canResearch = user?.role === "admin" || user?.role === "researcher";
+
+  const handleReviewClick = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    setShowReviewModal(true);
+  };
+
+  const handleApproveReport = () => {
+    if (onReviewReport) {
+      onReviewReport('approve');
+    }
+    setToastMessage("Approved Report Successfully");
+    setShowSuccessToast(true);
+  };
+
+  const handleDisapproveReport = (reason) => {
+    if (onReviewReport) {
+      onReviewReport('disapprove', reason);
+    }
+    setToastMessage("Disapproved Report Successfully");
+    setShowSuccessToast(true);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 mb-4 sm:mb-6">
@@ -185,12 +215,43 @@ export default function ReactionBar({
             <span className="hidden sm:inline">Report</span>
           </button>
         )}
+
+        {/* Researcher-only review button (only on report pages) */}
+        {canResearch && pageType === "report" && (
+          <button
+            onClick={handleReviewClick}
+            className="px-2 py-2 sm:px-3 sm:py-2 md:px-3 md:py-2 lg:px-4 lg:py-2 bg-[color:var(--color-dark)] text-white font-semibold rounded-lg shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-1 cursor-pointer text-xs md:text-sm lg:text-base flex-shrink-0"
+          >
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="sm:hidden">Review</span>
+            <span className="hidden sm:inline">Review</span>
+          </button>
+        )}
       </div>
 
       <LoginRequiredModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         action="like, dislike, bookmark, edit or delete content"
+      />
+
+      <ReviewReportModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onApprove={handleApproveReport}
+        onDisapprove={handleDisapproveReport}
+      />
+
+      <SuccessToast
+        message={toastMessage}
+        isVisible={showSuccessToast}
+        onClose={() => setShowSuccessToast(false)}
       />
 
       <AlertModal

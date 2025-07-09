@@ -237,6 +237,41 @@ export default function ReportDetail() {
     }
   };
 
+  const handleReviewReport = async (action, reason = null) => {
+    try {
+      const payload = {
+        action,
+        reportId: report._id,
+        ...(reason && { reason })
+      };
+
+      const response = await fetch(`http://localhost:5050/api/reports/${report._id}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to review report');
+      }
+
+      // Optionally refresh the report data to show updated status
+      fetchInitialData();
+    } catch (error) {
+      console.error('Error reviewing report:', error);
+      setAlert({
+        isOpen: true,
+        title: 'Review Failed',
+        message: error.message || 'Failed to review report',
+        type: 'error'
+      });
+    }
+  };
+
   const handleDeleteReport = async () => {
     if (!user || (user._id !== report.userId?._id && user.role !== 'admin')) {
       setAlert({
@@ -407,6 +442,7 @@ export default function ReportDetail() {
           canEdit={user._id !== report.userId?._id || user.role == "admin"}
           onEdit={() => setShowEditModal(true)}
           pageType="report"
+          onReviewReport={handleReviewReport}
         />
 
 
