@@ -20,6 +20,11 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     type: "error",
   });
 
+  const [evaluationModal, setEvaluationModal] = useState({
+    isOpen: false,
+    truthIndex: 75, // Static data for now
+  });
+
   // Autofill form when editing an existing claim
   useEffect(() => {
     if (isOpen && claim) {
@@ -50,10 +55,32 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     }, 150);
   };
 
-  // Submit handler
-  const handleSubmitClaim = async (e) => {
+  // Evaluate claim handler - shows confirmation modal
+  const handleEvaluateClaim = (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!claimFormData.claimTitle.trim() || !claimFormData.claimContent.trim()) {
+      setAlert({
+        isOpen: true,
+        title: "Validation Error",
+        message: "Please fill in both claim title and content before evaluating.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Show evaluation modal with static truth index
+    setEvaluationModal({
+      isOpen: true,
+      truthIndex: 75, // Static data for now
+    });
+  };
+
+  // Submit handler (called after evaluation confirmation)
+  const handleSubmitClaim = async () => {
     setIsSubmitting(true);
+    setEvaluationModal({ isOpen: false, truthIndex: 0 }); // Close evaluation modal
 
     try {
       const payload = {
@@ -183,7 +210,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
         <div className="flex-1 overflow-y-auto">
           <div className="p-6">
-            <form id="claim-form" onSubmit={handleSubmitClaim} className="space-y-4">
+            <form id="claim-form" onSubmit={handleEvaluateClaim} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Claim Title</label>
                 <input
@@ -241,11 +268,53 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
               disabled={isSubmitting}
               className={`px-6 py-2 rounded-lg transition-colors flex-1 ${isSubmitting ? "bg-gray-400 text-gray-600 cursor-not-allowed" : "bg-[color:var(--color-base)] text-white hover:bg-[color:var(--color-dark)] cursor-pointer"}`}
             >
-              {isSubmitting ? "Submitting..." : (claim ? "Update Claim" : "Submit Claim")}
+              {isSubmitting ? "Submitting..." : (claim ? "Update Claim" : "Evaluate Claim")}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Evaluation Confirmation Modal */}
+      {evaluationModal.isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-60 p-4 bg-[#00000080]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Claim Evaluation Complete</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                The AI Truth Index of this claim is:
+              </p>
+              <div className="text-3xl font-bold text-blue-600 mb-4">
+                {evaluationModal.truthIndex}%
+              </div>
+              <p className="text-sm text-gray-600">
+                Would you like to submit this claim?
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setEvaluationModal({ isOpen: false, truthIndex: 0 })}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitClaim}
+                className="px-4 py-2 bg-[color:var(--color-base)] text-white rounded-lg hover:bg-[color:var(--color-dark)] transition-colors flex-1"
+              >
+                Yes, Submit Claim
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AlertModal
         isOpen={alert.isOpen}
