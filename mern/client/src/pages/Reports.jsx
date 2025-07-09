@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
 import { parseTruthVerdict } from "../utils/strings";
+import PeerReviewModal from "../components/modals/PeerReviewModal";
+
 import {
   LoadingScreen,
   ReportCard,
@@ -24,6 +26,9 @@ export default function Reports() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [totalReports, setTotalReports] = useState(0);
+  const [showPeerReviewModal, setShowPeerReviewModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+
 
   const itemsPerPage = 6;
   const canResearch = isLoggedIn && (user?.role === "admin" || user?.role === "researcher");
@@ -77,6 +82,35 @@ export default function Reports() {
     }
   };
 
+  // peer review: need to modify
+  const handlePeerReviewSubmit = async ({ reviewText }) => {
+  try {
+    const response = await fetch(`http://localhost:5050/api/reports/${selectedReport?._id || reports[0]?._id}/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        reviewText,
+        reviewerId: user._id,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to submit review");
+    }
+
+    setShowPeerReviewModal(false);
+    await fetchReports(); // refresh
+  } catch (error) {
+    console.error("Peer review failed:", error);
+    alert(error.message);
+  }
+};
+
+
   const totalPages = Math.ceil(totalReports / itemsPerPage);
 
   if (loading) return <LoadingScreen message="Loading reports..." />;
@@ -96,22 +130,35 @@ export default function Reports() {
           <p className="text-gray-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-2">
             Browse through all fact-checking reports created by our expert team
           </p>
-          {canResearch && (
-            <div className="absolute top-0 right-0 hidden sm:block">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-1 sm:gap-2 cursor-pointer text-sm sm:text-base"
-              >
-                {/* Plus icon - always visible */}
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                {/* Full text on larger screens, abbreviated on mobile */}
-                <span className="hidden sm:inline">Make A Report</span>
-                <span className="sm:hidden">Report</span>
-              </button>
-            </div>
-          )}
+{canResearch && (
+  <div className="absolute top-0 right-0 hidden sm:flex gap-2">
+    <button
+      onClick={() => setShowCreateModal(true)}
+      className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base cursor-pointer"
+    >
+      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      <span className="hidden sm:inline">Make A Report</span>
+      <span className="sm:hidden">Report</span>
+    </button>
+
+    <button
+      onClick={() => {
+        setSelectedReport(null);
+        setShowPeerReviewModal(true);
+      }}
+      className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-sm sm:text-base cursor-pointer"
+    >
+      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+      <span className="hidden sm:inline">Peer Review</span>
+      <span className="sm:hidden">Review</span>
+    </button>
+  </div>
+)}
+
         </div>
 
         {/* Mobile "Make A Report" button */}
@@ -197,6 +244,13 @@ export default function Reports() {
         onClose={() => setShowCreateModal(false)}
         onSubmitFinish={handleSubmitFinish}
       />
+
+        <PeerReviewModal
+    isOpen={showPeerReviewModal}
+    onClose={() => setShowPeerReviewModal(false)}
+    onSubmit={handlePeerReviewSubmit}
+  />
+
       
       {/* Scroll to Top */}
       <ScrollToTop totalItems={totalReports} />
