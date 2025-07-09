@@ -421,6 +421,47 @@ export default function ReportDetail() {
           <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base">{report.reportConclusion}</p>
         </div>
 
+        {/* Peer Reviews (Visible to Admins and Researchers only) */}
+{(user?.role === 'admin' || user?.role === 'researcher') && (
+  <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+      Peer Reviews
+    </h2>
+
+    {/* Replace this with dynamic data from backend later */}
+    <div className="space-y-4">
+      {[
+        {
+          reviewer: 'Admin A',
+          role: 'admin',
+          review: 'This report presents the evidence clearly and supports the conclusion effectively.',
+        },
+        {
+          reviewer: 'Researcher B',
+          role: 'researcher',
+          review: 'There’s good use of sources, but I suggest adding counterclaims in the summary.',
+        },
+        {
+          reviewer: 'Admin C',
+          role: 'admin',
+          review: 'Excellent structure. Consider rewording the last paragraph of the conclusion.',
+        },
+      ].map((rev, index) => (
+        <div
+          key={index}
+          className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50"
+        >
+          <div className="text-sm sm:text-base text-gray-800 font-semibold mb-1">
+            {rev.reviewer} <span className="text-gray-500 text-xs sm:text-sm">({rev.role})</span>
+          </div>
+          <p className="text-gray-700 text-sm sm:text-base whitespace-pre-wrap">{rev.review}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+
         {/* References */}
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">References</h2>
