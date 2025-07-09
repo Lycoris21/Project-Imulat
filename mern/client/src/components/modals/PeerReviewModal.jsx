@@ -4,17 +4,27 @@ import { useNavigate } from "react-router-dom";
 export default function PeerReviewModal({ isOpen, onClose }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
+  const [reports, setReports] = useState([]);
 
-  const mockReports = [
-    { id: "r1", title: "Vaccines cause autism", submittedBy: "User A", date: "2025-07-01" },
-    { id: "r2", title: "Climate change is a hoax", submittedBy: "User B", date: "2025-07-03" },
-    { id: "r3", title: "Earth is flat", submittedBy: "User C", date: "2025-07-05" },
-    { id: "r4", title: "5G towers cause COVID-19", submittedBy: "User D", date: "2025-07-07" },
-    { id: "r6", title: "Dinosaurs lived with humans", submittedBy: "User F", date: "2025-07-10" },
-    { id: "r7", title: "The moon landing was faked", submittedBy: "User G", date: "2025-07-11" },
-    { id: "r8", title: "Wearing masks lowers oxygen levels", submittedBy: "User H", date: "2025-07-12" },
-    { id: "r9", title: "Bill Gates created the coronavirus", submittedBy: "User I", date: "2025-07-13" },
-  ];
+
+useEffect(() => {
+  if (!isOpen) return;
+
+  setIsAnimating(true);
+
+  const fetchPendingReports = async () => {
+    try {
+      const res = await fetch("http://localhost:5050/api/reports/pending");
+      const data = await res.json();
+      setReports(data.reports ?? []);
+    } catch (err) {
+      console.error("Failed to fetch pending reports", err);
+    }
+  };
+
+  fetchPendingReports();
+}, [isOpen]);
+
 
   useEffect(() => {
     if (isOpen) setIsAnimating(true);
@@ -48,23 +58,24 @@ export default function PeerReviewModal({ isOpen, onClose }) {
 
         {/* Scrollable List */}
         <div className="p-6 overflow-y-auto flex-1 bg-[#f9f9fc]">
-          {mockReports.length === 0 ? (
-            <p className="text-gray-500">No reports currently need review.</p>
-          ) : (
-            <ul className="space-y-4">
-              {mockReports.map((report) => (
-                <li
-                  key={report.id}
-                  onClick={() => handleReportClick(report.id)}
-                  className="cursor-pointer border border-gray-200 rounded-lg p-4 shadow-sm bg-white hover:bg-gray-200"
-                >
-                  <h3 className="font-semibold text-lg text-gray-800">{report.title}</h3>
-                  <p className="text-sm text-gray-600">Submitted by: {report.submittedBy}</p>
-                  <p className="text-sm text-gray-500">Submitted on: {report.date}</p>
-                </li>
-              ))}
-            </ul>
-          )}
+{reports.length === 0 ? (
+  <p className="text-gray-500">No reports currently need review.</p>
+) : (
+  <ul className="space-y-4">
+    {reports.map((report) => (
+      <li
+        key={report._id}
+        onClick={() => handleReportClick(report._id)}
+        className="cursor-pointer border border-gray-200 rounded-lg p-4 shadow-sm bg-white hover:bg-gray-200"
+      >
+        <h3 className="font-semibold text-lg text-gray-800">{report.reportTitle}</h3>
+        <p className="text-sm text-gray-600">Submitted by: {report.userId?.username ?? 'Unknown'}</p>
+        <p className="text-sm text-gray-500">Submitted on: {new Date(report.createdAt).toLocaleDateString()}</p>
+      </li>
+    ))}
+  </ul>
+)}
+
         </div>
 
         {/* Footer */}

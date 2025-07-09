@@ -370,6 +370,12 @@ class ReportService {
     });
   }
 
+  static async getReportsByStatus(status) {
+  return Report.find({ status })
+    .populate('userId', 'username') // populate user for display
+    .sort({ createdAt: -1 });
+}
+
   // Delete report
   static async deleteReport(id, userId) {
     const updatedReport = await Report.findByIdAndUpdate(
@@ -783,6 +789,8 @@ class ReportService {
               reactionCounts
             };
           }));
+
+          
 
       return {
         reports: reportsWithMeta,

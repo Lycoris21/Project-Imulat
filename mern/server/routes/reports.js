@@ -10,6 +10,9 @@ router.get("/latest", ReportController.getLatestReports);
 // Get reports by truth verdict
 router.get("/verdict/:verdict", ReportController.getReportsByVerdict);
 
+// Get pending reports
+router.get('/pending', ReportController.getPendingReports);
+
 // Get all reports
 router.get("/", ReportController.getAllReports);
 

@@ -58,6 +58,37 @@ const reportSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+
+  status: {
+    type: String,
+    enum: ['pending', 'under_review', 'approved', 'rejected'],
+    default: 'pending'
+  },
+
+    peerReviews: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      reviewText: {
+        type: String,
+        required: true,
+        trim: true
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
+
+    approvedAt: {
+    type: Date,
+    default: null
+  },
+
   deletedAt: {
     type: Date,
   default:

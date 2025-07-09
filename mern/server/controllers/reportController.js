@@ -41,6 +41,9 @@ class ReportController {
     }
   }
 
+
+  
+
   // Create new report
   static async createReport(req, res) {
     try {
@@ -117,6 +120,18 @@ class ReportController {
       });
     }
   }
+
+  // Get all reports with status: pending
+static async getPendingReports(req, res) {
+  try {
+    const reports = await ReportService.getReportsByStatus("pending");
+    res.status(200).json({ reports });
+  } catch (error) {
+    console.error("Error fetching pending reports:", error);
+    res.status(500).json({ error: "Error fetching pending reports" });
+  }
+}
+
 
   // Delete report
   static async deleteReport(req, res) {
