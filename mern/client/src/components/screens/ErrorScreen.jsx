@@ -16,7 +16,7 @@ export default function ErrorScreen({ title, message, onBack }) {
       <div className="text-center">
         <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>
         <p className="text-white mb-4">{message}</p>
-        <button onClick={handleBack} className="text-white hover:text-gray-400 font-medium">
+        <button onClick={handleBack} className="text-white hover:text-gray-400 font-medium cursor-pointer">
           ← Back
         </button>
       </div>
