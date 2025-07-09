@@ -15,8 +15,7 @@ class UserService {
   static async getUserById(id) {
     // Step 1: Get the user without passwordHash
     const user = await User.findOne({
-      _id: id,
-      deletedAt: null
+      _id: id
     }, '-passwordHash').lean();
     if (!user)
       throw new Error('User not found');

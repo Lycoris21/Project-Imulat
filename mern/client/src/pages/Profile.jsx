@@ -50,6 +50,8 @@ export default function Profile() {
                 const data = await res.json();
 
                 if (isMounted) {
+                    if (data.deletedAt != null) throw new Error("Failed to fetch user profile");
+
                     setProfileData(data);
                     setReactionCounts({ likes: data.likes || 0, dislikes: data.dislikes || 0 });
                     setLoading(false);
