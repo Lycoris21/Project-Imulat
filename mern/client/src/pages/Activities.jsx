@@ -108,7 +108,7 @@ const Activities = () => {
             <h1 className="text-3xl font-bold text-white">Activity Log</h1>
             <button
               onClick={() => setShowFilters(prev => !prev)}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
             >
               <FilterIcon />
               Filters
@@ -129,7 +129,7 @@ const Activities = () => {
                     <input
                       type="date"
                       name="startDate"
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3 cursor-pointer"
                       value={dateRange?.startDate ? format(dateRange.startDate, 'yyyy-MM-dd') : ''}
                       onChange={handleDateRangeChange}
                     />
@@ -141,7 +141,7 @@ const Activities = () => {
                     <input
                       type="date"
                       name="endDate"
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3"
+                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3 cursor-pointer"
                       value={dateRange?.endDate ? format(dateRange.endDate, 'yyyy-MM-dd') : ''}
                       onChange={handleDateRangeChange}
                     />
@@ -152,7 +152,7 @@ const Activities = () => {
             <div className="mt-4 flex justify-end">
               <button
                 onClick={() => setDateRange(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
               >
                 Clear Filters
               </button>

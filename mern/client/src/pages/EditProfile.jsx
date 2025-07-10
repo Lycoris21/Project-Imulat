@@ -261,13 +261,13 @@ export default function EditProfile() {
         <div className="flex flex-col sm:flex-row justify-between items-center mt-10 gap-4">
           <button
             onClick={() => navigate(`/profile/${user._id}`)}
-            className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition"
+            className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={() => setShowConfirmModal(true)}
-            className="w-full sm:w-auto px-6 py-3 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] font-medium transition"
+            className="w-full sm:w-auto px-6 py-3 bg-[color:var(--color-dark)] text-white rounded hover:bg-[color:var(--color-base)] font-medium transition cursor-pointer"
           >
             Save Changes
           </button>
@@ -276,7 +276,7 @@ export default function EditProfile() {
         <div className="text-center mt-6">
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="text-sm text-red-600 hover:text-red-800 underline"
+            className="text-sm text-red-600 hover:text-red-800 underline cursor-pointer"
           >
             Delete Account
           </button>
