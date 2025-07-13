@@ -12,25 +12,21 @@ class UserService {
   }
 
   // Get user by ID
-  static async getUserById(id) {
-    // Step 1: Get the user without passwordHash
+  static async getUserById(id, viewerId = null) {
     const user = await User.findOne({
       _id: id
     }, '-passwordHash').lean();
     if (!user)
       throw new Error('User not found');
 
-    // Step 2: Get all claims authored by this user using service
-    const claims = await claimService.getClaimsByUser(id); // must use .lean({ virtuals: true }) internally
+    const claims = await claimService.getClaimsByUser(id);
     user.claims = claims;
 
-    // Step 3: If researcher, get reports using service
     if (user?.role === 'admin' || user?.role === 'researcher') {
-      const reports = await reportService.getReportsByUser(id); // already populates and returns virtuals
+      const reports = await reportService.getReportsByUser(id, viewerId); // pass viewer ID
       user.reports = reports;
     }
 
-    // Step 4: Count likes and dislikes on the user object
     const [likes, dislikes] = await Promise.all([
           Reaction.countDocuments({
             targetId: id,

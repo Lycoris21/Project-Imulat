@@ -76,9 +76,9 @@ export default function ReactionBar({
     setShowReviewModal(true);
   };
 
-  const handleApproveReport = () => {
+  const handleApproveReport = (comment) => {
     if (onReviewReport) {
-      onReviewReport('approve');
+      onReviewReport('approve', comment);
     }
     setToastMessage("Approved Report Successfully");
     setShowSuccessToast(true);

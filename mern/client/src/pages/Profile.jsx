@@ -45,7 +45,13 @@ export default function Profile() {
             if (!targetUserId) return;
 
             try {
-                const res = await fetch(`http://localhost:5050/api/users/${targetUserId}`);
+                const res = await fetch(`http://localhost:5050/api/users/${targetUserId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Viewer-ID': user?._id  // <-- pass current user ID
+                    }
+                });
+
                 if (!res.ok) throw new Error("Failed to fetch user profile");
                 const data = await res.json();
 
@@ -89,10 +95,10 @@ export default function Profile() {
     return (
         <div className="min-h-[calc(100vh-5rem)] bg-base-gradient px-4 sm:px-6 lg:px-8 py-6 sm:pt-6 lg:pt-8 flex justify-center">
             {/* Success Notification */}
-            <SuccessToast 
-                message="Profile updated successfully!" 
-                visible={showSuccessMessage} 
-                onClose={() => setShowSuccessMessage(false)} 
+            <SuccessToast
+                message="Profile updated successfully!"
+                visible={showSuccessMessage}
+                onClose={() => setShowSuccessMessage(false)}
             />
 
             <div className="w-full max-w-4xl bg-white rounded-lg sm:rounded-xl shadow-xl p-4 sm:p-6 lg:p-8">

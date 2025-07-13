@@ -62,11 +62,11 @@ const reportSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'under_review', 'approved', 'rejected'],
-    default: 'pending'
+  default:
+    'pending'
   },
 
-    peerReviews: [
-    {
+  peerReviews: [{
       userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -77,16 +77,22 @@ const reportSchema = new mongoose.Schema({
         required: true,
         trim: true
       },
+      decision: {
+        type: String,
+        enum: ['approve', 'disapprove'],
+        required: true
+      },
       createdAt: {
         type: Date,
-        default: Date.now
+      default:
+        Date.now
       }
     }
   ],
-
-    approvedAt: {
+  approvedAt: {
     type: Date,
-    default: null
+  default:
+    null
   },
 
   deletedAt: {

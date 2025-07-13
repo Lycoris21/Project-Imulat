@@ -30,6 +30,10 @@ const getActivityIcon = (type) => {
     case 'COMMENT_UPDATE':
     case 'COMMENT_EDIT':
       return '✏️';
+    case 'PEER_REVIEW_APPROVE':
+      return '✅';
+    case 'PEER_REVIEW_DISAPPROVE':
+      return '❌';
     default:
       return '🔔';
   }
@@ -107,13 +111,17 @@ const getActivityText = (activity) => {
     case 'COMMENT_UPDATE':
     case 'COMMENT_EDIT':
       return targetOwner ? `edited your comment on ${targetOwner}'s ${target.targetType.toLowerCase()}` : 'edited your comment';
+    case 'PEER_REVIEW_APPROVE':
+      return 'approved a report';
+    case 'PEER_REVIEW_DISAPPROVE':
+      return 'disapproved a report';
     default:
       return 'performed an action';
   }
 };
 
 const getActivityLink = (activity) => {
-  const { type, targetType, target, postId, postType} = activity;
+  const { type, targetType, target, postId, postType } = activity;
 
   // Profile updates are not clickable
   if (type === 'PROFILE_UPDATE') {
@@ -177,6 +185,11 @@ const getActivityLink = (activity) => {
       }
       const bookmarkId = getTargetId(target);
       return bookmarkId ? `/bookmarks/${bookmarkId}` : '#';
+    case 'PEER_REVIEW_APPROVE':
+    case 'PEER_REVIEW_DISAPPROVE': {
+      const reportId = getTargetId(activity.target);
+      return reportId ? `/reports/${reportId}` : '#';
+    }
     default:
       return '#';
   }
@@ -254,19 +267,19 @@ const ActivityItem = ({ activity }) => {
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-lg">
             {icon}
           </div>
-        </div>      
-        <div className="flex-grow min-w-0">
-        <div className="text-sm break-words">
-          <span className="text-gray-900">You </span>
-          <span className="font-medium text-gray-700 break-words">{text}</span>
-          {targetTitle && (
-            <span className="ml-1">
-              <span className="text-gray-500"> "</span>
-              <span className="text-gray-700 font-medium break-words overflow-wrap-anywhere">{targetTitle}</span>
-              <span className="text-gray-500">"</span>
-            </span>
-          )}
         </div>
+        <div className="flex-grow min-w-0">
+          <div className="text-sm break-words">
+            <span className="text-gray-900">You </span>
+            <span className="font-medium text-gray-700 break-words">{text}</span>
+            {targetTitle && (
+              <span className="ml-1">
+                <span className="text-gray-500"> "</span>
+                <span className="text-gray-700 font-medium break-words overflow-wrap-anywhere">{targetTitle}</span>
+                <span className="text-gray-500">"</span>
+              </span>
+            )}
+          </div>
           <div className="mt-1 flex items-center space-x-2">
             <p className="text-xs text-gray-500">{time}</p>
           </div>

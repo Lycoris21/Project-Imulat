@@ -28,4 +28,10 @@ router.patch("/:id", ReportController.updateReport);
 // Delete a report
 router.delete("/:id", ReportController.deleteReport);
 
+// Review a report
+router.post('/:reportId/review', ReportController.submitPeerReview);
+
+// Get reviews
+router.get('/:reportId/peer-reviews', ReportController.getPeerReviews);
+
 export default router;

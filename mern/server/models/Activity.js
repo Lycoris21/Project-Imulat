@@ -27,6 +27,8 @@ const activitySchema = new mongoose.Schema({
             'BOOKMARK_UPDATE',
             'COMMENT_UPDATE',
             'COMMENT_EDIT', // we went with edit
+            'PEER_REVIEW_APPROVE',
+            'PEER_REVIEW_DISAPPROVE',
             'PROFILE_UPDATE'
         ]
     },

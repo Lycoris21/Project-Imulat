@@ -4,6 +4,7 @@ import { parseTruthVerdict } from "../utils/strings";
 import { useAuth } from "../context/AuthContext";
 import { formatRelativeTime } from '../utils/time.js';
 import { getVerdictColor } from '../utils/colors.js';
+import { handleAPIError } from '../utils/helpers.js';
 
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection, CreateReportModal, SuccessToast } from '../components'
@@ -21,6 +22,7 @@ export default function ReportDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [peerReviews, setPeerReviews] = useState([]);
   const [alert, setAlert] = useState({
     isOpen: false,
     title: '',
@@ -81,6 +83,24 @@ export default function ReportDetail() {
     // Small delay to wait for DOM
     setTimeout(scrollToComment, 200);
   }, [location.hash]);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`http://localhost:5050/api/reports/${report._id}/peer-reviews`);
+      if (!res.ok) throw new Error("Failed to fetch peer reviews");
+      const data = await res.json();
+      setPeerReviews(data);
+    } catch (err) {
+      console.error('Failed to fetch peer reviews:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (!report?._id) return; // prevent fetch until report is loaded
+
+    fetchReviews();
+  }, [report?._id]);
+
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -195,13 +215,19 @@ export default function ReportDetail() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to remove bookmark');
+          await handleAPIError(response);
         }
 
         setIsBookmarked(false);
       } catch (error) {
         console.error('Error removing bookmark:', error);
-        // You could show a toast notification here for the error
+  
+        setAlert({
+          isOpen: true,
+          title: 'Remove Bookmark Failed',
+          message: error.message || 'Failed to remove bookmark',
+          type: 'error'
+        });
       }
     } else {
       // If not bookmarked, open modal to select collection
@@ -237,14 +263,16 @@ export default function ReportDetail() {
     }
   };
 
-  const handleReviewReport = async (action, reason = null) => {
+  const handleReviewReport = async (action, comment = "") => {
     try {
       const payload = {
-        action,
         reportId: report._id,
-        ...(reason && { reason })
+        userId: user?._id,
+        reviewText: comment.trim(),
+        decision: action  // Explicitly include decision field
       };
 
+      console.log(payload);
       const response = await fetch(`http://localhost:5050/api/reports/${report._id}/review`, {
         method: 'POST',
         headers: {
@@ -255,12 +283,13 @@ export default function ReportDetail() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to review report');
+        await handleAPIError(response);
       }
-
-      // Optionally refresh the report data to show updated status
+      
+      // Refresh report data to reflect new peer review
       fetchInitialData();
+      fetchReviews();
+
     } catch (error) {
       console.error('Error reviewing report:', error);
       setAlert({
@@ -291,8 +320,8 @@ export default function ReportDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user._id,
-          userRole: user.role
+          userId: user?._id,
+          userRole: user?.role
         })
       });
 
@@ -318,7 +347,7 @@ export default function ReportDetail() {
   };
 
   // Check if user can delete the report
-  const canDeleteReport = user && (user._id === report?.userId?._id || user.role === 'admin');
+  const canDeleteReport = user && (user?._id === report?.userId?._id || user?.role === 'admin');
 
   if (loading) {
     return (
@@ -422,44 +451,56 @@ export default function ReportDetail() {
         </div>
 
         {/* Peer Reviews (Visible to Admins and Researchers only) */}
-{(user?.role === 'admin' || user?.role === 'researcher') && (
-  <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
-    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
-      Peer Reviews
-    </h2>
+        {(user?.role === 'admin' || user?.role === 'researcher') && (
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+              Peer Reviews
+            </h2>
 
-    {/* Replace this with dynamic data from backend later */}
-    <div className="space-y-4">
-      {[
-        {
-          reviewer: 'Admin A',
-          role: 'admin',
-          review: 'This report presents the evidence clearly and supports the conclusion effectively.',
-        },
-        {
-          reviewer: 'Researcher B',
-          role: 'researcher',
-          review: 'There’s good use of sources, but I suggest adding counterclaims in the summary.',
-        },
-        {
-          reviewer: 'Admin C',
-          role: 'admin',
-          review: 'Excellent structure. Consider rewording the last paragraph of the conclusion.',
-        },
-      ].map((rev, index) => (
-        <div
-          key={index}
-          className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50"
-        >
-          <div className="text-sm sm:text-base text-gray-800 font-semibold mb-1">
-            {rev.reviewer} <span className="text-gray-500 text-xs sm:text-sm">({rev.role})</span>
+            {/* Replace this with dynamic data from backend later */}
+            <div className="space-y-4">
+              {peerReviews.length === 0 ? (
+                <p className="text-gray-500 text-sm">No peer reviews yet.</p>
+              ) : (
+                peerReviews.map((rev, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-gray-50"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="text-sm sm:text-base text-gray-800 font-semibold">
+                        <Link
+                          to={`/profile/${rev.userId?._id}`}
+                          className="hover:underline text-[color:var(--color-base)]"
+                        >
+                          {rev.userId?.username || "Unknown User"}
+                        </Link>
+                        <span className="text-gray-500 text-xs sm:text-sm">
+                          {" "}({rev.userId?.role || "reviewer"})
+                        </span>
+                      </div>
+
+                      {rev.decision && (
+                        <span
+                          className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full ${rev.decision === 'approve'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                            }`}
+                        >
+                          {rev.decision === 'approve' ? 'Approved' : 'Disapproved'}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-gray-700 text-sm sm:text-base whitespace-pre-wrap">
+                      {rev.reviewText}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-          <p className="text-gray-700 text-sm sm:text-base whitespace-pre-wrap">{rev.review}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+        )}
 
 
         {/* References */}
@@ -480,7 +521,7 @@ export default function ReportDetail() {
           onBookmark={handleBookmark}
           canDelete={canDeleteReport}
           onDelete={() => setShowDeleteConfirm(true)}
-          canEdit={user._id !== report.userId?._id || user.role == "admin"}
+          canEdit={user?._id !== report.userId?._id || user.role == "admin"}
           onEdit={() => setShowEditModal(true)}
           pageType="report"
           onReviewReport={handleReviewReport}
@@ -542,13 +583,13 @@ export default function ReportDetail() {
               >
                 {deleting && (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        )}
-        {deleting ? 'Deleting...' : 'Delete Report'}
-      </button>
-    </div>
-  </div>
-</div>
-)}
+                )}
+                {deleting ? 'Deleting...' : 'Delete Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AlertModal
         isOpen={alert.isOpen}

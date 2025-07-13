@@ -1,4 +1,4 @@
-import { Report, User, Claim, Comment, Activity } from "../models/index.js";
+import { Report, User, Claim, Comment, Activity, Notification } from "../models/index.js";
 import aiSummaryService from "./aiSummaryService.js";
 import ReactionService from "./reactionService.js";
 import mongoose from "mongoose";
@@ -11,6 +11,7 @@ class ReportService {
 
     // Base match criteria
     let matchCriteria = {
+      status: "approved",
       deletedAt: null
     };
 
@@ -303,6 +304,7 @@ class ReportService {
       const newReport = new Report({
         ...reportData,
         aiReportSummary,
+        status: "pending",
         claimIds: claimIds || []
       });
 
@@ -336,8 +338,11 @@ class ReportService {
 
   static async updateReport(id, updateData, userId) {
     const updated = await Report.findByIdAndUpdate(
-        id,
-        updateData, {
+        id, {
+        ...updateData,
+        status: 'pending', // reset status
+        peerReviews: []// clear all reviews
+      }, {
         new: true,
         runValidators: true
       })
@@ -369,10 +374,15 @@ class ReportService {
   }
 
   static async getReportsByStatus(status) {
-  return Report.find({ status })
+    return Report.find({
+      status,
+      deletedAt: null
+    })
     .populate('userId', 'username') // populate user for display
-    .sort({ createdAt: -1 });
-}
+    .sort({
+      createdAt: -1
+    });
+  }
 
   // Delete report
   static async deleteReport(id, userId) {
@@ -436,11 +446,18 @@ class ReportService {
   }
 
   // Get reports by user
-  static async getReportsByUser(userId) {
-    const reports = await Report.find({
+  static async getReportsByUser(userId, viewerId) {
+    const filter = {
       userId,
-      deletedAt: null
-    })
+      deletedAt: null,
+    };
+
+    // Only show approved reports if the viewer is not the owner
+    if (viewerId !== String(userId)) {
+      filter.status = 'approved';
+    }
+
+    const reports = await Report.find(filter)
       .populate('userId', 'username email')
       .populate('claimIds', 'claimTitle aiTruthIndex')
       .sort({
@@ -471,6 +488,7 @@ class ReportService {
   // Get latest reports
   static async getLatestReports() {
     const reports = await Report.find({
+      status: "approved",
       deletedAt: null
     })
       .populate('userId', 'username email')
@@ -788,8 +806,6 @@ class ReportService {
             };
           }));
 
-          
-
       return {
         reports: reportsWithMeta,
         total,
@@ -797,6 +813,139 @@ class ReportService {
         totalPages: Math.ceil(total / limit)
       };
     }
+  }
+
+  static async getPeerReviews(reportId) {
+    const report = await Report.findById(reportId).populate({
+      path: 'peerReviews.userId',
+      select: 'username role' // Assuming User model has fullName and role
+    });
+
+    if (!report)
+      throw new Error('Report not found');
+
+    return report.peerReviews;
+  }
+
+  static async submitPeerReview(reportId, userId, reviewText, decision, io = null) {
+    if (!userId) {
+      throw new Error("Missing user ID.");
+    }
+    if (!reviewText?.trim()) {
+      throw new Error("Review text is required.");
+    }
+    if (!['approve', 'disapprove'].includes(decision)) {
+      throw new Error("Decision must be either 'approve' or 'disapprove'.");
+    }
+
+    const report = await Report.findById(reportId);
+    if (!report) {
+      throw new Error("Report not found.");
+    }
+
+    const alreadyReviewed = report.peerReviews.some(
+        (review) => review.userId.toString() === userId);
+    if (alreadyReviewed) {
+      throw new Error("User has already submitted a review.");
+    }
+
+    // Add the peer review
+    report.peerReviews.push({
+      userId,
+      reviewText: reviewText.trim(),
+      decision,
+    });
+
+    // Update status
+    let previousStatus = report.status;
+    if (['pending', ''].includes(report.status)) {
+      report.status = 'under_review';
+    }
+
+    const approvals = report.peerReviews.filter(r => r.decision === 'approve').length;
+    const rejections = report.peerReviews.filter(r => r.decision === 'disapprove').length;
+
+    if (approvals >= 2) {
+      report.status = 'approved';
+    } else if (rejections >= 5) {
+      report.status = 'rejected';
+    }
+
+    await report.save();
+
+    // LOG THE ACTIVITY
+    const actionType = decision === 'approve' ? 'PEER_REVIEW_APPROVE' : 'PEER_REVIEW_DISAPPROVE';
+
+    try {
+      await activityService.logActivity(
+        userId,
+        actionType,
+        'REPORT',
+        reportId,
+        'Report');
+    } catch (err) {
+      console.error('Error logging ' + actionType + ' activity:', err);
+    }
+
+    const recipientId = report.userId?.toString();
+
+    // Notify the owner about the review (only if not reviewing their own report)
+    if (recipientId && recipientId !== userId) {
+      const alreadyExists = await Notification.exists({
+        recipientId,
+        senderId: userId,
+        type: "peer_review",
+        targetType: "report",
+        targetId: reportId,
+      });
+
+      if (!alreadyExists) {
+        const newNotif = await Notification.create({
+          recipientId,
+          senderId: userId,
+          type: "peer_review",
+          targetType: "report",
+          targetId: reportId,
+        });
+
+        if (io) {
+          io.to(recipientId).emit("new-notification", newNotif);
+        }
+      }
+    }
+
+    // Notify the owner when report status is finalized (approved or rejected)
+    if (
+      report.status !== previousStatus &&
+      ['approved', 'rejected'].includes(report.status) &&
+      recipientId) {
+      const finalStatusNotif = await Notification.create({
+        recipientId,
+        senderId: null,
+        type: report.status === 'approved' ? 'report_approved' : 'report_rejected',
+        targetType: 'report',
+        targetId: reportId,
+      });
+
+      if (io) {
+        io.to(recipientId).emit("new-notification", finalStatusNotif);
+      }
+    }
+
+    return report.peerReviews;
+  }
+
+  static async getReportsByStatuses(statuses) {
+    return await Report.find({
+      status: {
+        $in: statuses
+      },
+      deletedAt: null // Exclude soft-deleted reports
+    })
+    .populate('userId', 'username role') // optional: populate creator info
+    .sort({
+      createdAt: -1
+    });
   }
 }
 

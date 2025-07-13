@@ -9,11 +9,11 @@ const notificationSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
   },
   type: {
     type: String,
-    enum: ["like", "comment"],
+    enum: ["like", "comment", "peer_review", "report_approved", "report_rejected"],
     required: true,
   },
   targetType: {
