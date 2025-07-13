@@ -1,5 +1,7 @@
 import fetch from "node-fetch";
 
+let aiEnabled = false; // WHY WASN'T IT HERE IN THE FIRST PLACE???
+
 class aiSummaryService {
     static apiKey = process.env.COHERE_API_KEY;
 
@@ -19,6 +21,10 @@ class aiSummaryService {
     }
 
     static async generateTruthIndex(text) {
+        if (!aiEnabled){
+            return Math.floor(Math.random() * 100);
+        }
+
         const apiKey = process.env.COHERE_API_KEY;
 
         const response = await fetch("https://api.cohere.ai/v1/generate", {
@@ -45,6 +51,10 @@ class aiSummaryService {
 
 
     static async generateAISummary(text) {
+        if (!aiEnabled){
+            return "SAMPLE AI SUMMARY";
+        }
+
         const response = await fetch("https://api.cohere.ai/v1/summarize", {
         method: "POST",
         headers: {

@@ -4,8 +4,6 @@ import ReactionService from "./reactionService.js";
 import mongoose from "mongoose";
 import activityService from './activityService.js';
 
-let aiEnabled = false;
-
 class ReportService {
   // Get all reports
   static async getAllReports(page = 1, limit = 24, sort = 'newest') {
@@ -300,7 +298,7 @@ class ReportService {
         }
       }
 
-      const aiReportSummary = aiEnabled ? await aiSummaryService.generateAISummary(reportContent) : "SAMPLE AI SUMMARY";
+      const aiReportSummary = await aiSummaryService.generateAISummary(reportContent);
 
       const newReport = new Report({
         ...reportData,

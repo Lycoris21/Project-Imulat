@@ -315,13 +315,13 @@ class ClaimService {
   }
 
   static async createClaim(claimData) {
-    const { claimContent } = claimData;
+    const { claimContent, aiTruthIndex: clientTruthIndex } = claimData;
 
     try {
       console.log("Creating claim with content:", claimContent); // log input
 
-      const aiClaimSummary = aiEnabled ? await aiSummaryService.generateAISummary(claimContent) : "SAMPLE AI SUMMARY";
-      const aiTruthIndex = aiEnabled ? await aiSummaryService.generateTruthIndex(claimContent) : Math.floor(Math.random() * 101); ;
+      const aiClaimSummary = await aiSummaryService.generateAISummary(claimContent);
+      const aiTruthIndex = clientTruthIndex ?? await aiSummaryService.generateTruthIndex(claimContent);
 
       const newClaim = new Claim({
         ...claimData,

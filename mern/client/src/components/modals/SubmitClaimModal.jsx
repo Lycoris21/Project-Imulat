@@ -10,7 +10,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   const [claimFormData, setClaimFormData] = useState({
     claimTitle: "",
     claimContent: "",
-    claimSources: ""
+    claimSources: "",
+    aiTruthIndex: 50, // Default mid-point value
   });
 
   const [alert, setAlert] = useState({
@@ -22,7 +23,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
   const [evaluationModal, setEvaluationModal] = useState({
     isOpen: false,
-    truthIndex: 75, // Static data for now
+    truthIndex: 50, // Static data for now
   });
 
   // Autofill form when editing an existing claim
@@ -31,7 +32,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       setClaimFormData({
         claimTitle: claim.claimTitle || "",
         claimContent: claim.claimContent || "",
-        claimSources: claim.claimSources || ""
+        claimSources: claim.claimSources || "",
+        claimAccuracy: claim.aiTruthIndex || 50
       });
     }
   }, [isOpen, claim]);
@@ -42,7 +44,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       setClaimFormData({
         claimTitle: "",
         claimContent: "",
-        claimSources: ""
+        claimSources: "",
+        aiTruthIndex: 50
       });
       setIsAnimating(false);
     }
@@ -56,9 +59,9 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
   };
 
   // Evaluate claim handler - shows confirmation modal
-  const handleEvaluateClaim = (e) => {
+  const handleEvaluateClaim = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!claimFormData.claimTitle.trim() || !claimFormData.claimContent.trim()) {
       setAlert({
@@ -70,12 +73,44 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       return;
     }
 
-    // Show evaluation modal with static truth index
-    setEvaluationModal({
-      isOpen: true,
-      truthIndex: 75, // Static data for now
-    });
+    try {
+      // Call your backend to get AI truth index
+      const response = await fetch("http://localhost:5050/api/ai/evaluate-truth-index", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ claimContent: claimFormData.claimContent })
+      });
+
+      const data = await response.json();
+
+      // Log full response from backend for debugging
+      console.log("AI Evaluation Response:", data);
+
+      const truthIndex = data.aiTruthIndex ?? Math.floor(Math.random() * 100); // fallback
+
+      setClaimFormData(prev => ({
+        ...prev,
+        aiTruthIndex: truthIndex
+      }));
+
+      setEvaluationModal({
+        isOpen: true,
+        aiTruthIndex: truthIndex
+      });
+
+    } catch (err) {
+      console.error("Error evaluating claim:", err);
+      setAlert({
+        isOpen: true,
+        title: "Evaluation Failed",
+        message: "An error occurred while evaluating the claim. Please try again.",
+        type: "error",
+      });
+    }
   };
+
 
   // Submit handler (called after evaluation confirmation)
   const handleSubmitClaim = async () => {
@@ -88,6 +123,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
         claimTitle: claimFormData.claimTitle,
         claimContent: claimFormData.claimContent,
         claimSources: claimFormData.claimSources,
+        aiTruthIndex: claimFormData.aiTruthIndex,
       };
 
       const method = claim ? "PATCH" : "POST";
@@ -141,9 +177,10 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     const { name, value } = e.target;
     setClaimFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "claimAccuracy" ? parseInt(value) : value,
     }));
   };
+
 
   useEffect(() => {
     if (isOpen) setIsAnimating(true);
@@ -158,15 +195,15 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscKey);
-      
+
       // Disable background scroll while keeping scrollbar visible
       // Calculate scrollbar width to prevent layout shift
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      
+
       // Store original styles
       const originalOverflow = document.body.style.overflow;
       const originalPaddingRight = document.body.style.paddingRight;
-      
+
       // Apply styles to prevent scroll but keep scrollbar space
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
@@ -289,13 +326,13 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                 The AI Truth Index of this claim is:
               </p>
               <div className="text-3xl font-bold text-blue-600 mb-4">
-                {evaluationModal.truthIndex}%
+                {evaluationModal.aiTruthIndex}%
               </div>
               <p className="text-sm text-gray-600">
                 Would you like to submit this claim?
               </p>
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 type="button"

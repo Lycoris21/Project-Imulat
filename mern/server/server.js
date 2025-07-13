@@ -7,6 +7,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 // Import routes
+import ai from "./routes/ai.js";
 import auth from "./routes/auth.js";
 import activities from "./routes/activities.js";
 import bookmarks from "./routes/bookmarks.js";
@@ -60,6 +61,7 @@ io.on("connection", (socket) => {
 // app.use('/uploads', express.static('uploads'));
 
 // API Routes
+app.use("/api/ai", ai);
 app.use("/api/auth", auth);
 app.use("/api/activities", activities);
 app.use("/api/bookmarks", bookmarks);
