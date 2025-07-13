@@ -20,7 +20,7 @@ export default function ReportDetail() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successToast, setSuccessToast] = useState({ visible: false, message: '' });
   const [deleting, setDeleting] = useState(false);
   const [peerReviews, setPeerReviews] = useState([]);
   const [alert, setAlert] = useState({
@@ -95,13 +95,6 @@ export default function ReportDetail() {
     }
   };
 
-  useEffect(() => {
-    if (!report?._id) return; // prevent fetch until report is loaded
-
-    fetchReviews();
-  }, [report?._id]);
-
-
   const fetchInitialData = async () => {
     setLoading(true);
 
@@ -138,6 +131,8 @@ export default function ReportDetail() {
       } else {
         setUserReaction(null);
       }
+
+      fetchReviews();
     } catch (err) {
       console.error("Error loading data:", err);
       setReport(null);
@@ -188,7 +183,7 @@ export default function ReportDetail() {
   const handleUpdateFinish = async (successType) => {
     fetchInitialData();
     if (successType === "reportUpdated") {
-      setShowSuccessMessage(true);
+      setSuccessToast({ visible: true, message: 'Report updated successfully!' });
       setTimeout(() => setShowSuccessMessage(false), 4000);
     }
   };
@@ -221,7 +216,7 @@ export default function ReportDetail() {
         setIsBookmarked(false);
       } catch (error) {
         console.error('Error removing bookmark:', error);
-  
+
         setAlert({
           isOpen: true,
           title: 'Remove Bookmark Failed',
@@ -285,10 +280,17 @@ export default function ReportDetail() {
       if (!response.ok) {
         await handleAPIError(response);
       }
-      
+
       // Refresh report data to reflect new peer review
       fetchInitialData();
-      fetchReviews();
+
+      setSuccessToast({
+        visible: true,
+        message: action === 'approve'
+          ? 'You have successfully approved this report.'
+          : 'You have disapproved this report.'
+      });
+      setTimeout(() => setSuccessToast({ visible: false, message: '' }), 4000);
 
     } catch (error) {
       console.error('Error reviewing report:', error);
@@ -364,9 +366,9 @@ export default function ReportDetail() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-base-gradient py-4 sm:py-8">
       <SuccessToast
-        message="Report updated successfully!"
-        visible={showSuccessMessage}
-        onClose={() => setShowSuccessMessage(false)}
+        message={successToast.message}
+        visible={successToast.visible}
+        onClose={() => setSuccessToast({ visible: false, message: '' })}
       />
 
       <div className="max-w-5xl mx-auto px-2 sm:px-4">

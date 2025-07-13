@@ -831,8 +831,8 @@ class ReportService {
     if (!userId) {
       throw new Error("Missing user ID.");
     }
-    if (!reviewText?.trim()) {
-      throw new Error("Review text is required.");
+    if (decision === 'disapprove' && !reviewText?.trim()) {
+      throw new Error("Review text is required when disapproving.");
     }
     if (!['approve', 'disapprove'].includes(decision)) {
       throw new Error("Decision must be either 'approve' or 'disapprove'.");

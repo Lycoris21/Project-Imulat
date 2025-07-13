@@ -74,7 +74,7 @@ const reportSchema = new mongoose.Schema({
       },
       reviewText: {
         type: String,
-        required: true,
+        required: false,
         trim: true
       },
       decision: {
