@@ -131,16 +131,16 @@ export default function Reports() {
             Browse through all fact-checking reports created by our expert team
           </p>
           {canResearch && (
-            <div className="absolute top-0 right-0 hidden sm:flex gap-2">
+            <div className="absolute top-0 right-0 hidden lg:flex gap-2">
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 text-xs sm:text-sm md:text-sm cursor-pointer"
+                className="px-3 py-2 lg:px-4 lg:py-2 xl:px-6 xl:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 text-xs lg:text-sm xl:text-sm cursor-pointer"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                <span className="hidden sm:inline">Make A Report</span>
-                <span className="sm:hidden">Report</span>
+                <span className="hidden lg:inline">Make A Report</span>
+                <span className="lg:hidden">Report</span>
               </button>
 
               <button
@@ -148,13 +148,13 @@ export default function Reports() {
                   setSelectedReport(null);
                   setShowPeerReviewModal(true);
                 }}
-                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
+                className="px-3 py-2 lg:px-4 lg:py-2 xl:px-6 xl:py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-xs lg:text-sm cursor-pointer"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="hidden sm:inline">Peer Review</span>
-                <span className="sm:hidden">Review</span>
+                <span className="hidden lg:inline">Peer Review</span>
+                <span className="lg:hidden">Review</span>
               </button>
             </div>
           )}
@@ -162,7 +162,7 @@ export default function Reports() {
 
         {/* Mobile buttons */}
         {canResearch && (
-          <div className="block sm:hidden mb-4 max-w-2xl mx-auto px-2">
+          <div className="block lg:hidden mb-4 max-w-2xl mx-auto px-2">
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCreateModal(true)}
