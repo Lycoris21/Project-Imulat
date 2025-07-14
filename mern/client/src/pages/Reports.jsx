@@ -130,49 +130,63 @@ export default function Reports() {
           <p className="text-gray-300 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto px-2">
             Browse through all fact-checking reports created by our expert team
           </p>
-{canResearch && (
-  <div className="absolute top-0 right-0 hidden sm:flex gap-2">
-    <button
-      onClick={() => setShowCreateModal(true)}
-      className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base cursor-pointer"
-    >
-      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-      <span className="hidden sm:inline">Make A Report</span>
-      <span className="sm:hidden">Report</span>
-    </button>
+          {canResearch && (
+            <div className="absolute top-0 right-0 hidden sm:flex gap-2">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center gap-2 text-xs sm:text-sm md:text-sm cursor-pointer"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span className="hidden sm:inline">Make A Report</span>
+                <span className="sm:hidden">Report</span>
+              </button>
 
-    <button
-      onClick={() => {
-        setSelectedReport(null);
-        setShowPeerReviewModal(true);
-      }}
-      className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-sm sm:text-base cursor-pointer"
-    >
-      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-      <span className="hidden sm:inline">Peer Review</span>
-      <span className="sm:hidden">Review</span>
-    </button>
-  </div>
-)}
-
+              <button
+                onClick={() => {
+                  setSelectedReport(null);
+                  setShowPeerReviewModal(true);
+                }}
+                className="px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="hidden sm:inline">Peer Review</span>
+                <span className="sm:hidden">Review</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Mobile "Make A Report" button */}
+        {/* Mobile buttons */}
         {canResearch && (
           <div className="block sm:hidden mb-4 max-w-2xl mx-auto px-2">
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="w-full px-3 py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-base"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Make A Report
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex-1 px-3 py-3 bg-[color:var(--color-dark)] text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-[#1E275E80] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-base"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Make A Report
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedReport(null);
+                  setShowPeerReviewModal(true);
+                }}
+                className="flex-1 px-3 py-3 bg-green-600 text-white border border-gray-400 font-semibold rounded-2xl shadow-lg hover:bg-green-700 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer text-base"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Peer Review
+              </button>
+            </div>
           </div>
         )}
 
