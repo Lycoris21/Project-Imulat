@@ -36,6 +36,9 @@ export default function ReportDetail() {
     fetchInitialData();
   }, [id, user?._id]);
 
+   useEffect(() => {
+    fetchReviews();
+  }, [report?._id]);
 
   // Handle ESC key press and disable background scroll when delete modal is open
   useEffect(() => {
@@ -131,8 +134,6 @@ export default function ReportDetail() {
       } else {
         setUserReaction(null);
       }
-
-      fetchReviews();
     } catch (err) {
       console.error("Error loading data:", err);
       setReport(null);
@@ -182,6 +183,8 @@ export default function ReportDetail() {
 
   const handleUpdateFinish = async (successType) => {
     fetchInitialData();
+    fetchReviews();
+
     if (successType === "reportUpdated") {
       setSuccessToast({ visible: true, message: 'Report updated successfully!' });
       setTimeout(() => setShowSuccessMessage(false), 4000);
@@ -283,6 +286,7 @@ export default function ReportDetail() {
 
       // Refresh report data to reflect new peer review
       fetchInitialData();
+      fetchReviews();
 
       setSuccessToast({
         visible: true,
