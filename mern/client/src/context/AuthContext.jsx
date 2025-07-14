@@ -3,6 +3,9 @@ import { createContext, useContext, useEffect, useState } from "react";
 // Create context
 const AuthContext = createContext();
 
+//for testing
+export { AuthContext };
+
 // Hook to use the auth context
 export function useAuth() {
   return useContext(AuthContext);
