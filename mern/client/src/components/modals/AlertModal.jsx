@@ -100,7 +100,7 @@ export default function AlertModal({
           {title && <h3 className="text-lg font-semibold text-gray-800 mb-1">{title}</h3>}
           <p className="text-gray-700 whitespace-pre-wrap">{message}</p>
         </div>
-        <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
+        <button onClick={handleClose} className="text-gray-500 hover:text-gray-700 cursor-pointer">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

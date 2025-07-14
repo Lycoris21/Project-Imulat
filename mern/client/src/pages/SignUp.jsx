@@ -261,7 +261,7 @@ export default function SignUp() {
 
           <button
             type="submit"
-            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition"
+            className="w-full bg-[color:var(--color-dark)] text-white font-semibold py-2 rounded-xl hover:bg-[color:var(--color-darker)] transition cursor-pointer"
           >
             Sign Up
           </button>
