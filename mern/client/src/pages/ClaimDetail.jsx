@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // assumes auth context is available
 import { getTruthIndexColor } from '../utils/colors';
 import { formatRelativeTime } from '../utils/time.js';
-
+import AccuracyMeter from "../components/ClaimAi/AccuracyMeter.jsx";
+import { SourceReliability } from "../components/ClaimAi/SourceReliability.jsx";
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CreateReportModal, CommentsSection, SuccessToast, SubmitClaimModal } from '../components';
 import BookmarkModal from '../components/modals/BookmarkModal';
@@ -295,39 +296,52 @@ export default function ClaimDetail() {
       />
 
       <div className="max-w-5xl mx-auto px-2 sm:px-4">
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4 sm:gap-0">
-            <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 mr-2">{claim.claimTitle}</h1>
-              <p className="text-gray-600 mb-2 text-sm sm:text-base"> By{" "}
-                <Link
-                  to={`/profile/${claim.userId?._id}`}
-                  className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
-                >
-                  {claim.userId?.username || "Unknown"}
-                </Link>
-              </p>
-              <p className="text-gray-500 text-xs sm:text-sm">{formatRelativeTime(claim.createdAt)}</p>
-            </div>
-            <div className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg border ${getTruthIndexColor(claim.aiTruthIndex)} self-start`}>
-              <span className="font-semibold text-sm sm:text-base">AI Truth Index: {claim.aiTruthIndex}%</span>
-            </div>
-          </div>
 
-          {claim.aiClaimSummary && (
-            <div className="mt-4">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
-              <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border-l-4 border-purple-400">
-                <p className="text-gray-700 text-sm sm:text-base">{claim.aiClaimSummary}</p>
-              </div>
-            </div>
-          )}
-        </div>
+<div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-4 sm:gap-0">
+    <div className="flex-1">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 mr-2">{claim.claimTitle}</h1>
+      <p className="text-gray-600 mb-2 text-sm sm:text-base">By{" "}
+        <Link
+          to={`/profile/${claim.userId?._id}`}
+          className="font-medium hover:text-[color:var(--color-selected)] hover:underline"
+        >
+          {claim.userId?.username || "Unknown"}
+        </Link>
+      </p>
+      <p className="text-gray-500 text-xs sm:text-sm">{formatRelativeTime(claim.createdAt)}</p>
+    </div>
+    
+    {/* Enhanced AI Accuracy Meter */}
+    <div className="ml-auto">
+      <AccuracyMeter percentage={claim.aiTruthIndex} variant="detail" />
+    </div>
+    </div>
+
+  {claim.aiClaimSummary && (
+    <div className="mt-4">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
+      <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border-l-4 border-purple-400">
+        <p className="text-gray-700 text-sm sm:text-base">{claim.aiClaimSummary}</p>
+      </div>
+    </div>
+  )}
+</div>
+
+{/* Add Source Reliability Analysis */}
+{claim.claimSources && (
+  <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Source Reliability Analysis</h2>
+    <SourceReliability sources={claim.claimSources} />
+  </div>
+)}
 
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Full Claim Details</h2>
           <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words text-sm sm:text-base">{claim.claimContent}</div>
         </div>
+
+    {/* Duplicate na, commenting this out js in case
 
         {claim.claimSources && (
           <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
@@ -335,6 +349,8 @@ export default function ClaimDetail() {
             <div className="whitespace-pre-wrap text-gray-700 break-words text-sm sm:text-base">{claim.claimSources}</div>
           </div>
         )}
+          
+  */}
 
         {/* Action Buttons */}
         <ReactionBar
