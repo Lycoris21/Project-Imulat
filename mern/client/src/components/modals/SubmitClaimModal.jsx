@@ -3,7 +3,6 @@ import { useAuth } from "../../context/AuthContext";
 import AlertModal from "../modals/AlertModal";
 import AccuracyMeter from "../ClaimAi/AccuracyMeter";
 import { SourceReliability } from "../ClaimAi/SourceReliability";
-import { parseLinks } from "../../utils/linkParser";
 
 export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claim = null }) {
   const { user } = useAuth();
@@ -365,7 +364,8 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
           
           {/* Show source reliability if sources exist */}
           {claimFormData.claimSources && (
-            <SourceReliability sources={parseLinks(claimFormData.claimSources)} />
+            <SourceReliability sources={claimFormData.claimSources} />
+      
           )}
         </div>
         

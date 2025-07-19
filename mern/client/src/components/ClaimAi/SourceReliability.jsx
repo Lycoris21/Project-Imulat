@@ -1,73 +1,75 @@
 export function categorizeSource(url) {
   if (!url || typeof url !== 'string') return null;
-  
+
   try {
-    // Normalize URL
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith('http')) {
       formattedUrl = `https://${formattedUrl}`;
     }
-    
+
     const domain = new URL(formattedUrl).hostname.replace('www.', '');
-    
-    // Expanded reliable sources list
-    const reliable = [
+
+    const reliableDomains = [
       'bipm.org', 'nist.gov', 'royalsociety.org', 
       'nasa.gov', 'nature.com', 'science.org',
       'arxiv.org', 'nih.gov', 'who.int', 'cdc.gov',
       'reuters.com', 'apnews.com', 'nytimes.com',
-      'bbc.com', 'cnn.com'
+      'bbc.com', 'cnn.com', 'nejm.org', 'thelancet.com',
+      'jamanetwork.com', 'heart.org', 'nhlbi.nih.gov',
+      'mayoclinic.org', 'hopkinsmedicine.org',
     ];
-    
-    // More comprehensive unreliable patterns
-    const unreliable = [
+
+    const unreliablePatterns = [
       'blogspot.com', 'wordpress.com', 
       'medium.com', 'tumblr.com',
       /\.blog\b/i, /\bblog\./i, /\.wordpress\./i
     ];
-    
-    if (reliable.some(d => domain.includes(d))) return 'reliable';
-    if (unreliable.some(d => 
+
+    // Check exact matches first
+    if (reliableDomains.some(d => domain.includes(d))) return 'reliable';
+    if (unreliablePatterns.some(d =>
       typeof d === 'string' ? domain.includes(d) : d.test(domain)
     )) return 'unreliable';
-    
+
+    // Pattern-based rules
+    if (domain.endsWith('.gov') || domain.endsWith('.edu')) return 'reliable';
+    if (domain.includes('blog') || domain.includes('opinion')) return 'unreliable';
+
     return 'unknown';
   } catch {
     return null;
   }
 }
 
+
 export function SourceReliability({ sources }) {
-  // Debug output
-  console.log('[SourceReliability] Received sources:', sources);
-  
-  // Handle edge cases more robustly
-  const parsedSources = () => {
+  const parseSources = () => {
     if (!sources) return [];
-    
-    // Handle both string and array inputs
+
     if (Array.isArray(sources)) {
-      return sources.filter(s => s && typeof s === 'string' && s.trim().length > 0);
-    }
-    
-    if (typeof sources === 'string') {
-      return sources.split('\n')
+      return sources
         .map(s => s.trim())
         .filter(s => s.length > 0);
     }
-    
+
+    if (typeof sources === "string") {
+      return sources
+        .split(/\s+|\n+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
+
     return [];
   };
 
-  const sourceList = parsedSources();
-  console.log('[SourceReliability] Processed sources:', sourceList);
+  const sourceList = parseSources();
 
   if (sourceList.length === 0) {
     return (
       <div className="mt-4">
         <h4 className="text-sm font-medium mb-2">Source Reliability Analysis</h4>
         <p className="text-sm text-gray-500">
-          {!sources ? "No sources provided" : "No valid sources detected"}
+          {!sources ? "No sources provided." : "No valid sources detected."}
         </p>
       </div>
     );
@@ -76,17 +78,28 @@ export function SourceReliability({ sources }) {
   return (
     <div className="mt-4">
       <h4 className="text-sm font-medium mb-2">Source Reliability Analysis</h4>
-      <ul className="space-y-1">
-        {sourceList.map((source, i) => {
+      <ul className="space-y-2">
+        {sourceList.map((source, index) => {
           const type = categorizeSource(source);
-          const bgColor = type === 'reliable' ? 'bg-green-500' : 
-                         type === 'unreliable' ? 'bg-red-500' : 'bg-gray-500';
-          
+
+          const colorClass =
+            type === "reliable" ? "bg-green-500" :
+            type === "unreliable" ? "bg-red-500" :
+            "bg-gray-400";
+
+          const label =
+            type === "reliable" ? "Reliable source" :
+            type === "unreliable" ? "Unreliable source" :
+            "Unknown source";
+
           return (
-            <li key={i} className="flex items-center text-sm">
-              <span className={`inline-block w-3 h-3 rounded-full mr-2 ${bgColor}`}></span>
-              <a 
-                href={source.startsWith('http') ? source : `https://${source}`}
+            <li key={index} className="flex items-center gap-2 text-sm">
+              <div
+                className={`w-3 h-3 rounded-full shrink-0 ${colorClass}`}
+                title={label}
+              ></div>
+              <a
+                href={source.startsWith("http") ? source : `https://${source}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline break-all"
