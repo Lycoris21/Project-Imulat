@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import AlertModal from "../modals/AlertModal";
+import AccuracyMeter from "../ClaimAi/AccuracyMeter";
+import { SourceReliability } from "../ClaimAi/SourceReliability";
+import { parseLinks } from "../../utils/linkParser";
 
 export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, claim = null }) {
   const { user } = useAuth();
@@ -23,7 +26,7 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
 
   const [evaluationModal, setEvaluationModal] = useState({
     isOpen: false,
-    truthIndex: 50, // Static data for now
+    truthIndex: 50, 
   });
 
   // Autofill form when editing an existing claim
@@ -74,42 +77,57 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
     }
 
     try {
+      setIsSubmitting(true);
+
+    // Debug: Log the exact payload being sent
+    console.log("Evaluation payload:", {
+      claimContent: claimFormData.claimContent,
+      claimSources: claimFormData.claimSources
+    });
+
       // Call your backend to get AI truth index
       const response = await fetch("http://localhost:5050/api/ai/evaluate-truth-index", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ claimContent: claimFormData.claimContent })
+        body: JSON.stringify({ 
+        claimContent: claimFormData.claimContent,
+        claimSources: claimFormData.claimSources 
+      })
       });
 
       const data = await response.json();
+      const truthIndex = data.aiTruthIndex ?? 50;
+
 
       // Log full response from backend for debugging
       console.log("AI Evaluation Response:", data);
 
-      const truthIndex = data.aiTruthIndex ?? Math.floor(Math.random() * 100); // fallback
 
       setClaimFormData(prev => ({
         ...prev,
         aiTruthIndex: truthIndex
       }));
 
-      setEvaluationModal({
-        isOpen: true,
-        aiTruthIndex: truthIndex
-      });
+    setEvaluationModal({
+      isOpen: true,
+      aiTruthIndex: truthIndex,
+      sources: claimFormData.claimSources
+    });
 
-    } catch (err) {
-      console.error("Error evaluating claim:", err);
-      setAlert({
-        isOpen: true,
-        title: "Evaluation Failed",
-        message: "An error occurred while evaluating the claim. Please try again.",
-        type: "error",
-      });
-    }
-  };
+  } catch (err) {
+    console.error("Error evaluating claim:", err);
+    setAlert({
+      isOpen: true,
+      title: "Evaluation Failed",
+      message: "An error occurred while evaluating the claim. Please try again.",
+      type: "error",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
 
   // Submit handler (called after evaluation confirmation)
@@ -261,18 +279,27 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Claim Content (Min: 250 Characters)</label>
-                <textarea
-                  name="claimContent"
-                  value={claimFormData.claimContent}
-                  onChange={handleInputChange}
-                  required
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
-                  placeholder="Enter detailed claim content..."
-                />
-              </div>
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Claim Content (Min: 250 Characters)
+  </label>
+  <div className="relative">
+    <textarea
+      name="claimContent"
+      value={claimFormData.claimContent}
+      onChange={handleInputChange}
+      required
+      rows={6}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none resize-vertical"
+      placeholder="Enter detailed claim content..."
+    />
+    <div className={`absolute bottom-3 right-3 text-xs ${
+      claimFormData.claimContent.length < 250 ? 'text-red-500' : 'text-gray-500'
+    } bg-white/90 px-2 py-1 rounded`}>
+      {claimFormData.claimContent.length}/250
+    </div>
+  </div>
+</div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Sources (Optional)</label>
@@ -312,46 +339,60 @@ export default function SubmitClaimModal({ isOpen, onClose, onSubmitFinish, clai
       </div>
 
       {/* Evaluation Confirmation Modal */}
-      {evaluationModal.isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-60 p-4 bg-[#00000080]">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="text-center mb-6">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-                <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Claim Evaluation Complete</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                The AI Truth Index of this claim is:
-              </p>
-              <div className="text-3xl font-bold text-blue-600 mb-4">
-                {evaluationModal.aiTruthIndex}%
-              </div>
-              <p className="text-sm text-gray-600">
-                Would you like to submit this claim?
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setEvaluationModal({ isOpen: false, truthIndex: 0 })}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmitClaim}
-                className="px-4 py-2 bg-[color:var(--color-base)] text-white rounded-lg hover:bg-[color:var(--color-dark)] transition-colors flex-1"
-              >
-                Yes, Submit Claim
-              </button>
-            </div>
-          </div>
+{evaluationModal.isOpen && (
+  <div className="fixed inset-0 flex items-center justify-center z-60 p-4 bg-[#00000080]">
+    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <div className="text-center mb-6">
+        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+          <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
-      )}
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Claim Evaluation Complete</h3>
+        
+        {/* Add Accuracy Meter */}
+        <AccuracyMeter percentage={evaluationModal.aiTruthIndex} />
+        
+        {/* Add Context Explanation */}
+        <div className="text-sm text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">
+          {evaluationModal.aiTruthIndex <= 50 ? (
+            <p>This claim is considered inaccurate. Information gathered for this claim is provided in the links below:</p>
+          ) : evaluationModal.aiTruthIndex <= 69 ? (
+            <p>This claim falls in a gray area - it may contain both accurate and dubious information. Post at your own discretion.</p>
+          ) : (
+            <p>This claim appears to be well-supported by available evidence.</p>
+          )}
+          
+          {/* Show source reliability if sources exist */}
+          {claimFormData.claimSources && (
+            <SourceReliability sources={parseLinks(claimFormData.claimSources)} />
+          )}
+        </div>
+        
+        <p className="text-sm text-gray-500">
+          Would you like to submit this claim?
+        </p>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => setEvaluationModal({ isOpen: false, truthIndex: 0 })}
+          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex-1 cursor-pointer"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={handleSubmitClaim}
+          className="px-4 py-2 bg-[color:var(--color-base)] text-white rounded-lg hover:bg-[color:var(--color-dark)] transition-colors flex-1 cursor-pointer"
+        >
+          Yes, Submit Claim
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       <AlertModal
         isOpen={alert.isOpen}
