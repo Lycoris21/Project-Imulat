@@ -188,9 +188,13 @@ export default function Profile() {
                         {/* Tab Content */}
                         {activeTab === "claims" && (
                             <div className="space-y-3 sm:space-y-4">
-                                {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
-                                    <ClaimCard key={claim._id} claim={claim} variant="simple" />
-                                ))}
+                                {profileData.claims.length === 0 ? (
+                                    <p className="text-gray-500 text-sm italic text-center">No claims found.</p>
+                                ) : (
+                                    profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
+                                        <ClaimCard key={claim._id} claim={claim} variant="simple" />
+                                    ))
+                                )}
                                 {profileData.claims.length > CLAIM_LIMIT && (
                                     <Link
                                         to={`/claims?user=${profileData._id}`}
@@ -204,9 +208,13 @@ export default function Profile() {
 
                         {activeTab === "reports" && (
                             <div className="space-y-3 sm:space-y-4">
-                                {profileData.reports.slice(0, REPORT_LIMIT).map((report) => (
-                                    <ReportCard key={report._id} report={report} variant="simple" />
-                                ))}
+                                {profileData.reports.length === 0 ? (
+                                    <p className="text-gray-500 text-sm italic text-center">No reports found.</p>
+                                ) : (
+                                    profileData.reports.slice(0, REPORT_LIMIT).map((report) => (
+                                        <ReportCard key={report._id} report={report} variant="simple" />
+                                    ))
+                                )}
                                 {profileData.reports.length > REPORT_LIMIT && (
                                     <Link
                                         to={`/reports?user=${profileData._id}`}
@@ -224,9 +232,13 @@ export default function Profile() {
                     <div className="mt-6 sm:mt-8">
                         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Claims</h2>
                         <div className="space-y-3 sm:space-y-4">
-                            {profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
-                                <ClaimCard key={claim._id} claim={claim} variant="simple" />
-                            ))}
+                            {profileData.claims.length === 0 ? (
+                                <p className="text-gray-500 text-sm italic text-center">No claims found.</p>
+                            ) : (
+                                profileData.claims.slice(0, CLAIM_LIMIT).map((claim) => (
+                                    <ClaimCard key={claim._id} claim={claim} variant="simple" />
+                                ))
+                            )}
                             {profileData.claims.length > CLAIM_LIMIT && (
                                 <Link
                                     to={`/claims?user=${profileData._id}`}
