@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
+import { useClaimsSearchSuggestions } from "../hooks/useClaimsSearchSuggestions";
 import { LoadingScreen, ClaimCard, SearchBar, SubmitClaimModal, SuccessToast, PaginationControls, ScrollToTop } from '../components';
 
 export default function Claims() {
   const { isLoggedIn = false } = useAuth() || {};
+  const navigate = useNavigate();
   const { search, sort, page, user: queryUser , updateParams } = useQueryParams();
 
   const [searchQuery, setSearchQuery] = useState(search);
@@ -16,13 +19,45 @@ export default function Claims() {
   const [totalClaims, setTotalClaims] = useState(0);
   const itemsPerPage = 6;
 
+  // Search suggestions hook
+  const {
+    query: suggestionQuery,
+    updateQuery,
+    suggestions,
+    isLoading: suggestionsLoading,
+    disableSuggestions,
+    enableSuggestions
+  } = useClaimsSearchSuggestions(searchQuery);
+
   useEffect(() => {
     fetchClaims();
   }, [search, sort, page, queryUser ]);
 
+  // Sync search query with suggestions hook
+  useEffect(() => {
+    updateQuery(searchQuery);
+  }, [searchQuery, updateQuery]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     updateParams({ search: searchQuery.trim(), page: 1 });
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.type === 'claim') {
+      // Navigate to the specific claim page
+      navigate(`/claims/${suggestion._id}`);
+    } else if (suggestion.type === 'user') {
+      // Filter claims by this user
+      updateParams({ user: suggestion.name, search: '', page: 1, sort });
+      setSearchQuery('');
+    }
+    disableSuggestions();
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    enableSuggestions();
   };
 
   const fetchClaims = async () => {
@@ -118,10 +153,15 @@ export default function Claims() {
         <div className="max-w-6xl mx-auto mb-4 sm:mb-6">
           <SearchBar
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             onSubmit={handleSearch}
             placeholder="Search claims by title, content, author, or summary..."
-            isLoading={searchLoading}
+            isLoading={searchLoading || suggestionsLoading}
+            showDropdown={true}
+            suggestions={suggestions}
+            onSuggestionClick={handleSuggestionClick}
+            disableSuggestions={disableSuggestions}
+            defaultSearchRoute="/claims"
           />
 
           <div className="max-w-2xl mx-auto mb-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
