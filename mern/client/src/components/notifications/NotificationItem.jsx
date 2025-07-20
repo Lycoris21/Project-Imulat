@@ -42,9 +42,9 @@ export default function NotificationItem({ notification, onClose, refreshNotific
 
     switch (notification.type) {
       case "like":
-        return `${username} liked your ${notification.targetType}.`;
+        return `${username} liked your ${notification?.targetType}.`;
       case "comment":
-        return `${username} commented on your ${notification.targetType}.`;
+        return `${username} commented on your ${notification?.targetType}.`;
       case "peer_review":
         return `${username} reviewed your report.`;
       case "report_approved":
@@ -57,16 +57,16 @@ export default function NotificationItem({ notification, onClose, refreshNotific
   };
 
   const getLink = () => {
-    switch (notification.targetType) {
+    switch (notification?.targetType) {
       case "claim":
-        return `/claims/${notification.targetId}`;
+        return `/claims/${notification?.targetId}`;
       case "report":
-        return `/reports/${notification.targetId}`;
+        return `/reports/${notification?.targetId}`;
       case "comment":
-        if (notification.postType === "claim") {
-          return `/claims/${notification.postId}#comment-${notification.targetId}`;
-        } else if (notification.postType === "report") {
-          return `/reports/${notification.postId}#comment-${notification.targetId}`;
+        if (notification?.postType === "claim") {
+          return `/claims/${notification?.postId}#comment-${notification?.targetId}`;
+        } else if (notification?.postType === "report") {
+          return `/reports/${notification?.postId}#comment-${notification?.targetId}`;
         }
         return "/";
       default:
@@ -91,7 +91,7 @@ export default function NotificationItem({ notification, onClose, refreshNotific
 
   return (
     <div
-      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? "bg-blue-50" : ""} rounded-lg`}
+      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification?.read ? "bg-blue-50" : ""} rounded-lg`}
     >
       <div className="flex items-center space-x-3">
         <div className="relative flex-shrink-0">
@@ -105,13 +105,13 @@ export default function NotificationItem({ notification, onClose, refreshNotific
             ) : (
               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 font-medium text-sm hover:bg-gray-400 transition-colors">
                 {notification.senderId?.username
-                  ? notification.senderId.username.charAt(0).toUpperCase()
+                  ? notification.senderId?.username.charAt(0).toUpperCase()
                   : "U"}
               </div>
             )}
           </Link>
           <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5 shadow-sm">
-            {getIcon(notification.targetType)}
+            {getIcon(notification?.targetType)}
           </div>
         </div>
 
@@ -119,7 +119,7 @@ export default function NotificationItem({ notification, onClose, refreshNotific
           onClick={handleClick}>
           <p className="text-sm text-gray-600 line-clamp-2">{getMessage()}</p>
           <p className="text-xs text-gray-500 mt-2">
-            {formatRelativeTime(notification.createdAt)}
+            {formatRelativeTime(notification?.createdAt)}
           </p>
         </div>
       </div>

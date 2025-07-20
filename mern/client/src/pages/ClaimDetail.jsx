@@ -49,7 +49,7 @@ export default function ClaimDetail() {
       setClaim(data);
 
       if (user?._id) {
-        const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/claim/${id}/${user._id}`);
+        const reactionRes = await fetch(`http://localhost:5050/api/reactions/user/claim/${id}/${user?._id}`);
         if (reactionRes.ok) {
           const reaction = await reactionRes.json();
           setUserReaction(reaction?.reactionType || null);
@@ -57,7 +57,7 @@ export default function ClaimDetail() {
 
         // Check bookmark status
         try {
-          const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user._id}/${id}/claim`);
+          const bookmarkRes = await fetch(`http://localhost:5050/api/bookmarks/check/${user?._id}/${id}/claim`);
           if (bookmarkRes.ok) {
             const bookmarkData = await bookmarkRes.json();
             setIsBookmarked(bookmarkData.isBookmarked);
@@ -141,14 +141,14 @@ export default function ClaimDetail() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: user._id,
+            userId: user?._id,
             targetId: id,
             targetType: "claim",
             reactionType: type,
           }),
         });
       } else {
-        await fetch(`http://localhost:5050/api/reactions/claim/${id}/${user._id}`, {
+        await fetch(`http://localhost:5050/api/reactions/claim/${id}/${user?._id}`, {
           method: "DELETE",
         });
       }
@@ -178,7 +178,7 @@ export default function ClaimDetail() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: user._id,
+            userId: user?._id,
             targetId: id,
             targetType: 'claim',
           }),
@@ -208,7 +208,7 @@ export default function ClaimDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user._id,
+          userId: user?._id,
           targetId: itemId,
           targetType: itemType,
           collectionId: collectionId || null,
@@ -228,7 +228,7 @@ export default function ClaimDetail() {
   };
 
   const handleDeleteClaim = async () => {
-    if (!user || (user._id !== claim.userId?._id && user.role !== 'admin')) {
+    if (!user || (user?._id !== claim.userId?._id && user.role !== 'admin')) {
       setAlert({
         isOpen: true,
         title: 'Permission Denied',
@@ -246,7 +246,7 @@ export default function ClaimDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user._id,
+          userId: user?._id,
           userRole: user.role
         })
       });
@@ -273,7 +273,7 @@ export default function ClaimDetail() {
   };
 
   // Check if user can delete the claim
-  const canDeleteClaim = user && (user._id === claim?.userId?._id || user.role === 'admin');
+  const canDeleteClaim = user && (user?._id === claim?.userId?._id || user.role === 'admin');
 
   if (loading) {
     return (
@@ -363,7 +363,7 @@ export default function ClaimDetail() {
           handleOpenModal={() => setShowCreateModal(true)}
           canDelete={canDeleteClaim}
           onDelete={() => setShowDeleteConfirm(true)}
-          canEdit={user._id !== claim.userId?._id || user.role == "admin"}
+          canEdit={user?._id !== claim.userId?._id || user.role == "admin"}
           onEdit={() => setShowEditModal(true)}
           pageType="claim"
         />
