@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useBookmarksSearchSuggestions } from "../hooks/useBookmarksSearchSuggestions";
 
 // Components
 import { LoadingScreen, ErrorScreen, SearchBar, ReportCard, ClaimCard, PaginationControls } from '../components';
@@ -31,6 +32,15 @@ export default function CollectionView() {
     const [reportsPage, setReportsPage] = useState(1);
     const [claimsPage, setClaimsPage] = useState(1);
     const itemsPerPage = 10;
+
+    // Search suggestions hook
+    const {
+        suggestions,
+        isLoading: suggestionsLoading,
+        disableSuggestions,
+        enableSuggestions,
+        updateQuery
+    } = useBookmarksSearchSuggestions(searchQuery);
 
     // Redirect if not logged in
     useEffect(() => {
@@ -211,6 +221,7 @@ export default function CollectionView() {
     // Handle search change and submit like Reports/Claims pages
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
+        enableSuggestions();
     };
 
     // Handle search submit - trigger new fetch
@@ -220,6 +231,22 @@ export default function CollectionView() {
         setReportsPage(1);
         setClaimsPage(1);
     };
+
+    const handleSuggestionClick = (suggestion) => {
+        if (suggestion.type === 'report') {
+            // Navigate to the specific report page
+            navigate(`/reports/${suggestion._id}`);
+        } else if (suggestion.type === 'claim') {
+            // Navigate to the specific claim page
+            navigate(`/claims/${suggestion._id}`);
+        }
+        disableSuggestions();
+    };
+
+    // Sync search query with suggestions hook
+    useEffect(() => {
+        updateQuery(searchQuery);
+    }, [searchQuery, updateQuery]);
 
     // Effect for handling search changes (reset to page 1)
     useEffect(() => {
@@ -369,7 +396,12 @@ export default function CollectionView() {
                         onChange={handleSearchChange}
                         onSubmit={handleSearchSubmit}
                         placeholder="Search in this collection..."
-                        disableSuggestions={true}
+                        showDropdown={true}
+                        suggestions={suggestions}
+                        onSuggestionClick={handleSuggestionClick}
+                        disableSuggestions={disableSuggestions}
+                        isLoading={suggestionsLoading}
+                        defaultSearchRoute={`/bookmarks/collection/${collectionId}`}
                     />
 
                     {/* Stats */}
