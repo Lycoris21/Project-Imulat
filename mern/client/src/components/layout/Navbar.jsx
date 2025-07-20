@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import ConfirmLogoutModal from "../modals/ConfirmLogoutModal";
 import { useAuth } from "../../context/AuthContext";
@@ -18,6 +18,7 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
 
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showPasswordSuccessMessage, setShowPasswordSuccessMessage] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -162,13 +163,17 @@ export default function Navbar({ isLoggedIn = false, user = null }) {
             <NavLink
               key={item.name}
               to={item.to}
-              className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive 
+              className={({ isActive }) => {
+                // Custom logic for Home route: make it active for both "/" and "/home" and "/Home"
+                const isHomeActive = item.name === "Home" && (location.pathname === "/" || location.pathname === "/home" || location.pathname === "/Home");
+                const finalActive = isActive || isHomeActive;
+                
+                return `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  finalActive 
                     ? "text-[color:var(--color-dark)] bg-gray-100" 
                     : "text-[color:var(--color-base)] hover:text-[color:var(--color-dark)] hover:bg-gray-50"
-                }`
-              }
+                }`;
+              }}
               onClick={() => setMobileMenuOpen(false)}
             >
               {item.name}
