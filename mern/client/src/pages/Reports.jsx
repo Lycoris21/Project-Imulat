@@ -1,7 +1,9 @@
 // Reports.jsx (refactored to use useQueryParams)
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import useQueryParams from "../hooks/useQueryParams";
+import { useReportsSearchSuggestions } from "../hooks/useReportsSearchSuggestions";
 import { parseTruthVerdict } from "../utils/strings";
 import PeerReviewModal from "../components/modals/PeerReviewModal";
 
@@ -17,6 +19,7 @@ import {
 
 export default function Reports() {
   const { user, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   const { search, sort, page, user: queryUser , updateParams } = useQueryParams();
 
   const [searchQuery, setSearchQuery] = useState(search);
@@ -29,6 +32,15 @@ export default function Reports() {
   const [showPeerReviewModal, setShowPeerReviewModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  // Search suggestions hook
+  const {
+    query: suggestionQuery,
+    updateQuery,
+    suggestions,
+    isLoading: suggestionsLoading,
+    disableSuggestions,
+    enableSuggestions
+  } = useReportsSearchSuggestions(searchQuery);
 
   const itemsPerPage = 6;
   const canResearch = isLoggedIn && (user?.role === "admin" || user?.role === "researcher");
@@ -36,6 +48,11 @@ export default function Reports() {
   useEffect(() => {
     fetchReports();
   }, [search, sort, page, queryUser ]);
+
+  // Sync search query with suggestions hook
+  useEffect(() => {
+    updateQuery(searchQuery);
+  }, [searchQuery, updateQuery]);
 
   const fetchReports = async () => {
     try {
@@ -67,6 +84,23 @@ export default function Reports() {
   const handleSearch = (e) => {
     e.preventDefault();
     updateParams({ search: searchQuery.trim(), page: 1, sort });
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.type === 'report') {
+      // Navigate to the specific report page
+      navigate(`/reports/${suggestion._id}`);
+    } else if (suggestion.type === 'user') {
+      // Filter reports by this user
+      updateParams({ user: suggestion.name, search: '', page: 1, sort });
+      setSearchQuery('');
+    }
+    disableSuggestions();
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    enableSuggestions();
   };
 
   const handlePageChange = (newPage) => {
@@ -193,10 +227,15 @@ export default function Reports() {
         <div className="max-w-6xl mx-auto mb-4 sm:mb-6">
           <SearchBar
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             onSubmit={handleSearch}
             placeholder="Search reports by title, content, author, or verdict..."
-            isLoading={searchLoading}
+            isLoading={searchLoading || suggestionsLoading}
+            showDropdown={true}
+            suggestions={suggestions}
+            onSuggestionClick={handleSuggestionClick}
+            disableSuggestions={disableSuggestions}
+            defaultSearchRoute="/reports"
           />
 
           <div className="max-w-2xl mx-auto mb-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
