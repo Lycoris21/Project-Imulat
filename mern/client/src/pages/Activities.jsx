@@ -132,6 +132,7 @@ const Activities = () => {
                       className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3 cursor-pointer"
                       value={dateRange?.startDate ? format(dateRange.startDate, 'yyyy-MM-dd') : ''}
                       onChange={handleDateRangeChange}
+                      max={format(new Date(), 'yyyy-MM-dd')}
                     />
                   </div>
                 </div>
@@ -144,6 +145,7 @@ const Activities = () => {
                       className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md py-1 px-3 cursor-pointer"
                       value={dateRange?.endDate ? format(dateRange.endDate, 'yyyy-MM-dd') : ''}
                       onChange={handleDateRangeChange}
+                      max={format(new Date(), 'yyyy-MM-dd')}
                     />
                   </div>
                 </div>
