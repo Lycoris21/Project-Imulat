@@ -42,7 +42,7 @@ const reportSchema = new mongoose.Schema({
   },
   truthVerdict: {
     type: String,
-    enum: ['true', 'false', 'partially_true', 'misleading', 'unverified', 'disputed'],
+    enum: ['true', 'false', 'partially_true', 'misleading', 'unverified', 'disputed', 'debunked'],
     required: true
   },
   aiReportSummary: {

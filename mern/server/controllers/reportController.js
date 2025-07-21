@@ -83,16 +83,34 @@ class ReportController {
   // Update report
   static async updateReport(req, res) {
     try {
-      const { claimIds, reportTitle, reportContent, truthVerdict, aiReportSummary, reportConclusion, reportReferences } = req.body;
+      const { claimIds, reportTitle, reportContent, truthVerdict, aiReportSummary, reportConclusion, reportReferences, reportCoverUrl
+       } = req.body;
 
       const updateData = {
-        claimIds,
-        reportTitle,
-        reportContent,
-        truthVerdict,
-        aiReportSummary,
-        reportConclusion,
-        reportReferences
+        ...(claimIds && {
+          claimIds
+        }),
+        ...(reportTitle && {
+          reportTitle
+        }),
+        ...(reportContent && {
+          reportContent
+        }),
+        ...(truthVerdict && {
+          truthVerdict
+        }),
+        ...(aiReportSummary && {
+          aiReportSummary
+        }),
+        ...(reportConclusion && {
+          reportConclusion
+        }),
+        ...(reportReferences && {
+          reportReferences
+        }),
+        ...(reportCoverUrl && {
+          reportCoverUrl
+        })
       };
 
       const userId = req.user?.id || req.body?.userId || req.headers['user-id'];

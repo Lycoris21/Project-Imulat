@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { formatRelativeTime } from '../utils/time.js';
 import { getVerdictColor } from '../utils/colors.js';
 import { handleAPIError } from '../utils/helpers.js';
+import { SourceReliability } from "../components/ClaimAi/SourceReliability.jsx";
 
 // Components
 import { LoadingScreen, ErrorScreen, ReactionBar, CommentsSection, CreateReportModal, SuccessToast } from '../components'
@@ -89,7 +90,7 @@ export default function ReportDetail() {
 
   const fetchReviews = async () => {
     try {
-      const res = await fetch(`http://localhost:5050/api/reports/${report._id}/peer-reviews`);
+      const res = await fetch(`http://localhost:5050/api/reports/${report?._id}/peer-reviews`);
       if (!res.ok) throw new Error("Failed to fetch peer reviews");
       const data = await res.json();
       setPeerReviews(data);
@@ -435,7 +436,7 @@ export default function ReportDetail() {
           <div className="mb-4">
             <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">AI-Generated Summary</h3>
             <div className="bg-purple-50 p-3 sm:p-4 rounded-lg border-l-4 border-purple-400">
-              <p className="text-gray-700 text-sm sm:text-base">{report.aiReportSummary}</p>
+              <p className="text-gray-700 text-sm sm:text-base text-justify">{report.aiReportSummary}</p>
             </div>
           </div>
         </div>
@@ -444,7 +445,7 @@ export default function ReportDetail() {
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Full Report</h2>
           <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words text-sm sm:text-base">
+            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed break-words text-sm sm:text-base text-justify">
               {report.reportContent}
             </div>
           </div>
@@ -453,7 +454,7 @@ export default function ReportDetail() {
         {/* Report Conclustion */}
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Conclusion</h2>
-          <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base">{report.reportConclusion}</p>
+          <p className="text-gray-700 whitespace-pre-wrap break-words text-sm sm:text-base text-justify">{report.reportConclusion}</p>
         </div>
 
         {/* Peer Reviews (Visible to Admins and Researchers only) */}
@@ -510,12 +511,13 @@ export default function ReportDetail() {
 
 
         {/* References */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">References</h2>
-          <div className="whitespace-pre-wrap text-gray-700 break-words text-sm sm:text-base">
-            {report.reportReferences}
+        {/* Add Source Reliability Analysis */}
+        {report.reportReferences && (
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">References</h2>
+            <SourceReliability sources={report.reportReferences} />
           </div>
-        </div>
+        )}
 
         {/* Action Buttons */}
         <ReactionBar
