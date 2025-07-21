@@ -44,7 +44,7 @@ export default function NotificationItem({ notification, onClose, refreshNotific
       case "like":
         return `${username} liked your ${notification?.targetType}.`;
       case "comment":
-        return `${username} commented on your ${notification?.targetType}.`;
+        return `${username} commented on your ${notification?.postType}.`;
       case "peer_review":
         return `${username} reviewed your report.`;
       case "report_approved":

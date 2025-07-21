@@ -6,6 +6,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
   const [bannerFile, setBannerFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isAnimating, setIsAnimating] = useState(false);
   const fileInputRef = useRef(null);
 
   const isEdit = !!collection;
@@ -21,26 +22,28 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
       }
       setBannerFile(null);
       setError('');
+      setIsAnimating(true);
     }
   }, [isOpen, collection]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 150); // match transition duration
+  };
 
   // Disable scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Disable background scroll while keeping scrollbar visible
-      // Calculate scrollbar width to prevent layout shift
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      
-      // Store original styles
       const originalOverflow = document.body.style.overflow;
       const originalPaddingRight = document.body.style.paddingRight;
-      
-      // Apply styles to prevent scroll but keep scrollbar space
+
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
 
       return () => {
-        // Restore original styles
         document.body.style.overflow = originalOverflow;
         document.body.style.paddingRight = originalPaddingRight;
       };
@@ -51,7 +54,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.key === 'Escape') {
-        onClose();
+        handleClose();
       }
     };
 
@@ -62,11 +65,10 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!name.trim()) {
       setError('Collection name is required');
       return;
@@ -78,7 +80,6 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
     try {
       let finalBannerUrl = bannerUrl;
 
-      // Upload banner file if selected
       if (bannerFile) {
         const formData = new FormData();
         formData.append("image", bannerFile);
@@ -92,7 +93,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
       }
 
       await onCreate({ name: name.trim(), bannerUrl: finalBannerUrl || null });
-      onClose();
+      handleClose();
     } catch (err) {
       setError(err.message || 'Failed to create collection');
     } finally {
@@ -103,13 +104,19 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50"
+    <div
+      className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-[#00000080] transition-opacity duration-150 ${
+        isAnimating ? 'opacity-100' : 'opacity-0'
+      }`}
     >
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative">
+      <div
+        className={`bg-white rounded-lg p-6 max-w-md w-full mx-4 relative transform transition-all duration-150 ${
+          isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}
+      >
         {/* Close button */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,15 +158,11 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Banner Image (Optional)
-            </label>
-            
-            {/* File Upload Option */}
+            <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image (Optional)</label>
+
+            {/* File Upload */}
             <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Upload Image File
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Upload Image File</label>
               <div className="relative">
                 <input
                   ref={fileInputRef}
@@ -167,14 +170,12 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
                   accept="image/*"
                   onChange={(e) => {
                     setBannerFile(e.target.files[0]);
-                    if (e.target.files[0]) {
-                      setBannerUrl(''); // Clear URL when file is selected
-                    }
+                    if (e.target.files[0]) setBannerUrl('');
                   }}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   disabled={loading}
                 />
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 bg-white flex items-center">
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 bg-white flex items-center cursor-pointer">
                   <span className="text-gray-900">Choose File</span>
                   <span className="mx-2 text-gray-400">|</span>
                   <span className={`${bannerFile ? 'text-gray-600' : 'text-gray-400'} flex-1 truncate text-left`}>
@@ -184,19 +185,15 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
               </div>
             </div>
 
-            {/* URL Input Option */}
+            {/* URL Input */}
             <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Or Enter Image URL
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Or Enter Image URL</label>
               <input
                 type="url"
                 value={bannerUrl}
                 onChange={(e) => {
                   setBannerUrl(e.target.value);
-                  if (e.target.value.trim()) {
-                    setBannerFile(null); // Clear file when URL is entered
-                  }
+                  if (e.target.value.trim()) setBannerFile(null);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="https://example.com/banner-image.jpg"
@@ -214,9 +211,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
                     onClick={() => {
                       setBannerUrl('');
                       setBannerFile(null);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = '';
-                      }
+                      if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                     className="text-xs text-red-600 hover:text-red-800 transition-colors"
                     disabled={loading}
@@ -226,16 +221,16 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
                 </div>
                 <div className="w-full h-24 bg-gray-100 rounded-lg overflow-hidden">
                   {bannerFile ? (
-                    <img 
-                      src={URL.createObjectURL(bannerFile)} 
-                      alt="Banner preview" 
+                    <img
+                      src={URL.createObjectURL(bannerFile)}
+                      alt="Banner preview"
                       className="w-full h-full object-cover"
                     />
                   ) : bannerUrl ? (
                     <>
-                      <img 
-                        src={bannerUrl} 
-                        alt="Banner preview" 
+                      <img
+                        src={bannerUrl}
+                        alt="Banner preview"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.style.display = 'none';
@@ -262,7 +257,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate, colle
           <div className="flex justify-end space-x-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-200 disabled:opacity-50 cursor-pointer"
             >
