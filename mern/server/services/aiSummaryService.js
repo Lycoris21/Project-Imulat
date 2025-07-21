@@ -22,17 +22,15 @@ class aiSummaryService {
 
 static async generateTruthIndex(text, sources = "") {
   if (!aiEnabled) {
-    // Create a consistent numeric hash from the inputs
     let hash = 0;
     const combinedInput = text + sources;
-    
+
     for (let i = 0; i < combinedInput.length; i++) {
       const char = combinedInput.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash |= 0; // Convert to 32bit integer
+      hash |= 0;
     }
 
-    // Process sources if provided
     if (sources) {
       const sourceList = sources.split('\n')
         .map(s => s.trim())
@@ -45,61 +43,63 @@ static async generateTruthIndex(text, sources = "") {
         sourceList.forEach(source => {
           const type = categorizeSource(source);
           if (type === 'reliable') {
-            reliabilityScore += 100; // Full points for reliable sources
+            reliabilityScore += 100;
             sourceWeight += 1;
-          } 
-          else if (type === 'unreliable') {
-            reliabilityScore += 10; // Minimal points for unreliable
+          } else if (type === 'unreliable') {
+            reliabilityScore += 10;
             sourceWeight += 1;
-          }
-          // Unknown sources get 50 points
-          else {
-            reliabilityScore += 50;
+          } else {
+            reliabilityScore += 5;
             sourceWeight += 1;
           }
         });
 
-        // Calculate base score from sources (70% weight)
         const sourceScore = sourceWeight > 0 
           ? reliabilityScore / sourceWeight 
           : 50;
 
-        // Calculate content score from hash (30% weight)
-        const contentScore = 50 + (hash % 50); // 50-100 based on content
+        const contentScore = 50 + (hash % 50);
 
-        // Weighted average
-        return Math.round((sourceScore * 0.7) + (contentScore * 0.3));
+        //  if all sources are unreliable, cap the score
+        if (sourceList.every(s => categorizeSource(s) === 'unreliable')) {
+          return Math.min(50, sourceScore);
+        }
+
+        // less content weight if sources exist
+        const contentWeight = sourceWeight > 0 ? 0.1 : 0.3;
+        const sourceWeightFactor = 1 - contentWeight;
+
+        return Math.round((sourceScore * sourceWeightFactor) + (contentScore * contentWeight));
       }
     }
 
-    // Fallback for no sources - deterministic based on content
-    return 50 + (hash % 50); // 50-100 range
+    return 50 + (hash % 50);
   }
 
+  const apiKey = process.env.COHERE_API_KEY;
 
-        const apiKey = process.env.COHERE_API_KEY;
+  const response = await fetch("https://api.cohere.ai/v1/generate", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "command-r-plus-08-2024",
+      prompt: `Analyze this claim and its sources. Rate its truthfulness 0-100 (0=false, 100=true). Consider source reliability.\n\nClaim: "${text}"\nSources: ${sources || "None"}\n\nScore:`,
+      temperature: 0.3,
+      max_tokens: 5,
+      stop_sequences: ["\n"]
+    })
+  });
 
-        const response = await fetch("https://api.cohere.ai/v1/generate", {
-            method: "POST",
-            headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-            model: "command-r-plus-08-2024",
-            prompt: `Analyze this claim and its sources. Rate its truthfulness 0-100 (0=false, 100=true). Consider source reliability.\n\nClaim: "${text}"\nSources: ${sources || "None"}\n\nScore:`,
-            temperature: 0.3,
-            max_tokens: 5,
-            stop_sequences: ["\n"]
-            })
-        });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to generate truth index");
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Failed to generate truth index");
+  const score = parseInt(data.generations?.[0]?.text?.trim());
+  return isNaN(score) ? null : Math.min(Math.max(score, 0), 100);
+}
 
-        const score = parseInt(data.generations?.[0]?.text?.trim());
-        return isNaN(score) ? null : Math.min(Math.max(score, 0), 100); // ensure 0–100
-        }
 
 
     static async generateAISummary(text) {

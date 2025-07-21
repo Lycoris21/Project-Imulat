@@ -25,13 +25,16 @@ export function categorizeSource(url) {
       /\.blog\b/i, /\bblog\./i, /\.wordpress\./i
     ];
 
-    // Check exact matches first
+    const zeroScoreSources = [
+      'reddit.com', 'quora.com', '4chan.org', '8kun.top', 'discord.com', 'tapatalk.com', 'stackexchange.com',
+    ];
+
     if (reliableDomains.some(d => domain.includes(d))) return 'reliable';
+    if (zeroScoreSources.some(d => domain.includes(d))) return 'unreliable'; // treat as noise
     if (unreliablePatterns.some(d =>
       typeof d === 'string' ? domain.includes(d) : d.test(domain)
     )) return 'unreliable';
 
-    // Pattern-based rules
     if (domain.endsWith('.gov') || domain.endsWith('.edu')) return 'reliable';
     if (domain.includes('blog') || domain.includes('opinion')) return 'unreliable';
 
@@ -40,6 +43,7 @@ export function categorizeSource(url) {
     return null;
   }
 }
+
 
 
 export function SourceReliability({ sources }) {
