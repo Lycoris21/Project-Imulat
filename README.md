@@ -27,8 +27,7 @@ This project is developed by students from the **University of San Carlos** for 
 - **Frontend**: HTML, CSS, Tailwind, React.js
 - **Backend**: Node.js + Express
 - **Database**: MongoDB Atlas (Cloud-based NoSQL database)
-- **AI Integration**:  OpenAI GPT-3.5
-- **API**: NewsAPI.org (Free up to 100 requests/day)
+- **AI Integration**:  Cohere API
 
 ---
 
